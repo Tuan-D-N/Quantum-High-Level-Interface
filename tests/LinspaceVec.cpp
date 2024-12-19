@@ -5,7 +5,7 @@ TEST(LinspaceVec, linspaceInclude) {
     std::vector<double> input;
     std::vector<double> output;
 
-    input = linspaceVec(-9, -5.4, 10);
+    input = linspaceVec(-9.0, -5.4, 10);
     output = { -9,-8.6,-8.2,-7.8,-7.4,-7,-6.6,-6.2,-5.8,-5.4 };
 
     EXPECT_TRUE(input.size() == output.size());
@@ -31,7 +31,7 @@ TEST(LinspaceVec, linspaceInclude) {
     }
 
 
-    input = linspaceVec(1, 4.5, 4);
+    input = linspaceVec(1.0, 4.5, 4);
     output = { 1, 2.166666667, 3.333333333, 4.5 };
     EXPECT_TRUE(input.size() == output.size());
 
@@ -71,7 +71,7 @@ TEST(LinspaceVec, linspaceNoInclude) {
         EXPECT_NEAR(input[i], output[i], 0.000001);
     }
 
-    input = linspaceVec(1, 4.5, 7, false);
+    input = linspaceVec(1.0, 4.5, 7, false);
     output = { 1,1.5,2,2.5,3,3.5,4 };
     EXPECT_TRUE(input.size() == output.size());
     for (int i = 0; i < input.size(); i++)
@@ -79,7 +79,7 @@ TEST(LinspaceVec, linspaceNoInclude) {
         EXPECT_NEAR(input[i], output[i], 0.000001);
     }
 
-    input = linspaceVec(-10, -4.6, 9, false);
+    input = linspaceVec(-10.0, -4.6, 9, false);
     output = { -10,-9.4,-8.8,-8.2,-7.6,-7,-6.4,-5.8,-5.2 };
     EXPECT_TRUE(input.size() == output.size());
 
