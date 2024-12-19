@@ -25,10 +25,10 @@ std::vector<double> linspaceVec(double start, double end, int n, bool includeEnd
 }
 
 // Function to generate linearly spaced values from start to end
-std::vector<double> linspace(int start, int end, int n, bool includeEnd = true) {
+std::vector<double> linspaceVec(int start, int end, int n, bool includeEnd) {
 
     double start_p = static_cast<double>(start);
     double end_p = static_cast<double>(end);
 
-    return linspace(start_p, end_p, n, includeEnd);
+    return linspaceVec(start_p, end_p, n, includeEnd);
 }
