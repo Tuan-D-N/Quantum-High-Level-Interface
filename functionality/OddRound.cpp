@@ -1,5 +1,5 @@
 #include "OddRound.hpp"
-#include <math.h>
+#include <cmath>
 
 double roundToHigherOdd(double num) {
     double roundedUp = std::ceil(num);
