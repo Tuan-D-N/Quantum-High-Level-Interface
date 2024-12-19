@@ -21,6 +21,7 @@ add_executable(${PROJECT_NAME} main.cpp)
 
 
 add_subdirectory("functionality")
+add_subdirectory("tests")
 target_link_libraries(${PROJECT_NAME} radon_functionality)
 
 
@@ -34,16 +35,23 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-add_executable(
-  runTest
-  testRunner.cpp
-)
+set(BUILD_TESTING True)
 
-target_link_libraries(
-  runTest
-  GTest::gtest_main
-  radon_functionality
+message(STATUS "Testing = ${BUILD_TESTING}")
+if(BUILD_TESTING)
+  file(GLOB TestSources "tests/*.cpp")
+
+  add_executable(
+    runTest
+    ${TestSources}
   )
-  
-include(GoogleTest)
-gtest_discover_tests(runTest)
+
+  target_link_libraries(
+    runTest
+    GTest::gtest_main
+    radon_functionality
+    )
+    
+  include(GoogleTest)
+  gtest_discover_tests(runTest)
+endif()

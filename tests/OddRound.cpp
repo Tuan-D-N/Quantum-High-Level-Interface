@@ -1,6 +1,4 @@
 
-#pragma once
-
 #include <gtest/gtest.h>
 #include "../functionality/OddRound.hpp"
 #include <vector>
