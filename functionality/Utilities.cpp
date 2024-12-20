@@ -20,7 +20,7 @@ void print2DVector(const std::vector<std::vector<T>>& vec) {
         for (T val : row) {       // Iterate over each column in the row
             std::cout << val << " ";  // Print the element
         }
-        std::cout << std::endl;  // Move to the next line after printing a row
+        std::cout << "\n";  // Move to the next line after printing a row
     }
 }
 
