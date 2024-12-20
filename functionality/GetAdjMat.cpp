@@ -49,7 +49,7 @@ template std::vector<std::tuple<double, double>> allPermuteOfVectors<double, dou
 
 
 
-std::vector<std::complex<double>> getMatA(int evenQubits) {
+std::vector<std::vector<complex>> getMatA(int evenQubits) {
 
 
     assert(isEven(evenQubits));
@@ -95,7 +95,7 @@ std::vector<std::complex<double>> getMatA(int evenQubits) {
 
 
     // Create a 2D vector of size x by y, initialized with 0
-    std::vector<std::vector<double>> aMat(fullMatLength, std::vector<double>(fullMatLength, 0));
+    std::vector<std::vector<complex>> aMat(fullMatLength, std::vector<complex>(fullMatLength, 0));
 
     for (int i = 0; i < halfMatLength; i++)
     {
@@ -127,20 +127,14 @@ std::vector<std::complex<double>> getMatA(int evenQubits) {
         }
     }
 
-    // Flatten the 2D matrix into a 1D vector
-    std::vector<std::complex<double>> flattened;
-    for (const auto& row : aMat) {
-        for (double val : row) {
-            flattened.push_back(std::complex<double>(val));
-        }
-    }
 
 
-    return flattened;
+
+    return aMat;
 }
 
 
-std::vector<std::complex<double>> getMatAMini(int evenQubits) {
+std::vector<std::vector<complex>> getMatAMini(int evenQubits) {
 
 
     assert(isEven(evenQubits));
@@ -198,7 +192,7 @@ std::vector<std::complex<double>> getMatAMini(int evenQubits) {
 
 
     // Create a 2D vector of size x by y, initialized with 0
-    std::vector<std::vector<double>> aMatMini(halfMatLength, std::vector<double>(halfMatLength, 0));
+    std::vector<std::vector<complex>> aMatMini(halfMatLength, std::vector<complex>(halfMatLength, 0));
 
     for (int i = 0; i < halfMatLength; i++)
     {
@@ -232,14 +226,8 @@ std::vector<std::complex<double>> getMatAMini(int evenQubits) {
 
     }
 
-    // Flatten the 2D matrix into a 1D vector
-    std::vector<std::complex<double>> flattened;
-    for (const auto& row : aMatMini) {
-        for (double val : row) {
-            flattened.push_back(std::complex<double>(val));
-        }
-    }
 
 
-    return flattened;
+
+    return aMatMini;
 }
