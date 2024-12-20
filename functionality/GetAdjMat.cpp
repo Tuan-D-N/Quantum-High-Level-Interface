@@ -25,7 +25,7 @@ std::vector<std::tuple<T, U>> allPermuteOfVectors(std::vector<T> slowChange, std
     if (slowChangeFirst) {
         for (int i = 0; i < slowChange.size(); ++i)
         {
-            for (int j = 0; j < fastChange.size(); ++j)
+            for (int j = 0; j < fastChange.size(); ++j) //Can be parallelised
             {
                 int index = i * fastChange.size() + j;
                 meshState[index] = std::make_tuple(slowChange[i], fastChange[j]);
@@ -35,7 +35,7 @@ std::vector<std::tuple<T, U>> allPermuteOfVectors(std::vector<T> slowChange, std
     else {
         for (int i = 0; i < slowChange.size(); ++i)
         {
-            for (int j = 0; j < fastChange.size(); ++j)
+            for (int j = 0; j < fastChange.size(); ++j) //Can be parallelised
             {
                 int index = i * fastChange.size() + j;
                 meshState[index] = std::make_tuple(fastChange[j], slowChange[i]);

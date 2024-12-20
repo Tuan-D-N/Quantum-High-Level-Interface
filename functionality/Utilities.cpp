@@ -27,7 +27,9 @@ void print2DVector(const std::vector<std::vector<T>>& vec) {
 template void print2DVector<double>(const std::vector<std::vector<double>>& vec);
 template void print2DVector<int>(const std::vector<std::vector<int>>& vec);
 template void print2DVector<float>(const std::vector<std::vector<float>>& vec);
-
+template void print2DVector<std::complex<double>>(const std::vector<std::vector<std::complex<double>>>& vec);
+template void print2DVector<std::complex<int>>(const std::vector<std::vector<std::complex<int>>>& vec);
+template void print2DVector<std::complex<float>>(const std::vector<std::vector<std::complex<float>>>& vec);
 
 
 template<Streamable T>
