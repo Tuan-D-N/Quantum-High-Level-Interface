@@ -43,5 +43,8 @@ void printVector(const std::vector<T>& vec) {
 template void printVector<double>(const std::vector<double>& vec);
 template void printVector<int>(const std::vector<int>& vec);
 template void printVector<float>(const std::vector<float>& vec);
+template void printVector<std::complex<double>>(const std::vector<std::complex<double>>& vec);
+template void printVector<std::complex<int>>(const std::vector<std::complex<int>>& vec);
+template void printVector<std::complex<float>>(const std::vector<std::complex<float>>& vec);
 
 

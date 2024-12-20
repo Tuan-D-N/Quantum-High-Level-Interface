@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.22)
 
 project(radon_transform LANGUAGES CXX)
 
-
+find_package(CUDAToolkit REQUIRED)
 find_program(CLANGXX_PATH clang++)
 
 set(CMAKE_CXX_COMPILER "${CLANGXX_PATH}")
@@ -22,7 +22,7 @@ add_executable(${PROJECT_NAME} main.cpp)
 
 add_subdirectory("functionality")
 add_subdirectory("tests")
-target_link_libraries(${PROJECT_NAME} radon_functionality)
+target_link_libraries(${PROJECT_NAME} radon_functionality CUDA::cusparse)
 
 
 
