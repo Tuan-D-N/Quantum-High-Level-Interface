@@ -17,3 +17,10 @@ set_target_properties(Examples PROPERTIES
 
 # Link the necessary CUDA libraries (e.g., cusparse)
 target_link_libraries(Examples PRIVATE CUDA::cusparse CUDA::cudart)
+
+set(CUDA_EXEC True)
+
+if($CUDA_EXEC)
+    add_executable(cuda_exec UnifiedMemExample.cu)
+    target_link_libraries(cuda_exec CUDA::cusparse)
+endif()
