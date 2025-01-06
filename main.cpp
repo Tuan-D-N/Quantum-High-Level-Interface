@@ -6,9 +6,9 @@
 int main()
 {
     int evenqubits = 6;
-    int *rowOffset = new int[getRowOffsetSize(evenqubits)];
-    int *columnIndices = new int[getColumnIndexSize(evenqubits)];
-    complex *values = new complex[getValuesSize(evenqubits)];
+    int *rowOffset = new int[getRowOffsetSizeMini(evenqubits)];
+    int *columnIndices = new int[getColumnIndexSizeMini(evenqubits)];
+    complex *values = new complex[getValuesSizeMini(evenqubits)];
 
     int rowOffsetSize;
     int columnIndicesSize;
