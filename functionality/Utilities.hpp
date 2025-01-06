@@ -34,10 +34,3 @@ template<Streamable T> void print2DVector(const std::vector<std::vector<T>>& vec
 /// @param vec input vector
 template<Streamable T> void printVector(const std::vector<T>& vec);
 
-std::vector<std::vector<double>> csrToDense(
-    const cuDoubleComplex *values,   // Non-zero values
-    const std::vector<int> &rowPtr, // Row pointers
-    const std::vector<int> &cols,   // Column indices
-    int rows,                       // Number of rows
-    int colsCount                   // Number of columns
-);
