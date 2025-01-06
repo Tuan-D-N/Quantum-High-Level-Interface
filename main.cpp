@@ -14,7 +14,7 @@ int main()
     int columnIndicesSize;
     int valuesSize;
 
-    writeMatACSR(rowOffset,
+    writeMatAMiniCSR(rowOffset,
                  columnIndices,
                  values,
                  evenqubits,
