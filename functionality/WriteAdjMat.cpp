@@ -64,121 +64,123 @@ void writeMatAMiniCSR(int *rowOffset, int *columnIndex, complex *values, int eve
 {
     assert(isEven(evenQubits));
 
-    int totalQubits = evenQubits + 1;        // We need 1 extra qubit to get both sides
-    int halfMatLength = pow(2, evenQubits);  // At half length
-    int fullMatLength = pow(2, totalQubits); // At full length
+    const int totalQubits = evenQubits + 1;        // We need 1 extra qubit to get both sides
+    const int halfMatLength = pow(2, evenQubits);  // At half length
+    const int fullMatLength = pow(2, totalQubits); // At full length
 
-    int rLen = pow(2, evenQubits / 2);     // Length of each list
-    int thetaLen = pow(2, evenQubits / 2); // Happens to be square grid so they are the same
-    int xLen = pow(2, evenQubits / 2);
-    int yLen = pow(2, evenQubits / 2);
+    const int rLen = pow(2, evenQubits / 2);     // Length of each list
+    const int thetaLen = pow(2, evenQubits / 2); // Happens to be square grid so they are the same
+    const int xLen = pow(2, evenQubits / 2);
+    const int yLen = pow(2, evenQubits / 2);
 
-    int maxR = rLen - 1; // RList = [-3 -1 1 3] so length is 4
-    int maxX = maxR;
-    int maxY = maxR;
+    const int maxR = rLen - 1; // RList = [-3 -1 1 3] so length is 4
+    const int minR = -maxR;
+    const int maxTheta = 180;
+    const int minTheta = 0;
 
-    double xStep = (maxX - (-maxX)) / (xLen - 1); // endings inclusive scheme
-    double yStep = (maxY - (-maxY)) / (xLen - 1); // endings inclusive scheme
-
-    auto toRThetaIndex = [maxR, thetaLen, rLen](int rIndex, int thetaIndex)
+    auto toXYIndex = [xLen, maxR](int x, int y)
     {
-        return thetaIndex * rLen + rIndex; // r is fast, theta is slow
+        assert(isOdd(x));
+        assert(isOdd(y));
+        x = (x + maxR) / 2;
+        y = (y + maxR) / 2;
+        return xLen * x + y;
     };
+
+    double rStep = (maxR - minR) / (rLen - 1);                 // endings inclusive scheme
+    double thetaStep = (maxTheta - minTheta) / (thetaLen - 1); // endings inclusive scheme
 
     int ValueIter = 0;
     int RowIter = 0;
     int ColumnIter = 0;
-    for (int i_x = 0; i_x < xLen; ++i_x)
+
+    for (int i_theta = 0; i_theta < thetaLen; ++i_theta)
     {
-        double x = -maxX + xStep * i_x;
-        for (int i_y = 0; i_y < yLen; ++i_y)
+        double thetaValue = minTheta + thetaStep * i_theta;
+        for (int i_r = 0; i_r < rLen; ++i_r)
         {
-            double y = -maxY + yStep * i_y;
+            double rValue = minR + rStep * i_r;
 
-            double r = sqrt(x * x + y * y) * sign(y); // Radial distance
-            double theta = std::atan2(std::abs(y), x) * 180.0 / M_PI; // angle
-            double rIndex = (r + maxR) / 2.0;                         // index from 0 -> maxRLen-1, could be between
-            double thetaIndex = (thetaLen - 1) * theta / 180.0;       // index from 0 -> thetaLen-1, could be between
+            double x = rValue * cos(thetaValue);
+            double y = rValue * sin(thetaValue);
 
-            int lrIndex = std::floor(rIndex);
-            int urIndex = std::ceil(rIndex);
+            double lx = roundToLowerOdd(x);
+            double ux = roundToHigherOdd(x);
+            double ly = roundToLowerOdd(y);
+            double uy = roundToHigherOdd(y);
 
-            int lthetaIndex = std::floor(thetaIndex);
-            int uthetaIndex = std::ceil(thetaIndex);
-
-            if (lrIndex == urIndex && lthetaIndex == uthetaIndex)
+            if (lx == ux && ly == uy)
             {
-                int index = toRThetaIndex(lrIndex, lthetaIndex); // Only 1 element
-
                 rowOffset[RowIter] = ValueIter;
+                ++RowIter;
+
+                int index1 = toXYIndex(lx, ly); // one value
                 values[ValueIter] = complex(1);
-                columnIndex[ColumnIter] = index;
-
-                ++RowIter;
                 ++ValueIter;
+                columnIndex[ColumnIter] = index1;
                 ++ColumnIter;
             }
-            else if (lrIndex == urIndex)
+            else if (lx == ux)
             {
-                int index1 = toRThetaIndex(lrIndex, lthetaIndex); // Lowest
-                int index2 = toRThetaIndex(lrIndex, uthetaIndex); // Highest
-
                 rowOffset[RowIter] = ValueIter;
-                values[ValueIter] = complex(CorrelationHelper(lthetaIndex, thetaIndex, 1.0));
-                columnIndex[ColumnIter] = index1;
                 ++RowIter;
+
+                int index1 = toXYIndex(lx, ly); // smaller value first
+                values[ValueIter] = complex(CorrelationHelper(ly, y));
                 ++ValueIter;
+                columnIndex[ColumnIter] = index1;
                 ++ColumnIter;
 
-                values[ValueIter] = complex(CorrelationHelper(uthetaIndex, thetaIndex, 1.0));
-                columnIndex[ColumnIter] = index2;
+                int index2 = toXYIndex(lx, uy); // larger value second
+                values[ValueIter] = complex(CorrelationHelper(uy, y));
                 ++ValueIter;
+                columnIndex[ColumnIter] = index2;
                 ++ColumnIter;
             }
-            else if (lthetaIndex == uthetaIndex)
+            else if (ly == uy)
             {
-                int index1 = toRThetaIndex(lrIndex, lthetaIndex); // Lowest
-                int index2 = toRThetaIndex(urIndex, lthetaIndex); // Highest
-
                 rowOffset[RowIter] = ValueIter;
-                values[ValueIter] = complex(CorrelationHelper(lrIndex, rIndex, 1.0));
-                columnIndex[ColumnIter] = index1;
                 ++RowIter;
+
+                int index1 = toXYIndex(lx, ly); // smaller value first
+                values[ValueIter] = complex(CorrelationHelper(lx, x));
                 ++ValueIter;
+                columnIndex[ColumnIter] = index1;
                 ++ColumnIter;
 
-                values[ValueIter] = complex(CorrelationHelper(urIndex, rIndex, 1.0));
-                columnIndex[ColumnIter] = index2;
+                int index2 = toXYIndex(ux, ly); // larger value second
+                values[ValueIter] = complex(CorrelationHelper(ux, x));
                 ++ValueIter;
+                columnIndex[ColumnIter] = index2;
                 ++ColumnIter;
             }
             else
             {
-                int index1 = toRThetaIndex(lrIndex, lthetaIndex); // Lowest
-                int index2 = toRThetaIndex(urIndex, lthetaIndex); // R changes faster so will have smaller index
-                int index3 = toRThetaIndex(lrIndex, uthetaIndex); // Theta changes slower so will have larger index
-                int index4 = toRThetaIndex(urIndex, uthetaIndex); // Highest
-
                 rowOffset[RowIter] = ValueIter;
-                values[ValueIter] = complex(CorrelationHelper(lrIndex, rIndex, 1.0) * CorrelationHelper(lthetaIndex, thetaIndex, 1.0));
-                columnIndex[ColumnIter] = index1;
                 ++RowIter;
+
+                int index1 = toXYIndex(lx, ly); // smaller value first
+                values[ValueIter] = complex(CorrelationHelper(lx, x) * CorrelationHelper(ly, y));
                 ++ValueIter;
+                columnIndex[ColumnIter] = index1;
                 ++ColumnIter;
 
-                values[ValueIter] = complex(CorrelationHelper(urIndex, rIndex, 1.0) * CorrelationHelper(lthetaIndex, thetaIndex, 1.0));
-                columnIndex[ColumnIter] = index2;
+                int index2 = toXYIndex(lx, uy); // y changes faster than x
+                values[ValueIter] = complex(CorrelationHelper(lx, x) * CorrelationHelper(uy, y));
                 ++ValueIter;
+                columnIndex[ColumnIter] = index1;
                 ++ColumnIter;
 
-                values[ValueIter] = complex(CorrelationHelper(lrIndex, rIndex, 1.0) * CorrelationHelper(uthetaIndex, thetaIndex, 1.0));
-                columnIndex[ColumnIter] = index3;
+                int index3 = toXYIndex(ux, ly); // x changes slower
+                values[ValueIter] = complex(CorrelationHelper(ux, x) * CorrelationHelper(ly, y));
                 ++ValueIter;
+                columnIndex[ColumnIter] = index1;
                 ++ColumnIter;
 
-                values[ValueIter] = complex(CorrelationHelper(urIndex, rIndex, 1.0) * CorrelationHelper(uthetaIndex, thetaIndex, 1.0));
-                columnIndex[ColumnIter] = index4;
+                int index4 = toXYIndex(ux, uy); // large value
+                values[ValueIter] = complex(CorrelationHelper(ux, x) * CorrelationHelper(uy, y));
                 ++ValueIter;
+                columnIndex[ColumnIter] = index1;
                 ++ColumnIter;
             }
         }
