@@ -58,7 +58,7 @@ int getValuesSizeMini(int evenQubits)
     return 4 * getRowOffsetSizeMini(evenQubits); // max of 4 each row
 }
 
-void writeMatAMiniCSR(int *rowOffset, int *columnIndex, complex *values, int evenQubits)
+void writeMatAMiniCSR(int *rowOffset, int *columnIndex, complex *values, int evenQubits, int &rowOffsetSize, int &columnIndexSize, int &valuesSize)
 {
     assert(isEven(evenQubits));
 
@@ -181,4 +181,7 @@ void writeMatAMiniCSR(int *rowOffset, int *columnIndex, complex *values, int eve
             }
         }
     }
+    rowOffsetSize = RowIter;
+    columnIndexSize = ColumnIter;
+    valuesSize = ValueIter;
 }
