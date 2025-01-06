@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include <complex>
-#include <cuComplex.h>
 
 
 /// @brief The function speaks for itself
