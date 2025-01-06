@@ -20,7 +20,8 @@ target_link_libraries(Examples PRIVATE CUDA::cusparse CUDA::cudart)
 
 set(CUDA_EXEC True)
 
-if($CUDA_EXEC)
+if(CUDA_EXEC)
+    message(STATUS "building CUDA_EXEC")
     add_executable(cuda_exec UnifiedMemExample.cu)
     target_link_libraries(cuda_exec CUDA::cusparse)
 endif()
