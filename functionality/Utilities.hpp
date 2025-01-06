@@ -34,3 +34,8 @@ template<Streamable T> void print2DVector(const std::vector<std::vector<T>>& vec
 /// @param vec input vector
 template<Streamable T> void printVector(const std::vector<T>& vec);
 
+template <typename T>
+int sign(T value) {
+    if (value == 0) return 0;
+    return std::signbit(value) ? -1 : 1;
+}

@@ -95,10 +95,10 @@ void writeMatAMiniCSR(int *rowOffset, int *columnIndex, complex *values, int eve
         {
             double y = -maxY + yStep * i_y;
 
-            double r = sqrt(x * x + y * y);                     // Radial distance
-            double theta = atan2(y, x);                         // angle
-            double rIndex = (r + maxR) / 2.0;                   // index from 0 -> maxRLen-1, could be between
-            double thetaIndex = (thetaLen - 1) * theta / 180.0; // index from 0 -> thetaLen-1, could be between
+            double r = sqrt(x * x + y * y) * sign(r); // Radial distance
+            double theta = std::atan2(std::abs(y), x) * 180.0 / M_PI; // angle
+            double rIndex = (r + maxR) / 2.0;                         // index from 0 -> maxRLen-1, could be between
+            double thetaIndex = (thetaLen - 1) * theta / 180.0;       // index from 0 -> thetaLen-1, could be between
 
             int lrIndex = std::floor(rIndex);
             int urIndex = std::ceil(rIndex);

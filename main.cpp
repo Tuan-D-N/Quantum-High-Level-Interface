@@ -25,39 +25,39 @@ int main()
                      columnIndicesSize,
                      valuesSize);
 
-    // for (int i = 0; i < rowOffsetSize; ++i)
-    // {
-    //     std::cout << rowOffset[i] << " , ";
-    // }
-    // std::cout << std::endl;
-
-    // for (int i = 0; i < columnIndicesSize; ++i)
-    // {
-    //     std::cout << columnIndices[i] << " , ";
-    // }
-    // std::cout << std::endl;
-
-    // for (int i = 0; i < valuesSize; ++i)
-    // {
-    //     std::cout << cuCreal(values[i]) << " , ";
-    // }
-    // std::cout << std::endl;
-
-    auto matA = getMatAMini(evenqubits);
-
-    auto matB = csrToDense(values, rowOffset, columnIndices, len, len);
-
-    for (int i = 0; i < len; ++i)
+    for (int i = 0; i < rowOffsetSize; ++i)
     {
-        for (int j = 0; j < len; ++j)
-        {
-            if(matA[i][j].real() - matB[i][j] > 0.003){
-                std::cout << "failed" << matA[i][j] << " , " << matB[i][j];
-            }
-        }
+        std::cout << rowOffset[i] << " , ";
     }
+    std::cout << std::endl;
 
-    delete[] values;
+    for (int i = 0; i < columnIndicesSize; ++i)
+    {
+        std::cout << columnIndices[i] << " , ";
+    }
+    std::cout << std::endl;
+
+    for (int i = 0; i < valuesSize; ++i)
+    {
+        std::cout << cuCreal(values[i]) << " , ";
+    }
+    std::cout << std::endl;
+
+    // auto matA = getMatAMini(evenqubits);
+
+    // auto matB = csrToDense(values, rowOffset, columnIndices, len, len);
+
+    // for (int i = 0; i < len; ++i)
+    // {
+    //     for (int j = 0; j < len; ++j)
+    //     {
+    //         if(matA[i][j].real() - matB[i][j] > 0.003){
+    //             std::cout << "failed" << matA[i][j] << " , " << matB[i][j];
+    //         }
+    //     }
+    // }
+
+    // delete[] values;
 
     return 0;
 }
