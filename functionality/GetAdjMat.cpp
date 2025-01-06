@@ -7,6 +7,8 @@
 #include "OddRound.hpp"
 #include <cassert>
 
+using complex = std::complex<double>;
+
 template <typename T, typename U>
 std::tuple<T, U> createTuple(T slowChange, U fastChange) {
     return std::make_tuple(slowChange, fastChange);

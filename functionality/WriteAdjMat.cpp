@@ -7,6 +7,8 @@
 #include "OddRound.hpp"
 #include <cassert>
 
+using complex = cuDoubleComplex;
+
 double CorrelationHelper(double a, double b, double maxDifference = 2.0)
 {
     return 1 - std::abs((a - b) / maxDifference);

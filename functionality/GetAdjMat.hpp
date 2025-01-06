@@ -1,7 +1,7 @@
 #include <vector>
 #include <complex>
 
-using complex = std::complex<double>;
+
 
 /// @brief Used helper in getMatA
 /// @param a starting value
@@ -14,14 +14,14 @@ double getMatAHelperDiffCorrel(double a, double b);
 /// @brief Generate the double interpolation matrix
 /// @param evenQubits number of qubits. Have to be even.
 /// @return flattened vector of a 2^(n+1)*2^(n+1) matrix
-std::vector<std::vector<complex>> getMatA(int evenQubits = 6);
+std::vector<std::vector<std::complex<double>>> getMatA(int evenQubits = 6);
 
 
 
 /// @brief Generate the mini interpolation matrix
 /// @param evenQubits number of qubits. Have to be even
 /// @return flattened vector of a 2^(n)*2^(n) matrix
-std::vector<std::vector<complex>> getMatAMini(int evenQubits = 6);
+std::vector<std::vector<std::complex<double>>> getMatAMini(int evenQubits = 6);
 
 
 
