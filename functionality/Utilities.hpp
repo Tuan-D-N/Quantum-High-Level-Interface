@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <complex>
+#include <cuComplex.h>
 
 
 /// @brief The function speaks for itself
@@ -38,3 +39,19 @@ int sign(T value) {
     if (value == 0) return 0;
     return std::signbit(value) ? -1 : 1;
 }
+
+std::vector<std::vector<double>> csrToDense(
+    const cuDoubleComplex *values,  // Non-zero values
+    const std::vector<int> &rowPtr, // Row pointers
+    const std::vector<int> &cols,   // Column indices
+    int rows,                       // Number of rows
+    int colsCount                   // Number of columns
+);
+
+std::vector<std::vector<double>> cscToDense(
+    const cuDoubleComplex *values,    // Non-zero values
+    const std::vector<int> &colPtr,   // Column pointers
+    const std::vector<int> &rows,     // Row indices
+    int rowsCount,                    // Number of rows
+    int colsCount                     // Number of columns
+);

@@ -7,7 +7,7 @@
 
 int main()
 {
-    int evenqubits = 6;
+    int evenqubits = 4;
     int len = 1 << evenqubits;
     auto rowOffset = std::vector<int>(getRowOffsetSizeMini(evenqubits), 0);
     auto columnIndices = std::vector<int>(getColumnIndexSizeMini(evenqubits), 0);
@@ -42,22 +42,24 @@ int main()
         std::cout << cuCreal(values[i]) << " , ";
     }
     std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
 
-    // auto matA = getMatAMini(evenqubits);
+    auto matA = getMatAMini(evenqubits);
 
-    // auto matB = csrToDense(values, rowOffset, columnIndices, len, len);
+    auto matB = cscToDense(values, rowOffset, columnIndices, len, len);
 
-    // for (int i = 0; i < len; ++i)
-    // {
-    //     for (int j = 0; j < len; ++j)
-    //     {
-    //         if(matA[i][j].real() - matB[i][j] > 0.003){
-    //             std::cout << "failed" << matA[i][j] << " , " << matB[i][j];
-    //         }
-    //     }
-    // }
+    for (int i = 0; i < len; ++i)
+    {
+        for (int j = 0; j < len; ++j)
+        {
+                std::cout << "failed " << i << "," << j << " " << matA[i][j].real() << " , " << matB[i][j] << "\n";
+            if(matA[i][j].real() - matB[i][j] > 0.003){
+            }
+        }
+    }
 
-    // delete[] values;
+    delete[] values;
 
     return 0;
 }
