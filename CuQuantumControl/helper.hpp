@@ -1,4 +1,5 @@
 #include <cuComplex.h>
+#pragma once
 
 #define HANDLE_ERROR(x)                                                        \
 {   const auto err = x;                                                        \
