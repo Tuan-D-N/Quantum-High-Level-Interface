@@ -6,7 +6,7 @@
 
 // Test for reading CSV of doubles
 TEST(ReadCSVTest, CorrectParsing) {
-    std::string filename = "csvTest/test_data.csv";
+    std::string filename = "../tests/csvTest/test_data.csv";
 
     // Create a test CSV file
     std::ofstream outFile(filename);
@@ -31,7 +31,7 @@ TEST(ReadCSVTest, CorrectParsing) {
 
 // Test for edge case: Empty file
 TEST(ReadCSVTest, EmptyFile) {
-    std::string filename = "csvTest/empty.csv";
+    std::string filename = "../tests/csvTest/empty.csv";
 
     // Create an empty test CSV file
     std::ofstream outFile(filename);
@@ -46,7 +46,7 @@ TEST(ReadCSVTest, EmptyFile) {
 
 // Test for edge case: Single cell file
 TEST(ReadCSVTest, SingleCell) {
-    std::string filename = "csvTest/single_cell.csv";
+    std::string filename = "../tests/csvTest/single_cell.csv";
 
     // Create a CSV with a single cell
     std::ofstream outFile(filename);
@@ -65,7 +65,7 @@ TEST(ReadCSVTest, SingleCell) {
 
 // Test for edge case: Different types (e.g., integers in the CSV)
 TEST(ReadCSVTest, DifferentTypes) {
-    std::string filename = "csvTest/different_types.csv";
+    std::string filename = "../tests/csvTest/different_types.csv";
 
     // Create a CSV with integer values
     std::ofstream outFile(filename);
