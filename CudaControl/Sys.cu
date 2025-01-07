@@ -85,9 +85,10 @@ int runSys()
 
     for (int i = 0; i < A_num_cols; ++i)
     {
-        rThetaVector[i] = make_cuDoubleComplex(1, 0);
         xyVector[0] = make_cuDoubleComplex(0, 0);
+        rThetaVector[i] = make_cuDoubleComplex(0, 0);
     }
+    rThetaVector[0] = make_cuDoubleComplex(1, 0);
 
     //--------------------------------------------------------------------------
     cusparseHandle_t handle = NULL;
@@ -113,23 +114,28 @@ int runSys()
     float tmp_result;
     CHECK_CUSPARSE(cusparseSpMV_bufferSize(handle, CUSPARSE_OPERATION_TRANSPOSE,
                             &alpha, matA, vectorIn, &beta, vectorOut,
-                            CUDA_C_64F, CUSPARSE_SPMV_CSR_ALG1, &bufferSize));
+                            CUDA_C_64F, CUSPARSE_SPMV_ALG_DEFAULT, &bufferSize));
     CHECK_CUDA(cudaMalloc(&dBuffer, bufferSize));
 
     // Perform the SpMV operation
-    CHECK_CUSPARSE(cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+    CHECK_CUSPARSE(cusparseSpMV(handle, CUSPARSE_OPERATION_TRANSPOSE,
                  &alpha, matA, vectorIn, &beta, vectorOut,
-                 CUDA_C_64F, CUSPARSE_SPMV_CSR_ALG1, dBuffer));
+                 CUDA_C_64F, CUSPARSE_SPMV_ALG_DEFAULT, dBuffer));
 
+    printDeviceArray(dA_csrOffsets, postOffsetSize);
+    printDeviceArray(dA_columns, postIndexSize);
+    printDeviceArray(dA_values, postValueSize);
+
+    std::cout << alpha.x << "," << alpha.y << "\n";
+    std::cout <<  beta.x << "," << beta.y << "\n";
+    
+    printDeviceArray(rThetaVector, A_num_cols);
     printDeviceArray(xyVector, A_num_cols);
 
     cusparseDestroySpMat(matA);
     cusparseDestroyDnVec(vectorIn);
     cusparseDestroyDnVec(vectorOut);
 
-    // printDeviceArray(dA_csrOffsets, postOffsetSize);
-    // printDeviceArray(dA_columns, postIndexSize);
-    // printDeviceArray(dA_values, postValueSize);
 
     CHECK_CUDA(cudaFree(dA_csrOffsets))
     CHECK_CUDA(cudaFree(dA_columns))
