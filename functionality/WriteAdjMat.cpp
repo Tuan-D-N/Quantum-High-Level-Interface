@@ -96,7 +96,7 @@ void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int eve
 
     for (int i_theta = 0; i_theta < thetaLen; ++i_theta)
     {
-        double thetaValue = minTheta + thetaStep * i_theta;
+        double thetaValue = (minTheta + thetaStep * i_theta) * M_PI / 180;
         for (int i_r = 0; i_r < rLen; ++i_r)
         {
             double rValue = minR + rStep * i_r;
@@ -168,23 +168,26 @@ void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int eve
                 int index2 = toXYIndex(lx, uy); // y changes faster than x
                 values[ValueIter] = complex(CorrelationHelper(lx, x) * CorrelationHelper(uy, y));
                 ++ValueIter;
-                rowIndex[RowIter] = index1;
+                rowIndex[RowIter] = index2;
                 ++RowIter;
 
                 int index3 = toXYIndex(ux, ly); // x changes slower
                 values[ValueIter] = complex(CorrelationHelper(ux, x) * CorrelationHelper(ly, y));
                 ++ValueIter;
-                rowIndex[RowIter] = index1;
+                rowIndex[RowIter] = index3;
                 ++RowIter;
 
                 int index4 = toXYIndex(ux, uy); // large value
                 values[ValueIter] = complex(CorrelationHelper(ux, x) * CorrelationHelper(uy, y));
                 ++ValueIter;
-                rowIndex[RowIter] = index1;
+                rowIndex[RowIter] = index4;
                 ++RowIter;
             }
         }
     }
+    ColumnOffset[ColumnOffsetIter] = ValueIter; // Closing offset
+    ++ColumnOffsetIter;
+    
     ColumnOffsetSize = ColumnOffsetIter;
     rowIndexSize = RowIter;
     valuesSize = ValueIter;
