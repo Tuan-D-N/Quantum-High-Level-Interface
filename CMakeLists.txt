@@ -38,11 +38,13 @@ message(STATUS "CUDA_LINK_LIBRARIES: ${CUDA_LINK_LIBRARIES}")
 
 add_subdirectory("functionality")
 add_subdirectory("Examples")
+add_subdirectory("CudaControl")
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE
     radon_functionality
     Examples
+    CudaControl
     CUDA::cusparse
 )
 
