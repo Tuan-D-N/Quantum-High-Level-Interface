@@ -30,9 +30,10 @@
         }                                                                  \
     }
 
-template<typename T>
-void printDeviceArray(T* d_array, T size) {
-    T* h_array = new T[size];
+template <typename T>
+void printDeviceArray(T *d_array, T size)
+{
+    T *h_array = new T[size];
     cudaMemcpy(h_array, d_array, size * sizeof(T), cudaMemcpyDeviceToHost);
     for (T i = 0; i < size; ++i)
         std::cout << h_array[i] << " ";
@@ -40,14 +41,15 @@ void printDeviceArray(T* d_array, T size) {
     delete[] h_array;
 }
 
-void printDeviceArray(cuDoubleComplex* d_array, int size) {
-    cuDoubleComplex* h_array = new cuDoubleComplex[size];
+void printDeviceArray(cuDoubleComplex *d_array, int size)
+{
+    cuDoubleComplex *h_array = new cuDoubleComplex[size];
     cudaMemcpy(h_array, d_array, size * sizeof(cuDoubleComplex), cudaMemcpyDeviceToHost);
-    
+
     for (int i = 0; i < size; ++i)
         std::cout << "(" << h_array[i].x << ", " << h_array[i].y << ") ";
     std::cout << std::endl;
-    
+
     delete[] h_array;
 }
 
@@ -57,10 +59,10 @@ int runSys()
     int evenqubits = 4;
     int A_num_rows = 1 << evenqubits;
     int A_num_cols = 1 << evenqubits;
-    int A_max_nnz = 4*A_num_rows;
+    int A_max_nnz = 4 * A_num_rows;
 
-    float alpha = 1.0f;
-    float beta = 0.0f;
+    cuDoubleComplex alpha = make_cuDoubleComplex(1.0, 0.0);
+    cuDoubleComplex beta = make_cuDoubleComplex(0.0, 0.0);
     //--------------------------------------------------------------------------
     // Device memory management
     int *dA_csrOffsets, *dA_columns;
@@ -72,16 +74,67 @@ int runSys()
 
     int postIndexSize, postOffsetSize, postValueSize;
 
+    // Unified Memory Cuda Write
     writeMatAMiniCSC(dA_csrOffsets, dA_columns, dA_values, evenqubits, postOffsetSize, postIndexSize, postValueSize);
+
+    // Vector
+    cuDoubleComplex *rThetaVector;
+    cuDoubleComplex *xyVector;
+    CHECK_CUDA(cudaMallocManaged((void **)&rThetaVector, A_num_cols * sizeof(cuDoubleComplex)));
+    CHECK_CUDA(cudaMallocManaged((void **)&xyVector, A_num_cols * sizeof(cuDoubleComplex)));
+
+    for (int i = 0; i < A_num_cols; ++i)
+    {
+        rThetaVector[i] = make_cuDoubleComplex(1, 0);
+        xyVector[0] = make_cuDoubleComplex(0, 0);
+    }
+
     //--------------------------------------------------------------------------
+    cusparseHandle_t handle = NULL;
+    cusparseSpMatDescr_t matA;
+    CHECK_CUSPARSE(cusparseCreate(&handle))
 
-    printDeviceArray(dA_csrOffsets, postOffsetSize);
-    printDeviceArray(dA_columns, postOffsetSize);
-    printDeviceArray(dA_values, postOffsetSize);
-    
+    CHECK_CUSPARSE(cusparseCreateCsr(&matA, A_num_rows, A_num_cols, postValueSize,
+                                     dA_csrOffsets, dA_columns, dA_values,
+                                     CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I,
+                                     CUSPARSE_INDEX_BASE_ZERO, CUDA_C_64F))
 
-    CHECK_CUDA( cudaFree(dA_csrOffsets) )
-    CHECK_CUDA( cudaFree(dA_columns) )
-    CHECK_CUDA( cudaFree(dA_values) )
+    cusparseDnVecDescr_t  vectorIn;
+    CHECK_CUSPARSE(cusparseCreateDnVec(&vectorIn, A_num_rows, rThetaVector, CUDA_C_64F));
+
+    cusparseDnVecDescr_t vectorOut;
+    CHECK_CUSPARSE(cusparseCreateDnVec(&vectorOut, A_num_rows, xyVector, CUDA_C_64F));
+
+    //---------------------------------------------------------------------------
+
+    // Workspace buffer
+    void *dBuffer = nullptr;
+    size_t bufferSize = 0;
+    float tmp_result;
+    CHECK_CUSPARSE(cusparseSpMV_bufferSize(handle, CUSPARSE_OPERATION_TRANSPOSE,
+                            &alpha, matA, vectorIn, &beta, vectorOut,
+                            CUDA_C_64F, CUSPARSE_SPMV_CSR_ALG1, &bufferSize));
+    CHECK_CUDA(cudaMalloc(&dBuffer, bufferSize));
+
+    // Perform the SpMV operation
+    CHECK_CUSPARSE(cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                 &alpha, matA, vectorIn, &beta, vectorOut,
+                 CUDA_C_64F, CUSPARSE_SPMV_CSR_ALG1, dBuffer));
+
+    printDeviceArray(xyVector, A_num_cols);
+
+    cusparseDestroySpMat(matA);
+    cusparseDestroyDnVec(vectorIn);
+    cusparseDestroyDnVec(vectorOut);
+
+    // printDeviceArray(dA_csrOffsets, postOffsetSize);
+    // printDeviceArray(dA_columns, postIndexSize);
+    // printDeviceArray(dA_values, postValueSize);
+
+    CHECK_CUDA(cudaFree(dA_csrOffsets))
+    CHECK_CUDA(cudaFree(dA_columns))
+    CHECK_CUDA(cudaFree(dA_values))
+    CHECK_CUDA(cudaFree(xyVector))
+    CHECK_CUDA(cudaFree(rThetaVector))
     return EXIT_SUCCESS;
 }
