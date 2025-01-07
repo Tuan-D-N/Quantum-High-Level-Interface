@@ -8,6 +8,18 @@
 #include <bitset>
 #include "helper.hpp" // HANDLE_ERROR, HANDLE_CUDA_ERROR
 
+int applyGatesGeneral(custatevecHandle_t &handle,
+                      const int nIndexBits,
+                      const cuDoubleComplex matrix[],
+                      const int adjoint,
+                      const int targets[],
+                      const int nTargets,
+                      const int controls[],
+                      const int nControls,
+                      cuDoubleComplex *d_sv,
+                      void *extraWorkspace = nullptr,
+                      size_t extraWorkspaceSizeInBytes = 0);
+
 #define DEFINE_GATE_APPLY_FUNCTION(FUNC_NAME, MATRIX_VALUES) \
     int FUNC_NAME(custatevecHandle_t &handle,                \
                   const int nIndexBits,                      \
@@ -62,14 +74,3 @@ DEFINE_GATE_APPLY_FUNCTION(applyZ, ZMat)
         {cos(theta), 0.0}, {-sin(theta), 0.0}, {sin(theta), 0.0}, { cos(theta), 0.0 } \
     }
 
-int applyGatesGeneral(custatevecHandle_t &handle,
-                      const int nIndexBits,
-                      const cuDoubleComplex matrix[],
-                      const int adjoint,
-                      const int targets[],
-                      const int nTargets,
-                      const int controls[],
-                      const int nControls,
-                      cuDoubleComplex *d_sv,
-                      void *extraWorkspace = nullptr,
-                      size_t extraWorkspaceSizeInBytes = 0);

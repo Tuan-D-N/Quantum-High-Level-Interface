@@ -1,4 +1,4 @@
-#include <opencv2/opencv.hpp>
+#include <opencv2/opencv.hpp> // NOLINT
 #include <vector>
 #include <iostream>
 #include "ImageReader.hpp"

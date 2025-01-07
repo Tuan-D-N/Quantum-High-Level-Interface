@@ -17,8 +17,8 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                       const int controls[],
                       const int nControls,
                       cuDoubleComplex *d_sv,
-                      void *extraWorkspace = nullptr,
-                      size_t extraWorkspaceSizeInBytes = 0)
+                      void *extraWorkspace,
+                      size_t extraWorkspaceSizeInBytes)
 {
 
     // check the size of external workspace
@@ -27,7 +27,7 @@ int applyGatesGeneral(custatevecHandle_t &handle,
         adjoint, nTargets, nControls, CUSTATEVEC_COMPUTE_64F, &extraWorkspaceSizeInBytes));
 
     // allocate external workspace if necessary
-    if (extraWorkspaceSizeInBytes > extraWorkspaceSizeInBytes)
+    if (extraWorkspaceSizeInBytes > 0)
     {
         std::cout << "Extra space needed: " << extraWorkspaceSizeInBytes << " Bytes";
         if (extraWorkspace != nullptr)
@@ -45,4 +45,5 @@ int applyGatesGeneral(custatevecHandle_t &handle,
     {
         HANDLE_CUDA_ERROR(cudaFree(extraWorkspace));
     }
+    return cudaSuccess;
 }
