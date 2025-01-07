@@ -43,9 +43,9 @@ add_subdirectory("CudaControl")
 # Link libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE
     radon_functionality
-    Examples
     CudaControl
-    CUDA::cusparse
+    CUDA::cusparse 
+    CUDA::cudart
 )
 
 

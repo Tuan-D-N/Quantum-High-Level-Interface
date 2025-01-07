@@ -18,7 +18,7 @@ set_target_properties(Examples PROPERTIES
 # Link the necessary CUDA libraries (e.g., cusparse)
 target_link_libraries(Examples PRIVATE CUDA::cusparse CUDA::cudart)
 
-set(CUDA_EXEC True)
+set(CUDA_EXEC False)
 
 if(CUDA_EXEC)
     message(STATUS "building CUDA_EXEC")
