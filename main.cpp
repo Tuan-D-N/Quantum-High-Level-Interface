@@ -1,6 +1,6 @@
 #include <iostream>
 #include "CudaControl/Sys.hpp"
-#include "CuquantumControl/ApplyGateTest.hpp"
+#include "CuQuantumControl/Sys.hpp"
 
 int main()
 {
