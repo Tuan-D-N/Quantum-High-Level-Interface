@@ -55,3 +55,20 @@ std::vector<std::vector<double>> cscToDense(
     int rowsCount,                    // Number of rows
     int colsCount                     // Number of columns
 );
+
+// Helper function to compare two matrices
+template <typename T>
+bool matricesEqual(const std::vector<std::vector<T>>& matrix1, const std::vector<std::vector<T>>& matrix2, T tolerance = 1e-5) {
+    if (matrix1.size() != matrix2.size() || matrix1[0].size() != matrix2[0].size()) {
+        return false;
+    }
+
+    for (size_t i = 0; i < matrix1.size(); ++i) {
+        for (size_t j = 0; j < matrix1[0].size(); ++j) {
+            if (abs(matrix1[i][j] - matrix2[i][j]) > tolerance) {
+                return false;
+            }
+        }
+    }
+    return true;
+}

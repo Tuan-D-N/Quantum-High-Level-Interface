@@ -1,13 +1,13 @@
 #include <iostream>
+#include <gtest/gtest.h>
 #include <cuComplex.h>
-#include "functionality/WriteAdjMat.hpp"
-#include "functionality/GetAdjMat.hpp"
-#include "functionality/Utilities.hpp"
+#include "../functionality/WriteAdjMat.hpp"
+#include "../functionality/GetAdjMat.hpp"
+#include "../functionality/Utilities.hpp"
 #include <vector>
 
-int main()
+bool testQubitCompare(int evenqubits)
 {
-    int evenqubits = 4;
     int len = 1 << evenqubits;
     auto rowOffset = std::vector<int>(getRowOffsetSizeMini(evenqubits), 0);
     auto columnIndices = std::vector<int>(getColumnIndexSizeMini(evenqubits), 0);
@@ -25,26 +25,6 @@ int main()
                      columnIndicesSize,
                      valuesSize);
 
-    for (int i = 0; i < rowOffsetSize; ++i)
-    {
-        std::cout << rowOffset[i] << " , ";
-    }
-    std::cout << std::endl;
-
-    for (int i = 0; i < columnIndicesSize; ++i)
-    {
-        std::cout << columnIndices[i] << " , ";
-    }
-    std::cout << std::endl;
-
-    for (int i = 0; i < valuesSize; ++i)
-    {
-        std::cout << cuCreal(values[i]) << " , ";
-    }
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-
     auto matA = getMatAMini(evenqubits);
 
     auto matB = cscToDense(values, rowOffset, columnIndices, len, len);
@@ -55,11 +35,20 @@ int main()
         {
             if(matA[i][j].real() - matB[i][j] > 0.003){
                 std::cout << "failed " << i << "," << j << " " << matA[i][j].real() << " , " << matB[i][j] << "\n";
+                return false;
             }
         }
     }
-
     delete[] values;
+    return true;
+}
 
-    return 0;
+TEST(WriteAdjMat, comparing2dense) 
+{
+    EXPECT_TRUE(testQubitCompare(4));
+    EXPECT_TRUE(testQubitCompare(6));
+    EXPECT_TRUE(testQubitCompare(8));
+    EXPECT_TRUE(testQubitCompare(10));
+    EXPECT_TRUE(testQubitCompare(12));  
+
 }
