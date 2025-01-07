@@ -60,7 +60,7 @@ int getValuesSizeMini(int evenQubits)
     return 4 * getRowOffsetSizeMini(evenQubits); // max of 4 each row
 }
 
-void writeMatAMiniCSR(int *rowOffset, int *columnIndex, complex *values, int evenQubits, int &rowOffsetSize, int &columnIndexSize, int &valuesSize)
+void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int evenQubits, int &ColumnOffsetSize, int &rowIndexSize, int &valuesSize)
 {
     assert(isEven(evenQubits));
 
@@ -91,8 +91,8 @@ void writeMatAMiniCSR(int *rowOffset, int *columnIndex, complex *values, int eve
     double thetaStep = (maxTheta - minTheta) / (thetaLen - 1); // endings inclusive scheme
 
     int ValueIter = 0;
+    int ColumnOffsetIter = 0;
     int RowIter = 0;
-    int ColumnIter = 0;
 
     for (int i_theta = 0; i_theta < thetaLen; ++i_theta)
     {
@@ -111,82 +111,82 @@ void writeMatAMiniCSR(int *rowOffset, int *columnIndex, complex *values, int eve
 
             if (lx == ux && ly == uy)
             {
-                rowOffset[RowIter] = ValueIter;
-                ++RowIter;
+                ColumnOffset[ColumnOffsetIter] = ValueIter;
+                ++ColumnOffsetIter;
 
                 int index1 = toXYIndex(lx, ly); // one value
                 values[ValueIter] = complex(1);
                 ++ValueIter;
-                columnIndex[ColumnIter] = index1;
-                ++ColumnIter;
+                rowIndex[RowIter] = index1;
+                ++RowIter;
             }
             else if (lx == ux)
             {
-                rowOffset[RowIter] = ValueIter;
-                ++RowIter;
+                ColumnOffset[ColumnOffsetIter] = ValueIter;
+                ++ColumnOffsetIter;
 
                 int index1 = toXYIndex(lx, ly); // smaller value first
                 values[ValueIter] = complex(CorrelationHelper(ly, y));
                 ++ValueIter;
-                columnIndex[ColumnIter] = index1;
-                ++ColumnIter;
+                rowIndex[RowIter] = index1;
+                ++RowIter;
 
                 int index2 = toXYIndex(lx, uy); // larger value second
                 values[ValueIter] = complex(CorrelationHelper(uy, y));
                 ++ValueIter;
-                columnIndex[ColumnIter] = index2;
-                ++ColumnIter;
+                rowIndex[RowIter] = index2;
+                ++RowIter;
             }
             else if (ly == uy)
             {
-                rowOffset[RowIter] = ValueIter;
-                ++RowIter;
+                ColumnOffset[ColumnOffsetIter] = ValueIter;
+                ++ColumnOffsetIter;
 
                 int index1 = toXYIndex(lx, ly); // smaller value first
                 values[ValueIter] = complex(CorrelationHelper(lx, x));
                 ++ValueIter;
-                columnIndex[ColumnIter] = index1;
-                ++ColumnIter;
+                rowIndex[RowIter] = index1;
+                ++RowIter;
 
                 int index2 = toXYIndex(ux, ly); // larger value second
                 values[ValueIter] = complex(CorrelationHelper(ux, x));
                 ++ValueIter;
-                columnIndex[ColumnIter] = index2;
-                ++ColumnIter;
+                rowIndex[RowIter] = index2;
+                ++RowIter;
             }
             else
             {
-                rowOffset[RowIter] = ValueIter;
-                ++RowIter;
+                ColumnOffset[ColumnOffsetIter] = ValueIter;
+                ++ColumnOffsetIter;
 
                 int index1 = toXYIndex(lx, ly); // smaller value first
                 values[ValueIter] = complex(CorrelationHelper(lx, x) * CorrelationHelper(ly, y));
                 ++ValueIter;
-                columnIndex[ColumnIter] = index1;
-                ++ColumnIter;
+                rowIndex[RowIter] = index1;
+                ++RowIter;
 
                 int index2 = toXYIndex(lx, uy); // y changes faster than x
                 values[ValueIter] = complex(CorrelationHelper(lx, x) * CorrelationHelper(uy, y));
                 ++ValueIter;
-                columnIndex[ColumnIter] = index1;
-                ++ColumnIter;
+                rowIndex[RowIter] = index1;
+                ++RowIter;
 
                 int index3 = toXYIndex(ux, ly); // x changes slower
                 values[ValueIter] = complex(CorrelationHelper(ux, x) * CorrelationHelper(ly, y));
                 ++ValueIter;
-                columnIndex[ColumnIter] = index1;
-                ++ColumnIter;
+                rowIndex[RowIter] = index1;
+                ++RowIter;
 
                 int index4 = toXYIndex(ux, uy); // large value
                 values[ValueIter] = complex(CorrelationHelper(ux, x) * CorrelationHelper(uy, y));
                 ++ValueIter;
-                columnIndex[ColumnIter] = index1;
-                ++ColumnIter;
+                rowIndex[RowIter] = index1;
+                ++RowIter;
             }
         }
     }
-    rowOffsetSize = RowIter;
-    columnIndexSize = ColumnIter;
+    ColumnOffsetSize = ColumnOffsetIter;
+    rowIndexSize = RowIter;
     valuesSize = ValueIter;
 }
 

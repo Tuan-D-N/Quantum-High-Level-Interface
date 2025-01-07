@@ -19,16 +19,18 @@ add_executable(${PROJECT_NAME} main.cpp)
 set(CUDA_INClUDE_LIBRARIES "")
 set(CUDA_LINK_LIBRARIES "/opt/nvidia/hpc_sdk/Linux_aarch64/24.9/cuda/../math_libs/lib64")
 set(CUDA_INClUDE_LIBRARIES "/opt/nvidia/hpc_sdk/Linux_aarch64/24.9/cuda/../math_libs/include")
+set(CUDA_INClUDE_LIBRARIES "${CUDA_INClUDE_LIBRARIES}:/opt/nvidia/hpc_sdk/Linux_aarch64/24.9/cuda/12.6/targets/sbsa-linux/include")
 
+include_directories(/opt/nvidia/hpc_sdk/Linux_aarch64/24.9/cuda/12.6/targets/sbsa-linux/include)
 # Include directories
-target_include_directories(${PROJECT_NAME} PRIVATE
+target_include_directories(${PROJECT_NAME} PUBLIC
     ${CUDA_INClUDE_LIBRARIES}
 )
 
 message(STATUS "CUDA_INClUDE_LIBRARIES: ${CUDA_INClUDE_LIBRARIES}")
 
 # Link directories
-target_link_directories(${PROJECT_NAME} PRIVATE
+target_link_directories(${PROJECT_NAME} PUBLIC
     ${CUDA_LINK_LIBRARIES}
 )
 

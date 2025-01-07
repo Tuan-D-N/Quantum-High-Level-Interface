@@ -2,7 +2,6 @@
 #include <vector>
 #include <iostream>
 #include <complex>
-#include <cuComplex.h>
 
 bool isEven(int num)
 {

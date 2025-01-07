@@ -11,7 +11,7 @@ int getColumnIndexSizeMini(int evenQubits);
 int getValuesSizeMini(int evenQubits);
 
 
-void writeMatAMiniCSR(int* rowOffset, int* columnIndex, cuDoubleComplex* values, int evenQubits, int &rowOffsetSize, int &columnIndexSize, int &valuesSize);
+void writeMatAMiniCSC(int* ColumnOffset, int* rowIndex, cuDoubleComplex* values, int evenQubits, int &ColumnOffsetSize, int &rowIndexSize, int &valuesSize);
 
 std::vector<std::vector<double>> csrToDense(
     const cuDoubleComplex *values,  // Non-zero values

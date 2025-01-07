@@ -17,7 +17,7 @@ int main()
     int columnIndicesSize;
     int valuesSize;
 
-    writeMatAMiniCSR(rowOffset.data(),
+    writeMatAMiniCSC(rowOffset.data(),
                      columnIndices.data(),
                      values,
                      evenqubits,
