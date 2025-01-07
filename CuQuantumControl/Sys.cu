@@ -54,4 +54,6 @@ int runner()
     }
 
     HANDLE_CUDA_ERROR(cudaFree(d_sv));
+
+    return cudaSuccess;
 }

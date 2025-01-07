@@ -10,4 +10,5 @@
 int ApplyQFTOnStateVector(cuDoubleComplex *d_stateVector, int numQubits)
 {
     const int nSvSize = (1 << numQubits);
+    return cudaSuccess;
 }

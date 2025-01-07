@@ -47,6 +47,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     CudaControl
     CUDA::cusparse 
     CUDA::cudart
+    custatevec
     CuQuantumControl
 )
 

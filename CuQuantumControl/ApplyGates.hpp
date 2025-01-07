@@ -27,24 +27,8 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                   const int target,                          \
                   cuDoubleComplex *d_sv,                     \
                   void *extraWorkspace = nullptr,            \
-                  size_t extraWorkspaceSizeInBytes = 0)      \
-    {                                                        \
-        cuDoubleComplex matrix[] = MATRIX_VALUES;            \
-        applyGatesGeneral(                                   \
-            handle,                                          \
-            nIndexBits,                                      \
-            matrix,                                          \
-            adjoint,                                         \
-            &target,                                         \
-            1,                                               \
-            {},                                              \
-            0,                                               \
-            d_sv,                                            \
-            extraWorkspace,                                  \
-            extraWorkspaceSizeInBytes);                      \
-        return 0;                                            \
-    }
-
+                  size_t extraWorkspaceSizeInBytes = 0);
+                  
 #define HMat                                              \
     {                                                     \
         {0.5, 0.0}, {0.5, 0.0}, {0.5, 0.0}, { -0.5, 0.0 } \

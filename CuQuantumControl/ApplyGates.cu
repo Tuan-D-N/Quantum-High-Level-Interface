@@ -47,3 +47,33 @@ int applyGatesGeneral(custatevecHandle_t &handle,
     }
     return cudaSuccess;
 }
+
+#define DEFINE_GATE_APPLY_FUNCTION_BACKEND(FUNC_NAME, MATRIX_VALUES) \
+    int FUNC_NAME(custatevecHandle_t &handle,                        \
+                  const int nIndexBits,                              \
+                  const int adjoint,                                 \
+                  const int target,                                  \
+                  cuDoubleComplex *d_sv,                             \
+                  void *extraWorkspace,                              \
+                  size_t extraWorkspaceSizeInBytes)                  \
+    {                                                                \
+        cuDoubleComplex matrix[] = MATRIX_VALUES;                    \
+        applyGatesGeneral(                                           \
+            handle,                                                  \
+            nIndexBits,                                              \
+            matrix,                                                  \
+            adjoint,                                                 \
+            &target,                                                 \
+            1,                                                       \
+            {},                                                      \
+            0,                                                       \
+            d_sv,                                                    \
+            extraWorkspace,                                          \
+            extraWorkspaceSizeInBytes);                              \
+        return 0;                                                    \
+    }
+
+DEFINE_GATE_APPLY_FUNCTION_BACKEND(applyH, HMat)
+DEFINE_GATE_APPLY_FUNCTION_BACKEND(applyX, XMat)
+DEFINE_GATE_APPLY_FUNCTION_BACKEND(applyY, YMat)
+DEFINE_GATE_APPLY_FUNCTION_BACKEND(applyZ, ZMat)
