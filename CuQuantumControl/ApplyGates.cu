@@ -58,7 +58,7 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                   size_t extraWorkspaceSizeInBytes)                  \
     {                                                                \
         cuDoubleComplex matrix[] = MATRIX_VALUES;                    \
-        applyGatesGeneral(                                           \
+        return applyGatesGeneral(                                           \
             handle,                                                  \
             nIndexBits,                                              \
             matrix,                                                  \
@@ -70,7 +70,6 @@ int applyGatesGeneral(custatevecHandle_t &handle,
             d_sv,                                                    \
             extraWorkspace,                                          \
             extraWorkspaceSizeInBytes);                              \
-        return 0;                                                    \
     }
 
 DEFINE_GATE_APPLY_FUNCTION_BACKEND(applyH, HMat)
