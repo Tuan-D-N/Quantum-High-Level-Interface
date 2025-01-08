@@ -7,7 +7,7 @@
 #include <bitset>
 #include "helper.hpp" // HANDLE_ERROR, HANDLE_CUDA_ERROR
 #include "ApplyGates.hpp"
-#include "QftRhoWise.hpp"
+#include "QftStateVec.hpp"
 #include "../functionality/fftShift.hpp"
 #include <cstring>
 int runner()

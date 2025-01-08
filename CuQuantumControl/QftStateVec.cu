@@ -8,7 +8,7 @@
 #include "helper.hpp" // HANDLE_ERROR, HANDLE_CUDA_ERROR
 #include "ApplyGates.hpp"
 #include <cstring>
-#include "QftRhoWise.hpp"
+#include "QftStateVec.hpp"
 #include "SwapGates.hpp"
 #include <vector>
 
@@ -37,23 +37,6 @@ int ApplyQFTOnStateVector(cuDoubleComplex *d_stateVector, int numQubits)
             const int controls[] = {i_qubit_reversed - 1 - j_qubit};
             const int ncontrols = 1;
             const cuDoubleComplex matrix[] = RKMat(n);
-
-            // std::cout << "num Qubits" << numQubits << "\n";
-            // for (int i = 0; i < 4; ++i)
-            // {
-            //     std::cout << matrix[i].x << "," << matrix[i].y << "\n";
-            // }
-            // std::cout << "adjoint" << adjoint << "\n";
-            // std::cout << "Targets" << targets[0] << "\n";
-            // std::cout << "nTargets" << nTargets << "\n";
-            // std::cout << "controls" << controls[0] << "\n";
-            // std::cout << "ncontrols" << ncontrols << "\n";
-            // for (int i = 0; i < nSvSize; ++i)
-            // {
-            //     std::cout << d_stateVector[i].x << "," << d_stateVector[i].y << "\n";
-            // }
-            // std::cout << "extraWorkspaceSizeInBytes" << extraWorkspaceSizeInBytes << "\n";
-
             HANDLE_ERROR(
                 static_cast<custatevecStatus_t>(applyGatesGeneral(handle,
                                                                   numQubits,
@@ -79,6 +62,7 @@ int ApplyQFTOnStateVector(cuDoubleComplex *d_stateVector, int numQubits)
         qubitsToSwap[i] = {swapA, swapB};
     }
     swap(handle, numQubits, qubitsToSwap.data(), numberOfSwaps, d_stateVector);
+
     // destroy handle
     HANDLE_ERROR(custatevecDestroy(handle));
 
