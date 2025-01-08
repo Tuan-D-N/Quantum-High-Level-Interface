@@ -6,6 +6,7 @@
 #include "Linspace.hpp"
 #include "OddRound.hpp"
 #include <cassert>
+#include <iostream>
 
 using complex = cuDoubleComplex;
 
@@ -87,8 +88,8 @@ void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int eve
         return xLen * x + y;
     };
 
-    double rStep = (maxR - minR) / (rLen - 1);                 // endings inclusive scheme
-    double thetaStep = (maxTheta - minTheta) / (thetaLen - 1); // endings inclusive scheme
+    double rStep = (maxR - minR) / static_cast<double>((rLen - 1));                 // endings inclusive scheme
+    double thetaStep = (maxTheta - minTheta) / static_cast<double>((thetaLen - 1)); // endings inclusive scheme
 
     int ValueIter = 0;
     int ColumnOffsetIter = 0;
@@ -108,7 +109,6 @@ void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int eve
             double ux = roundToHigherOdd(x);
             double ly = roundToLowerOdd(y);
             double uy = roundToHigherOdd(y);
-
             if (lx == ux && ly == uy)
             {
                 ColumnOffset[ColumnOffsetIter] = ValueIter;
