@@ -53,10 +53,12 @@ DEFINE_GATE_APPLY_FUNCTION(applyY, YMat)
     }
 DEFINE_GATE_APPLY_FUNCTION(applyZ, ZMat)
 
-#define RKMat(theta)                                                                                             \
-    /*dyadic rational phase gate*/                                                                               \
-    {                                                                                                            \
-        inline cuDoubleComplex phase = make_cuDoubleComplex(cos(2 * M_PI / (1 << k)), sin(2 * M_PI / (1 << k))); \
-        cuDoubleComplex matrix[] = {make_cuDoubleComplex(1.0, 0.0), make_cuDoubleComplex(0.0, 0.0),              \
-                                    make_cuDoubleComplex(0.0, 0.0), phase};                                      \
+#define RKMat(k)                                               \
+    {                                                          \
+        {1.0, 0.0},                                            \
+            {0.0, 0.0},                                        \
+            {0.0, 0.0},                                        \
+        {                                                      \
+            cos(2 * M_PI / (1 << k)), sin(2 * M_PI / (1 << k)) \
+        }                                                      \
     }

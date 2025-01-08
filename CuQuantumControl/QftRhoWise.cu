@@ -34,11 +34,11 @@ int ApplyQFTOnStateVector(cuDoubleComplex *d_stateVector, int numQubits)
             int n = j_qubit + 2;
             const int controls[] = {i_qubit - 1 - j_qubit};
             const int ncontrols = 1;
-
+            const cuDoubleComplex matrix[] = RKMat(n);
             HANDLE_ERROR(
                 static_cast<custatevecStatus_t >(applyGatesGeneral(handle,
                                                            numQubits,
-                                                           {},
+                                                           matrix,
                                                            adjoint,
                                                            targets,
                                                            nTargets,
