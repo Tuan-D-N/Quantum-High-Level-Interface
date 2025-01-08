@@ -59,7 +59,13 @@ std::vector<std::vector<double>> cscToDense(
 // Helper function to compare two matrices
 template <typename T>
 bool matricesEqual(const std::vector<std::vector<T>>& matrix1, const std::vector<std::vector<T>>& matrix2, T tolerance = 1e-5) {
-    if (matrix1.size() != matrix2.size() || matrix1[0].size() != matrix2[0].size()) {
+    if (matrix1.size() != matrix2.size()) {
+        return false;
+    }
+    else if(matrix1.size() == 0){
+        return true;
+    }
+    else if(matrix1[0].size() != matrix2[0].size()){
         return false;
     }
 
