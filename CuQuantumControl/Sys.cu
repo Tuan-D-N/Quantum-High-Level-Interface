@@ -8,6 +8,7 @@
 #include "helper.hpp" // HANDLE_ERROR, HANDLE_CUDA_ERROR
 #include "ApplyGates.hpp"
 #include "QftRhoWise.hpp"
+#include "../functionality/fftShift.hpp"
 #include <cstring>
 int runner()
 {
@@ -29,8 +30,11 @@ int runner()
     }
     std::cout << "\n";
 
-    HANDLE_CUDA_ERROR(static_cast<cudaError_t>(ApplyQFTOnStateVector(d_sv, nIndexBits)));
 
+    fftshift1D(d_sv, nSvSize);
+    HANDLE_CUDA_ERROR(static_cast<cudaError_t>(ApplyQFTOnStateVector(d_sv, nIndexBits)));
+    fftshift1D(d_sv, nSvSize);
+    
     for (int i = 0; i < nSvSize; i++)
     {
         std::cout << (d_sv[i].x) << "," << d_sv[i].y << " , " << static_cast<std::bitset<3>>(i) << std::endl;

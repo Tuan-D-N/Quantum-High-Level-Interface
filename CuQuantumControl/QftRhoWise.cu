@@ -9,6 +9,8 @@
 #include "ApplyGates.hpp"
 #include <cstring>
 #include "QftRhoWise.hpp"
+#include "SwapGates.hpp"
+#include <vector>
 
 int ApplyQFTOnStateVector(cuDoubleComplex *d_stateVector, int numQubits)
 {
@@ -67,6 +69,16 @@ int ApplyQFTOnStateVector(cuDoubleComplex *d_stateVector, int numQubits)
         }
     }
 
+    const int numberOfSwaps = numQubits / 2;
+    std::vector<int2> qubitsToSwap;
+    qubitsToSwap.reserve(numberOfSwaps);
+    for (int i = 0; i < numberOfSwaps; ++i)
+    {
+        int swapA = i;
+        int swapB = numQubits - i - 1;
+        qubitsToSwap[i] = {swapA, swapB};
+    }
+    swap(handle, numQubits, qubitsToSwap.data(), numberOfSwaps, d_stateVector);
     // destroy handle
     HANDLE_ERROR(custatevecDestroy(handle));
 
