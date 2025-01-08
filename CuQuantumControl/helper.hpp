@@ -1,6 +1,8 @@
 #pragma once
 #include <cuComplex.h>
 
+#define INV_SQRT2 (0.7071067811865475) // Approximation of 1/sqrt(2)
+
 #define HANDLE_ERROR(x)                                                        \
 {   const auto err = x;                                                        \
     if (err != CUSTATEVEC_STATUS_SUCCESS ) {                                   \

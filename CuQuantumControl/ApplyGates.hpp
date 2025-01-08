@@ -29,9 +29,10 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                                  void *extraWorkspace = nullptr, \
                                  size_t extraWorkspaceSizeInBytes = 0);
 
+
 #define HMat                                              \
     {                                                     \
-        {0.5, 0.0}, {0.5, 0.0}, {0.5, 0.0}, { -0.5, 0.0 } \
+        {INV_SQRT2, 0.0}, {INV_SQRT2, 0.0}, {INV_SQRT2, 0.0}, { -INV_SQRT2, 0.0 } \
     }
 DEFINE_GATE_APPLY_FUNCTION(applyH, HMat)
 
