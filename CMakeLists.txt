@@ -6,7 +6,7 @@ project(radon_transform LANGUAGES CXX)
 find_package(CUDAToolkit REQUIRED)
 
 # Set the C++ compiler
-set(CMAKE_CXX_COMPILER "/opt/nvidia/hpc_sdk/Linux_aarch64/24.9/compilers/bin/nvc++")
+set(CMAKE_CXX_COMPILER "/opt/nvidia/hpc_sdk/Linux_aarch64/24.5/compilers/bin/nvc++")
 
 # Set C++ standard
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
@@ -59,7 +59,7 @@ set(CMAKE_SKIP_RPATH TRUE)
 
 
 
-set(BUILD_TESTING True)
+set(BUILD_TESTING TRUE)
 
 message(STATUS "Testing = ${BUILD_TESTING}")
 if(BUILD_TESTING)
@@ -85,7 +85,20 @@ if(BUILD_TESTING)
     runTest
     GTest::gtest_main
     radon_functionality
+    CuQuantumControl
+    CudaControl
+    CUDA::cusparse 
+    CUDA::cudart
+    custatevec
     )
+
+  target_include_directories(runTest PUBLIC
+    ${CUDA_INClUDE_LIBRARIES}
+  )
+  target_link_directories(runTest PUBLIC
+    ${CUDA_LINK_LIBRARIES}
+  )
+
     
   include(GoogleTest)
   gtest_discover_tests(runTest)
