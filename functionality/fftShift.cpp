@@ -1,6 +1,20 @@
-#include <vector>
-#include <algorithm>
 #include "fftShift.hpp"
+#include <iostream>
+#include <vector>
+#include <cassert>
+#include <cmath>
+#include <algorithm>
+#include <cuComplex.h>
+
+// Functions to be tested
+void fftshift1D(cuDoubleComplex* data, int n) {
+    int half = n / 2;
+    if (n % 2 == 0) {
+        std::rotate(data, data + half, data + n);
+    } else {
+        std::rotate(data, data + half + 1, data + n);
+    }
+}
 
 void fftshift1D(std::vector<double>& data) {
     int n = data.size();
