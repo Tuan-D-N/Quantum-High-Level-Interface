@@ -43,12 +43,27 @@ bool testQubitCompare(int evenqubits)
     return true;
 }
 
-TEST(WriteAdjMat, comparing2dense) 
+TEST(WriteAdjMat, comparing2dense4) 
 {
     EXPECT_TRUE(testQubitCompare(4));
+}
+TEST(WriteAdjMat, comparing2dense6) 
+{
     EXPECT_TRUE(testQubitCompare(6));
+}
+TEST(WriteAdjMat, comparing2dense8) 
+{
     EXPECT_TRUE(testQubitCompare(8));
+}
+TEST(WriteAdjMat, comparing2dense10) 
+{
     EXPECT_TRUE(testQubitCompare(10));
-    EXPECT_TRUE(testQubitCompare(12));  
-
+}
+TEST(WriteAdjMat, comparing2dense12) 
+{
+    EXPECT_TRUE(testQubitCompare(12));
+}
+TEST(WriteAdjMat, comparing2dense14) 
+{
+    EXPECT_TRUE(testQubitCompare(14));
 }
