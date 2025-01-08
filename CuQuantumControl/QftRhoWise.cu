@@ -25,17 +25,29 @@ int ApplyQFTOnStateVector(cuDoubleComplex *d_stateVector, int numQubits)
     {
         int i_qubit_reversed = numQubits - 1 - i_qubit;
         const int targets[] = {i_qubit_reversed};
-        applyH(handle, numQubits, adjoint, i_qubit_reversed, d_stateVector, extraWorkspace, extraWorkspaceSizeInBytes);
 
-        for(int j_qubit = 0; j_qubit < i_qubit_reversed; ++j_qubit )
+        HANDLE_ERROR(
+            applyH(handle, numQubits, adjoint, i_qubit_reversed, d_stateVector, extraWorkspace, extraWorkspaceSizeInBytes));
+
+        for (int j_qubit = 0; j_qubit < i_qubit_reversed; ++j_qubit)
         {
             int n = j_qubit + 2;
             const int controls[] = {i_qubit - 1 - j_qubit};
             const int ncontrols = 1;
-            applyGatesGeneral(handle, numQubits, {}, adjoint, targets, nTargets, controls, ncontrols, d_stateVector, extraWorkspace, extraWorkspaceSizeInBytes);
-            
-        }
 
+            HANDLE_ERROR(
+                static_cast<custatevecStatus_t >(applyGatesGeneral(handle,
+                                                           numQubits,
+                                                           {},
+                                                           adjoint,
+                                                           targets,
+                                                           nTargets,
+                                                           controls,
+                                                           ncontrols,
+                                                           d_stateVector,
+                                                           extraWorkspace,
+                                                           extraWorkspaceSizeInBytes)));
+        }
     }
 
     // destroy handle

@@ -16,21 +16,20 @@ int runner()
     const int nSvSize = (1 << nIndexBits);
     const int adjoint = 0;
 
-
     cuDoubleComplex h_sv[] = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
     cuDoubleComplex *d_sv;
     HANDLE_CUDA_ERROR(cudaMallocManaged((void **)&d_sv, nSvSize * sizeof(cuDoubleComplex)));
 
     // Initialize the values
     std::memcpy(d_sv, &h_sv, nSvSize * sizeof(cuDoubleComplex));
-    
+
     for (int i = 0; i < nSvSize; i++)
     {
         std::cout << (d_sv[i].x) << "," << d_sv[i].y << " , " << static_cast<std::bitset<3>>(i) << std::endl;
     }
     std::cout << "\n";
 
-    ApplyQFTOnStateVector(d_sv, nIndexBits);
+    HANDLE_CUDA_ERROR(static_cast<cudaError_t>(ApplyQFTOnStateVector(d_sv, nIndexBits)));
 
     for (int i = 0; i < nSvSize; i++)
     {

@@ -49,16 +49,16 @@ int applyGatesGeneral(custatevecHandle_t &handle,
 }
 
 #define DEFINE_GATE_APPLY_FUNCTION_BACKEND(FUNC_NAME, MATRIX_VALUES) \
-    int FUNC_NAME(custatevecHandle_t &handle,                        \
-                  const int nIndexBits,                              \
-                  const int adjoint,                                 \
-                  const int target,                                  \
-                  cuDoubleComplex *d_sv,                             \
-                  void *extraWorkspace,                              \
-                  size_t extraWorkspaceSizeInBytes)                  \
+    custatevecStatus_t FUNC_NAME(custatevecHandle_t &handle,         \
+                                 const int nIndexBits,               \
+                                 const int adjoint,                  \
+                                 const int target,                   \
+                                 cuDoubleComplex *d_sv,              \
+                                 void *extraWorkspace,               \
+                                 size_t extraWorkspaceSizeInBytes)   \
     {                                                                \
         cuDoubleComplex matrix[] = MATRIX_VALUES;                    \
-        return applyGatesGeneral(                                           \
+        return static_cast<custatevecStatus_t>(applyGatesGeneral(    \
             handle,                                                  \
             nIndexBits,                                              \
             matrix,                                                  \
@@ -69,7 +69,7 @@ int applyGatesGeneral(custatevecHandle_t &handle,
             0,                                                       \
             d_sv,                                                    \
             extraWorkspace,                                          \
-            extraWorkspaceSizeInBytes);                              \
+            extraWorkspaceSizeInBytes));                             \
     }
 
 DEFINE_GATE_APPLY_FUNCTION_BACKEND(applyH, HMat)

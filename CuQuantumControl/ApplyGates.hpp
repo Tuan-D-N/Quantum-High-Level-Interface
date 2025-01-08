@@ -20,14 +20,14 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                       void *extraWorkspace = nullptr,
                       size_t extraWorkspaceSizeInBytes = 0);
 
-#define DEFINE_GATE_APPLY_FUNCTION(FUNC_NAME, MATRIX_VALUES) \
-    int FUNC_NAME(custatevecHandle_t &handle,                \
-                  const int nIndexBits,                      \
-                  const int adjoint,                         \
-                  const int target,                          \
-                  cuDoubleComplex *d_sv,                     \
-                  void *extraWorkspace = nullptr,            \
-                  size_t extraWorkspaceSizeInBytes = 0);
+#define DEFINE_GATE_APPLY_FUNCTION(FUNC_NAME, MATRIX_VALUES)     \
+    custatevecStatus_t FUNC_NAME(custatevecHandle_t &handle,     \
+                                 const int nIndexBits,           \
+                                 const int adjoint,              \
+                                 const int target,               \
+                                 cuDoubleComplex *d_sv,          \
+                                 void *extraWorkspace = nullptr, \
+                                 size_t extraWorkspaceSizeInBytes = 0);
 
 #define HMat                                              \
     {                                                     \
