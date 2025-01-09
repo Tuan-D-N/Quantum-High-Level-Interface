@@ -4,9 +4,13 @@
 #include <stdio.h>            // printf
 #include <stdlib.h>           // EXIT_FAILURE
 #include "../functionality/WriteAdjMat.hpp"
+#include "../functionality/ReadCsv.hpp"
+#include "../functionality/Utilities.hpp"
 #include <cuComplex.h>
 #include <iostream>
 #include "Sys.hpp"
+#include <string>
+#include <cassert>
 
 #define CHECK_CUDA(func)                                               \
     {                                                                  \
@@ -53,10 +57,27 @@ void printDeviceArray(cuDoubleComplex *d_array, int size)
     delete[] h_array;
 }
 
+void getData(cuDoubleComplex *rThetaVector, const int evenqubits, const std::string fileName)
+{
+    int lengthSize = 1 << (evenqubits / 2);
+    std::vector<std::vector<float>> image = readCSV<float>(fileName);
+    assert(image.size() == lengthSize);
+
+    for (int i = 0; i < lengthSize; ++i)
+    {
+        assert(image[i].size() == lengthSize);
+        for (int j = 0; j < lengthSize; ++j)
+        {
+            rThetaVector[i * lengthSize + j] = {image[i][j], 0};
+        }
+    }
+}
+
 int runSys()
 {
     // Host problem definition
     int evenqubits = 4;
+    int svSize = 1 << evenqubits;
     int A_num_rows = 1 << evenqubits;
     int A_num_cols = 1 << evenqubits;
     int A_max_nnz = 4 * A_num_rows;
@@ -78,7 +99,7 @@ int runSys()
     writeMatAMiniCSC(dA_csrOffsets, dA_columns, dA_values, evenqubits, postOffsetSize, postIndexSize, postValueSize);
 
     // Vector
-    cuDoubleComplex *rThetaVector;
+    cuDoubleComplex *rThetaVector; // theta slow, r fast
     cuDoubleComplex *xyVector;
     CHECK_CUDA(cudaMallocManaged((void **)&rThetaVector, A_num_cols * sizeof(cuDoubleComplex)));
     CHECK_CUDA(cudaMallocManaged((void **)&xyVector, A_num_cols * sizeof(cuDoubleComplex)));
@@ -88,7 +109,9 @@ int runSys()
         xyVector[0] = make_cuDoubleComplex(0, 0);
         rThetaVector[i] = make_cuDoubleComplex(0, 0);
     }
-    rThetaVector[0] = make_cuDoubleComplex(1, 0);
+    getData(rThetaVector, evenqubits, "../imageFile.csv");
+
+    printDeviceArray(rThetaVector, svSize);
 
     //--------------------------------------------------------------------------
     cusparseHandle_t handle = NULL;
@@ -100,7 +123,7 @@ int runSys()
                                      CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I,
                                      CUSPARSE_INDEX_BASE_ZERO, CUDA_C_64F))
 
-    cusparseDnVecDescr_t  vectorIn;
+    cusparseDnVecDescr_t vectorIn;
     CHECK_CUSPARSE(cusparseCreateDnVec(&vectorIn, A_num_rows, rThetaVector, CUDA_C_64F));
 
     cusparseDnVecDescr_t vectorOut;
@@ -113,29 +136,28 @@ int runSys()
     size_t bufferSize = 0;
     float tmp_result;
     CHECK_CUSPARSE(cusparseSpMV_bufferSize(handle, CUSPARSE_OPERATION_TRANSPOSE,
-                            &alpha, matA, vectorIn, &beta, vectorOut,
-                            CUDA_C_64F, CUSPARSE_SPMV_ALG_DEFAULT, &bufferSize));
+                                           &alpha, matA, vectorIn, &beta, vectorOut,
+                                           CUDA_C_64F, CUSPARSE_SPMV_ALG_DEFAULT, &bufferSize));
     CHECK_CUDA(cudaMalloc(&dBuffer, bufferSize));
 
     // Perform the SpMV operation
     CHECK_CUSPARSE(cusparseSpMV(handle, CUSPARSE_OPERATION_TRANSPOSE,
-                 &alpha, matA, vectorIn, &beta, vectorOut,
-                 CUDA_C_64F, CUSPARSE_SPMV_ALG_DEFAULT, dBuffer));
+                                &alpha, matA, vectorIn, &beta, vectorOut,
+                                CUDA_C_64F, CUSPARSE_SPMV_ALG_DEFAULT, dBuffer));
 
     printDeviceArray(dA_csrOffsets, postOffsetSize);
     printDeviceArray(dA_columns, postIndexSize);
     printDeviceArray(dA_values, postValueSize);
 
     std::cout << alpha.x << "," << alpha.y << "\n";
-    std::cout <<  beta.x << "," << beta.y << "\n";
-    
+    std::cout << beta.x << "," << beta.y << "\n";
+
     printDeviceArray(rThetaVector, A_num_cols);
     printDeviceArray(xyVector, A_num_cols);
 
     cusparseDestroySpMat(matA);
     cusparseDestroyDnVec(vectorIn);
     cusparseDestroyDnVec(vectorOut);
-
 
     CHECK_CUDA(cudaFree(dA_csrOffsets))
     CHECK_CUDA(cudaFree(dA_columns))
