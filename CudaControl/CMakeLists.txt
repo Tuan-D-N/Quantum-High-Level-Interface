@@ -18,5 +18,5 @@ set_target_properties(CudaControl PROPERTIES
 
 
 # Link the necessary CUDA libraries (e.g., cusparse)
-target_link_libraries(CudaControl PRIVATE CUDA::cusparse CUDA::cudart radon_functionality)
+target_link_libraries(CudaControl PRIVATE CUDA::cusparse CUDA::cudart radon_functionality CuQuantumControl)
 

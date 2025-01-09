@@ -7,6 +7,7 @@
 #include "../functionality/ReadCsv.hpp"
 #include "../functionality/Utilities.hpp"
 #include "../functionality/fftShift.hpp"
+#include "../CuQuantumControl/QftStateVec.hpp"
 #include <cuComplex.h>
 #include <iostream>
 #include "Sys.hpp"
@@ -78,6 +79,7 @@ int runSys()
 {
     // Host problem definition
     int evenqubits = 4;
+    int halfOfQubits = 2;
     int svSize = 1 << evenqubits;
     int img_num_rows = 1 << (evenqubits / 2);
     int img_num_columns = 1 << (evenqubits / 2);
@@ -117,7 +119,12 @@ int runSys()
     printDeviceArray(rThetaVector, svSize);
     fftshift2D(rThetaVector, img_num_rows, img_num_columns);
     printDeviceArray(rThetaVector, svSize);
-    
+
+    for (int i = 0; i < img_num_rows; ++i)
+    {
+        ApplyQFTOnStateVector(&rThetaVector[i*img_num_columns], halfOfQubits);
+    }
+    printDeviceArray(rThetaVector, svSize);
 
     //--------------------------------------------------------------------------
     cusparseHandle_t handle = NULL;
