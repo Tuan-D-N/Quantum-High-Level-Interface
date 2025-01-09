@@ -8,3 +8,5 @@ void fftshift1D(std::vector<double>& data);
 void fftshift1D(double* data, int length);
 
 void fftshift1D(cuDoubleComplex* data, int length);
+
+void fftshift2D(cuDoubleComplex* data, int rows, int cols);

@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <cuComplex.h>
 
-// Functions to be tested
 void fftshift1D(cuDoubleComplex* data, int n) {
     int half = n / 2;
     if (n % 2 == 0) {
@@ -33,5 +32,29 @@ void fftshift1D(double* data, int length) {
         std::rotate(data, data + half, data + length);
     } else {
         std::rotate(data, data + half + 1, data + length);
+    }
+}
+
+void fftshift2D(cuDoubleComplex* data, int rows, int cols) {
+    // Shift each row
+    for (int i = 0; i < rows; ++i) {
+        fftshift1D(data + i * cols, cols);
+    }
+
+    // Shift each column
+    for (int j = 0; j < cols; ++j) {
+        // Extract column into temporary storage
+        std::vector<cuDoubleComplex> column(rows);
+        for (int i = 0; i < rows; ++i) {
+            column[i] = data[i * cols + j];
+        }
+
+        // Apply 1D fftshift to the column
+        fftshift1D(column.data(), rows);
+
+        // Write back the shifted column
+        for (int i = 0; i < rows; ++i) {
+            data[i * cols + j] = column[i];
+        }
     }
 }

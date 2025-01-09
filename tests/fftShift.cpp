@@ -77,3 +77,24 @@ TEST(fftShift, fftShiftCuDoubleComplex1DOdd)
         EXPECT_EQ(cuCimag(data2D[i]), cuCimag(expected2[i]));
     }
 }
+
+TEST(FFTShift2DTest, BasicShift)
+{
+    const int rows = 4, cols = 4;
+    cuDoubleComplex data[rows * cols] = {
+        {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0}, {10, 0}, {11, 0}, {12, 0}, {13, 0}, {14, 0}, {15, 0}, {16, 0}};
+
+    cuDoubleComplex expected[rows * cols] = {
+        {11, 0}, {12, 0}, {9, 0}, {10, 0}, {15, 0}, {16, 0}, {13, 0}, {14, 0}, {3, 0}, {4, 0}, {1, 0}, {2, 0}, {7, 0}, {8, 0}, {5, 0}, {6, 0}};
+
+    // Apply FFTShift 2D
+    fftshift2D(data, rows, cols);
+
+    // Verify the result
+
+    for (int i = 0; i < rows * cols; ++i)
+    {
+        EXPECT_EQ(data[i].x, expected[i].x);
+        EXPECT_EQ(data[i].y, expected[i].y);
+    }
+}
