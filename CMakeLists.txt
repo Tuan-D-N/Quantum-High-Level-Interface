@@ -7,9 +7,11 @@ find_package(CUDAToolkit REQUIRED)
 
 # Set the C++ compiler
 set(CMAKE_CXX_COMPILER "/opt/nvidia/hpc_sdk/Linux_aarch64/24.5/compilers/bin/nvc++")
+set(CMAKE_CUDA_COMPILER "/opt/nvidia/hpc_sdk/Linux_aarch64/24.5/compilers/bin/nvc++")
 
 # Set C++ standard
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
+set(CMAKE_CUDA_FLAGS "-std=c++20")
 
 message(STATUS "CXX Compiler: ${CMAKE_CXX_COMPILER}")
 
