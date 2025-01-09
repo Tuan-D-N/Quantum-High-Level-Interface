@@ -6,6 +6,7 @@
 #include "../functionality/WriteAdjMat.hpp"
 #include "../functionality/ReadCsv.hpp"
 #include "../functionality/Utilities.hpp"
+#include "../functionality/fftShift.hpp"
 #include <cuComplex.h>
 #include <iostream>
 #include "Sys.hpp"
@@ -78,6 +79,8 @@ int runSys()
     // Host problem definition
     int evenqubits = 4;
     int svSize = 1 << evenqubits;
+    int img_num_rows = 1 << (evenqubits / 2);
+    int img_num_columns = 1 << (evenqubits / 2);
     int A_num_rows = 1 << evenqubits;
     int A_num_cols = 1 << evenqubits;
     int A_max_nnz = 4 * A_num_rows;
@@ -112,6 +115,9 @@ int runSys()
     getData(rThetaVector, evenqubits, "../imageFile.csv");
 
     printDeviceArray(rThetaVector, svSize);
+    fftshift2D(rThetaVector, img_num_rows, img_num_columns);
+    printDeviceArray(rThetaVector, svSize);
+    
 
     //--------------------------------------------------------------------------
     cusparseHandle_t handle = NULL;
