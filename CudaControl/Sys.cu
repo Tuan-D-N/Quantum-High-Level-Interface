@@ -75,14 +75,40 @@ void getData(cuDoubleComplex *rThetaVector, const int evenqubits, const std::str
     }
 }
 
+void applyQFTHorizontally(cuDoubleComplex *vector, const int num_columns, const int num_rows, const int num_qubit_per_row)
+{
+    for (int i = 0; i < num_rows; ++i)
+    {
+        ApplyQFTOnStateVector(&vector[i * num_columns], num_qubit_per_row);
+    }
+}
+
+void applyQFTVertically(cuDoubleComplex *vector, cuDoubleComplex *workSpace, const int num_columns, const int num_rows, const int num_qubit_per_row)
+{
+    for (int i = 0; i < num_columns; ++i)
+    {
+        for (int j = 0; j < num_rows; ++j)
+        {
+            workSpace[j] = vector[i * num_rows + j];
+        }
+
+        ApplyQFTOnStateVector(workSpace, num_qubit_per_row);
+
+        for (int j = 0; j < num_rows; ++j)
+        {
+            vector[i * num_rows + j] = workSpace[j];
+        }
+    }
+}
+
 int runSys()
 {
     // Host problem definition
     int evenqubits = 4;
-    int halfOfQubits = 2;
+    int halfOfQubits = evenqubits / 2;
     int svSize = 1 << evenqubits;
-    int img_num_rows = 1 << (evenqubits / 2);
-    int img_num_columns = 1 << (evenqubits / 2);
+    int img_num_rows = 1 << (halfOfQubits);
+    int img_num_columns = 1 << (halfOfQubits);
     int A_num_rows = 1 << evenqubits;
     int A_num_cols = 1 << evenqubits;
     int A_max_nnz = 4 * A_num_rows;
@@ -120,12 +146,16 @@ int runSys()
     fftshift2D(rThetaVector, img_num_rows, img_num_columns);
     printDeviceArray(rThetaVector, svSize);
 
+    cuDoubleComplex *qftWorkSpace;
+    CHECK_CUDA(cudaMallocManaged((void **)&qftWorkSpace, img_num_rows * sizeof(cuDoubleComplex)));
+
     for (int i = 0; i < img_num_rows; ++i)
     {
-        ApplyQFTOnStateVector(&rThetaVector[i*img_num_columns], halfOfQubits);
+        ApplyQFTOnStateVector(&rThetaVector[i * img_num_columns], halfOfQubits);
     }
     printDeviceArray(rThetaVector, svSize);
-
+    
+    CHECK_CUDA(cudaFree(qftWorkSpace))
     //--------------------------------------------------------------------------
     cusparseHandle_t handle = NULL;
     cusparseSpMatDescr_t matA;
@@ -171,6 +201,7 @@ int runSys()
     cusparseDestroySpMat(matA);
     cusparseDestroyDnVec(vectorIn);
     cusparseDestroyDnVec(vectorOut);
+
 
     CHECK_CUDA(cudaFree(dA_csrOffsets))
     CHECK_CUDA(cudaFree(dA_columns))
