@@ -51,7 +51,7 @@ int runner2()
     const int nSvSize = (1 << nIndexBits);
     const int adjoint = 0;
 
-    cuDoubleComplex h_sv[] = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
+    cuDoubleComplex h_sv[] = {{1, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
     cuDoubleComplex *d_sv;
     HANDLE_CUDA_ERROR(cudaMallocManaged((void **)&d_sv, nSvSize * sizeof(cuDoubleComplex)));
 
@@ -69,16 +69,19 @@ int runner2()
     void *extraWorkspace = nullptr;
     size_t extraWorkspaceSizeInBytes = 0;
 
-    applyH(handle, nIndexBits, adjoint, 0, d_sv, extraWorkspace, extraWorkspaceSizeInBytes);
+    cuDoubleComplex matrix[] = XMat; 
+    const int target[] = {0};
+    const int control[] = {};
+    applyGatesGeneral(handle, nIndexBits, matrix, adjoint, target, 1, control, 0, d_sv, extraWorkspace, extraWorkspaceSizeInBytes);
 
     HANDLE_ERROR(custatevecDestroy(handle));
-    HANDLE_CUDA_ERROR(cudaFree(d_sv));
-    
+
     for (int i = 0; i < nSvSize; i++)
     {
         std::cout << (d_sv[i].x) << "," << d_sv[i].y << " , " << static_cast<std::bitset<3>>(i) << std::endl;
     }
     std::cout << "\n";
+    HANDLE_CUDA_ERROR(cudaFree(d_sv));
 
     return cudaSuccess;
 }
