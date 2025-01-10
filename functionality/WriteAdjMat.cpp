@@ -61,7 +61,7 @@ int getValuesSizeMini(int evenQubits)
     return 4 * getRowOffsetSizeMini(evenQubits); // max of 4 each row
 }
 
-void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int evenQubits, int &ColumnOffsetSize, int &rowIndexSize, int &valuesSize)
+void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int evenQubits, int &ColumnOffsetSize, int &rowIndexSize, int &valuesSize, bool mask)
 {
     assert(isEven(evenQubits));
 
@@ -95,6 +95,14 @@ void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int eve
     int ColumnOffsetIter = 0;
     int RowIter = 0;
 
+    double lowerValue;
+    double upperValue;
+    double maxDistance;
+    auto maskFunc = [lowerValue, upperValue, maxDistance](double distance)
+    {
+        return lowerValue + (upperValue - lowerValue) * (distance / maxDistance);
+    };
+
     for (int i_theta = 0; i_theta < thetaLen; ++i_theta)
     {
         double thetaValue = (minTheta + thetaStep * i_theta) * M_PI / 180;
@@ -115,7 +123,7 @@ void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int eve
                 ++ColumnOffsetIter;
 
                 int index1 = toXYIndex(lx, ly); // one value
-                values[ValueIter] = complex(1);
+                values[ValueIter] = complex(1* maskFunc(rValue));
                 ++ValueIter;
                 rowIndex[RowIter] = index1;
                 ++RowIter;
@@ -126,13 +134,13 @@ void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int eve
                 ++ColumnOffsetIter;
 
                 int index1 = toXYIndex(lx, ly); // smaller value first
-                values[ValueIter] = complex(CorrelationHelper(ly, y));
+                values[ValueIter] = complex(CorrelationHelper(ly, y)* maskFunc(rValue));
                 ++ValueIter;
                 rowIndex[RowIter] = index1;
                 ++RowIter;
 
                 int index2 = toXYIndex(lx, uy); // larger value second
-                values[ValueIter] = complex(CorrelationHelper(uy, y));
+                values[ValueIter] = complex(CorrelationHelper(uy, y)* maskFunc(rValue));
                 ++ValueIter;
                 rowIndex[RowIter] = index2;
                 ++RowIter;
@@ -143,13 +151,13 @@ void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int eve
                 ++ColumnOffsetIter;
 
                 int index1 = toXYIndex(lx, ly); // smaller value first
-                values[ValueIter] = complex(CorrelationHelper(lx, x));
+                values[ValueIter] = complex(CorrelationHelper(lx, x)* maskFunc(rValue));
                 ++ValueIter;
                 rowIndex[RowIter] = index1;
                 ++RowIter;
 
                 int index2 = toXYIndex(ux, ly); // larger value second
-                values[ValueIter] = complex(CorrelationHelper(ux, x));
+                values[ValueIter] = complex(CorrelationHelper(ux, x)* maskFunc(rValue));
                 ++ValueIter;
                 rowIndex[RowIter] = index2;
                 ++RowIter;
@@ -160,25 +168,25 @@ void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int eve
                 ++ColumnOffsetIter;
 
                 int index1 = toXYIndex(lx, ly); // smaller value first
-                values[ValueIter] = complex(CorrelationHelper(lx, x) * CorrelationHelper(ly, y));
+                values[ValueIter] = complex(CorrelationHelper(lx, x) * CorrelationHelper(ly, y)* maskFunc(rValue));
                 ++ValueIter;
                 rowIndex[RowIter] = index1;
                 ++RowIter;
 
                 int index2 = toXYIndex(lx, uy); // y changes faster than x
-                values[ValueIter] = complex(CorrelationHelper(lx, x) * CorrelationHelper(uy, y));
+                values[ValueIter] = complex(CorrelationHelper(lx, x) * CorrelationHelper(uy, y)* maskFunc(rValue));
                 ++ValueIter;
                 rowIndex[RowIter] = index2;
                 ++RowIter;
 
                 int index3 = toXYIndex(ux, ly); // x changes slower
-                values[ValueIter] = complex(CorrelationHelper(ux, x) * CorrelationHelper(ly, y));
+                values[ValueIter] = complex(CorrelationHelper(ux, x) * CorrelationHelper(ly, y)* maskFunc(rValue));
                 ++ValueIter;
                 rowIndex[RowIter] = index3;
                 ++RowIter;
 
                 int index4 = toXYIndex(ux, uy); // large value
-                values[ValueIter] = complex(CorrelationHelper(ux, x) * CorrelationHelper(uy, y));
+                values[ValueIter] = complex(CorrelationHelper(ux, x) * CorrelationHelper(uy, y)* maskFunc(rValue));
                 ++ValueIter;
                 rowIndex[RowIter] = index4;
                 ++RowIter;
@@ -192,4 +200,3 @@ void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int eve
     rowIndexSize = RowIter;
     valuesSize = ValueIter;
 }
-
