@@ -29,30 +29,25 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                                  void *extraWorkspace = nullptr, \
                                  size_t extraWorkspaceSizeInBytes = 0);
 
-
-#define HMat                                              \
-    {                                                     \
+#define HMat                                                                      \
+    {                                                                             \
         {INV_SQRT2, 0.0}, {INV_SQRT2, 0.0}, {INV_SQRT2, 0.0}, { -INV_SQRT2, 0.0 } \
     }
-DEFINE_GATE_APPLY_FUNCTION(applyH, HMat)
 
 #define XMat                                             \
     {                                                    \
         {0.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}, { 0.0, 0.0 } \
     }
-DEFINE_GATE_APPLY_FUNCTION(applyX, XMat)
 
 #define YMat                                              \
     {                                                     \
         {0.0, 0.0}, {0.0, 0.1}, {0.0, -0.1}, { 0.0, 0.0 } \
     }
-DEFINE_GATE_APPLY_FUNCTION(applyY, YMat)
 
 #define ZMat                                              \
     {                                                     \
         {1.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}, { -1.0, 0.0 } \
     }
-DEFINE_GATE_APPLY_FUNCTION(applyZ, ZMat)
 
 #define RKMat(k)                                               \
     {                                                          \
@@ -63,3 +58,38 @@ DEFINE_GATE_APPLY_FUNCTION(applyZ, ZMat)
             cos(2 * M_PI / (1 << k)), sin(2 * M_PI / (1 << k)) \
         }                                                      \
     }
+
+#define RXMat(theta)                \
+    {                               \
+        {cos(theta / 2), 0.0},      \
+            {0.0, -sin(theta / 2)}, \
+            {0.0, -sin(theta / 2)}, \
+        {                           \
+            cos(theta / 2), 0.0     \
+        }                           \
+    }
+
+#define RYMat(theta)                \
+    {                               \
+        {cos(theta / 2), 0.0},      \
+            {-sin(theta / 2), 0.0}, \
+            {sin(theta / 2), 0.0},  \
+        {                           \
+            cos(theta / 2), 0.0     \
+        }                           \
+    }
+
+#define RZMat(theta)                        \
+    {                                       \
+        {cos(-theta / 2), sin(-theta / 2)}, \
+            {0.0, 0.0},                     \
+            {0.0, 0.0},                     \
+        {                                   \
+            cos(theta / 2), sin(theta / 2)  \
+        }                                   \
+    }
+
+DEFINE_GATE_APPLY_FUNCTION(applyH, HMat)
+DEFINE_GATE_APPLY_FUNCTION(applyX, XMat)
+DEFINE_GATE_APPLY_FUNCTION(applyY, YMat)
+DEFINE_GATE_APPLY_FUNCTION(applyZ, ZMat)

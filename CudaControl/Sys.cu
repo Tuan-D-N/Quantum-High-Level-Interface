@@ -94,6 +94,7 @@ int runSys()
     fftshift2D(rThetaVector, img_num_rows, img_num_columns);
     printDeviceArray(rThetaVector, A_num_cols);
 
+    Transpose(rThetaVector, img_num_rows, img_num_columns);
     CHECK_CUDA(static_cast<cudaError_t>(applyInterpolationMatrix(evenqubits, rThetaVector, xyVector)));
     printDeviceArray(xyVector, A_num_cols);
 
