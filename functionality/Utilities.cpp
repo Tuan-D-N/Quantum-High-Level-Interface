@@ -98,3 +98,18 @@ std::vector<std::vector<double>> cscToDense(
 
     return dense;
 }
+
+
+
+
+void printDeviceArray(cuDoubleComplex *d_array, int size)
+{
+    cuDoubleComplex *h_array = new cuDoubleComplex[size];
+    cudaMemcpy(h_array, d_array, size * sizeof(cuDoubleComplex), cudaMemcpyDeviceToHost);
+
+    for (int i = 0; i < size; ++i)
+        std::cout << "(" << h_array[i].x << ", " << h_array[i].y << ") ";
+    std::cout << std::endl;
+
+    delete[] h_array;
+}
