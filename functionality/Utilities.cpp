@@ -50,7 +50,6 @@ template void printVector<std::complex<double>>(const std::vector<std::complex<d
 template void printVector<std::complex<int>>(const std::vector<std::complex<int>> &vec);
 template void printVector<std::complex<float>>(const std::vector<std::complex<float>> &vec);
 
-
 std::vector<std::vector<double>> csrToDense(
     const cuDoubleComplex *values,  // Non-zero values
     const std::vector<int> &rowPtr, // Row pointers
@@ -74,13 +73,12 @@ std::vector<std::vector<double>> csrToDense(
     return dense;
 }
 
-
 std::vector<std::vector<double>> cscToDense(
-    const cuDoubleComplex *values,    // Non-zero values
-    const std::vector<int> &colPtr,   // Column pointers
-    const std::vector<int> &rows,     // Row indices
-    int rowsCount,                    // Number of rows
-    int colsCount                     // Number of columns
+    const cuDoubleComplex *values,  // Non-zero values
+    const std::vector<int> &colPtr, // Column pointers
+    const std::vector<int> &rows,   // Row indices
+    int rowsCount,                  // Number of rows
+    int colsCount                   // Number of columns
 )
 {
     // Initialize a dense matrix with zeros
@@ -99,16 +97,19 @@ std::vector<std::vector<double>> cscToDense(
     return dense;
 }
 
-
-
-
 void printDeviceArray(cuDoubleComplex *d_array, int size)
 {
     cuDoubleComplex *h_array = new cuDoubleComplex[size];
     cudaMemcpy(h_array, d_array, size * sizeof(cuDoubleComplex), cudaMemcpyDeviceToHost);
 
     for (int i = 0; i < size; ++i)
+    {
         std::cout << "(" << h_array[i].x << ", " << h_array[i].y << ") ";
+        if (i != size - 1)
+        {
+            std::cout << ",";
+        }
+    }
     std::cout << std::endl;
 
     delete[] h_array;

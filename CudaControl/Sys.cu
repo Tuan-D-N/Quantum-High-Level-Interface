@@ -20,7 +20,11 @@ void getData(cuDoubleComplex *rThetaVector, const int evenqubits, const std::str
 {
     int lengthSize = 1 << (evenqubits / 2);
     std::vector<std::vector<float>> image = readCSV<float>(fileName);
-    assert(image.size() == lengthSize);
+    if(image.size() != lengthSize){
+        std::cout << "imageSize: " << image.size() << "\n";
+        std::cout << "lengthSize: " << lengthSize << "\n";
+        assert(image.size() == lengthSize);
+    }
 
     for (int i = 0; i < lengthSize; ++i)
     {
@@ -60,7 +64,7 @@ void applyQFTVertically(cuDoubleComplex *vector, cuDoubleComplex *workSpace, con
 int runSys()
 {
     // Host problem definition
-    int evenqubits = 4;
+    int evenqubits = 12;
     int halfOfQubits = evenqubits / 2;
     int svSize = 1 << evenqubits;
     int img_num_rows = 1 << (halfOfQubits);
@@ -84,20 +88,65 @@ int runSys()
 
     printDeviceArray(rThetaVector, A_num_cols);
     fftshift2D(rThetaVector, img_num_rows, img_num_columns);
-    applyQFTHorizontally(rThetaVector, img_num_columns, img_num_rows, halfOfQubits);
+    applyQFTVertically(rThetaVector,qftWorkSpace, img_num_columns, img_num_rows, halfOfQubits);
     fftshift2D(rThetaVector, img_num_rows, img_num_columns);
     printDeviceArray(rThetaVector, A_num_cols);
 
     CHECK_CUDA(static_cast<cudaError_t>(applyInterpolationMatrix(evenqubits, rThetaVector, xyVector)));
-    printDeviceArray(rThetaVector, A_num_cols);
+    printDeviceArray(xyVector, A_num_cols);
 
     fftshift2D(xyVector, img_num_rows, img_num_columns);
     applyQFTHorizontally(xyVector, img_num_columns, img_num_rows, halfOfQubits);
     applyQFTVertically(xyVector, qftWorkSpace, img_num_columns, img_num_rows, halfOfQubits);
     fftshift2D(xyVector, img_num_rows, img_num_columns);
+    printDeviceArray(xyVector, A_num_cols);     
+
+    CHECK_CUDA(cudaFree(xyVector))
+    CHECK_CUDA(cudaFree(rThetaVector))
+    CHECK_CUDA(cudaFree(qftWorkSpace))
+    return EXIT_SUCCESS;
+}
+
+int runSys2()
+{
+    // Host problem definition
+    int evenqubits = 12;
+    int halfOfQubits = evenqubits / 2;
+    int svSize = 1 << evenqubits;
+    int img_num_rows = 1 << (halfOfQubits);
+    int img_num_columns = 1 << (halfOfQubits);
+    int A_num_rows = 1 << evenqubits;
+    int A_num_cols = 1 << evenqubits;
+    int A_max_nnz = 4 * A_num_rows;
+
+    cuDoubleComplex alpha = make_cuDoubleComplex(1.0, 0.0);
+    cuDoubleComplex beta = make_cuDoubleComplex(0.0, 0.0);
+    //--------------------------------------------------------------------------
+    // Vector
+    cuDoubleComplex *rThetaVector; // theta slow, r fast
+    cuDoubleComplex *xyVector = nullptr;
+    CHECK_CUDA(cudaMallocManaged((void **)&rThetaVector, A_num_cols * sizeof(cuDoubleComplex)));
+
+    cuDoubleComplex *qftWorkSpace;
+    CHECK_CUDA(cudaMallocManaged((void **)&qftWorkSpace, img_num_rows * sizeof(cuDoubleComplex)));
+
+    getData(rThetaVector, evenqubits, "../imageFile2.csv");
+
+    // printDeviceArray(rThetaVector, A_num_cols);
+    // fftshift2D(rThetaVector, img_num_rows, img_num_columns);
+    // applyQFTVertically(rThetaVector,qftWorkSpace, img_num_columns, img_num_rows, halfOfQubits);
+    // fftshift2D(rThetaVector, img_num_rows, img_num_columns);
+    // printDeviceArray(rThetaVector, A_num_cols);
 
     printDeviceArray(rThetaVector, A_num_cols);
+    CHECK_CUDA(static_cast<cudaError_t>(applyInterpolationMatrix(evenqubits, rThetaVector, xyVector)));
     printDeviceArray(xyVector, A_num_cols);
+
+    // fftshift2D(xyVector, img_num_rows, img_num_columns);
+    // applyQFTHorizontally(xyVector, img_num_columns, img_num_rows, halfOfQubits);
+    // applyQFTVertically(xyVector, qftWorkSpace, img_num_columns, img_num_rows, halfOfQubits);
+    // fftshift2D(xyVector, img_num_rows, img_num_columns);
+    // printDeviceArray(xyVector, A_num_cols);     
 
     CHECK_CUDA(cudaFree(xyVector))
     CHECK_CUDA(cudaFree(rThetaVector))
