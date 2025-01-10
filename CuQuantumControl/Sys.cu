@@ -71,13 +71,14 @@ int runner2()
 
     applyH(handle, nIndexBits, adjoint, 0, d_sv, extraWorkspace, extraWorkspaceSizeInBytes);
 
+    HANDLE_ERROR(custatevecDestroy(handle));
+    HANDLE_CUDA_ERROR(cudaFree(d_sv));
+    
     for (int i = 0; i < nSvSize; i++)
     {
         std::cout << (d_sv[i].x) << "," << d_sv[i].y << " , " << static_cast<std::bitset<3>>(i) << std::endl;
     }
     std::cout << "\n";
-    HANDLE_ERROR(custatevecDestroy(handle));
-    HANDLE_CUDA_ERROR(cudaFree(d_sv));
 
     return cudaSuccess;
 }
