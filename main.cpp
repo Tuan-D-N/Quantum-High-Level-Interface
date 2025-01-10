@@ -6,5 +6,5 @@ int main()
 {
     // runner();
 
-    return runSys();
+    return runSys2();
 }
