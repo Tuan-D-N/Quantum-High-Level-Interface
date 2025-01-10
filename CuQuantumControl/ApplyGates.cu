@@ -4,6 +4,7 @@
 #include <stdio.h>            // printf
 #include <stdlib.h>           // EXIT_FAILURE
 #include <iostream>
+#include <array>
 #include <bitset>
 #include "helper.hpp" // HANDLE_ERROR, HANDLE_CUDA_ERROR
 #include "ApplyGates.hpp"
@@ -67,6 +68,30 @@ int applyGatesGeneral(custatevecHandle_t &handle,
             1,                                                       \
             {},                                                      \
             0,                                                       \
+            d_sv,                                                    \
+            extraWorkspace,                                          \
+            extraWorkspaceSizeInBytes));                             \
+    }                                                                \
+    custatevecStatus_t FUNC_NAME(custatevecHandle_t &handle,         \
+                                 const int nIndexBits,               \
+                                 const int adjoint,                  \
+                                 const int target,                   \
+                                 const int controls[],               \
+                                 const int nControls,                \
+                                 cuDoubleComplex *d_sv,              \
+                                 void *extraWorkspace,               \
+                                 size_t extraWorkspaceSizeInBytes)   \
+    {                                                                \
+        cuDoubleComplex matrix[] = MATRIX_VALUES;                    \
+        return static_cast<custatevecStatus_t>(applyGatesGeneral(    \
+            handle,                                                  \
+            nIndexBits,                                              \
+            matrix,                                                  \
+            adjoint,                                                 \
+            &target,                                                 \
+            1,                                                       \
+            controls,                                                \
+            nControls,                                               \
             d_sv,                                                    \
             extraWorkspace,                                          \
             extraWorkspaceSizeInBytes));                             \
