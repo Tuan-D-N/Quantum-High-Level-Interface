@@ -169,6 +169,6 @@ int applyGatesGeneral(custatevecHandle_t &handle,
     }
 
 DEFINE_GATE_APPLY_FUNCTION(applyH, HMat)
-DEFINE_GATE_APPLY_FUNCTION(applyX, XMat)
 DEFINE_GATE_APPLY_FUNCTION(applyY, YMat)
 DEFINE_GATE_APPLY_FUNCTION(applyZ, YMat)
+DEFINE_GATE_APPLY_FUNCTION(applyX, XMat)

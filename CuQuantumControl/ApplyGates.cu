@@ -59,7 +59,7 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                                  size_t extraWorkspaceSizeInBytes)      \
     {                                                                   \
         cuDoubleComplex matrix[] = MATRIX_VALUES;                       \
-        return static_cast<custatevecStatus_t>(applyGatesGeneral(       \
+        HANDLE_ERROR(static_cast<custatevecStatus_t>(applyGatesGeneral( \
             handle,                                                     \
             nIndexBits,                                                 \
             matrix,                                                     \
@@ -70,7 +70,8 @@ int applyGatesGeneral(custatevecHandle_t &handle,
             0,                                                          \
             d_sv,                                                       \
             extraWorkspace,                                             \
-            extraWorkspaceSizeInBytes));                                \
+            extraWorkspaceSizeInBytes)));                               \
+        return CUSTATEVEC_STATUS_SUCCESS;                               \
     }                                                                   \
     custatevecStatus_t FUNC_NAME(custatevecHandle_t &handle,            \
                                  const int nIndexBits,                  \
