@@ -100,7 +100,7 @@ void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int eve
     double maxDistance = maxR;
     auto maskFunc = [lowerValue, upperValue, maxDistance](double distance)
     {
-        return lowerValue + (upperValue - lowerValue) * (distance / maxDistance);
+        return lowerValue + (upperValue - lowerValue) * (abs(distance) / maxDistance);
     };
 
     for (int i_theta = 0; i_theta < thetaLen; ++i_theta)
