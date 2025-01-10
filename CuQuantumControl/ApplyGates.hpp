@@ -79,8 +79,8 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                 d_sv,                                                               \
                 extraWorkspace,                                                     \
                 extraWorkspaceSizeInBytes)));                                       \
-            return CUSTATEVEC_STATUS_SUCCESS;                                       \
         }                                                                           \
+        return CUSTATEVEC_STATUS_SUCCESS;                                           \
     }                                                                               \
     template <int n_target, int n_control>                                          \
     inline custatevecStatus_t FUNC_NAME(custatevecHandle_t &handle,                 \
@@ -104,8 +104,8 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                 d_sv,                                                               \
                 extraWorkspace,                                                     \
                 extraWorkspaceSizeInBytes)));                                       \
-            return CUSTATEVEC_STATUS_SUCCESS;                                       \
         }                                                                           \
+        return CUSTATEVEC_STATUS_SUCCESS;                                           \
     }
 
 #define HMat                                                                      \
