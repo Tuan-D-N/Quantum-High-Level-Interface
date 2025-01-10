@@ -8,5 +8,5 @@ int main()
     // runSys2();
 
 
-    return runner();
+    return runner2();
 }
