@@ -7,6 +7,7 @@
 #include "../functionality/ReadCsv.hpp"
 #include "../functionality/Utilities.hpp"
 #include "../functionality/fftShift.hpp"
+#include "../functionality/Transpose.hpp"
 #include "../CuQuantumControl/QftStateVec.hpp"
 #include "Helper.hpp"
 #include "ApplyMatrixA.hpp"
@@ -20,7 +21,8 @@ void getData(cuDoubleComplex *rThetaVector, const int evenqubits, const std::str
 {
     int lengthSize = 1 << (evenqubits / 2);
     std::vector<std::vector<float>> image = readCSV<float>(fileName);
-    if(image.size() != lengthSize){
+    if (image.size() != lengthSize)
+    {
         std::cout << "imageSize: " << image.size() << "\n";
         std::cout << "lengthSize: " << lengthSize << "\n";
         assert(image.size() == lengthSize);
@@ -88,7 +90,7 @@ int runSys()
 
     printDeviceArray(rThetaVector, A_num_cols);
     fftshift2D(rThetaVector, img_num_rows, img_num_columns);
-    applyQFTVertically(rThetaVector,qftWorkSpace, img_num_columns, img_num_rows, halfOfQubits);
+    applyQFTVertically(rThetaVector, qftWorkSpace, img_num_columns, img_num_rows, halfOfQubits);
     fftshift2D(rThetaVector, img_num_rows, img_num_columns);
     printDeviceArray(rThetaVector, A_num_cols);
 
@@ -99,7 +101,7 @@ int runSys()
     applyQFTHorizontally(xyVector, img_num_columns, img_num_rows, halfOfQubits);
     applyQFTVertically(xyVector, qftWorkSpace, img_num_columns, img_num_rows, halfOfQubits);
     fftshift2D(xyVector, img_num_rows, img_num_columns);
-    printDeviceArray(xyVector, A_num_cols);     
+    printDeviceArray(xyVector, A_num_cols);
 
     CHECK_CUDA(cudaFree(xyVector))
     CHECK_CUDA(cudaFree(rThetaVector))
@@ -139,6 +141,7 @@ int runSys2()
     // printDeviceArray(rThetaVector, A_num_cols);
 
     printDeviceArray(rThetaVector, A_num_cols);
+    Transpose(rThetaVector, img_num_rows, img_num_columns);
     CHECK_CUDA(static_cast<cudaError_t>(applyInterpolationMatrix(evenqubits, rThetaVector, xyVector)));
     printDeviceArray(xyVector, A_num_cols);
 
@@ -146,7 +149,7 @@ int runSys2()
     // applyQFTHorizontally(xyVector, img_num_columns, img_num_rows, halfOfQubits);
     // applyQFTVertically(xyVector, qftWorkSpace, img_num_columns, img_num_rows, halfOfQubits);
     // fftshift2D(xyVector, img_num_rows, img_num_columns);
-    // printDeviceArray(xyVector, A_num_cols);     
+    // printDeviceArray(xyVector, A_num_cols);
 
     CHECK_CUDA(cudaFree(xyVector))
     CHECK_CUDA(cudaFree(rThetaVector))
