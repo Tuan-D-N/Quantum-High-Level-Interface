@@ -30,7 +30,7 @@ int applyInterpolationMatrix(int evenqubits, cuDoubleComplex *rThetaVector, cuDo
     int postIndexSize, postOffsetSize, postValueSize;
 
     // Unified Memory Cuda Write
-    writeMatAMiniCSC(dA_csrOffsets, dA_columns, dA_values, evenqubits, postOffsetSize, postIndexSize, postValueSize);
+    writeMatAMiniCSC(dA_csrOffsets, dA_columns, dA_values, evenqubits, postOffsetSize, postIndexSize, postValueSize, false);
 
     // Vector
     if (xyVector == nullptr)
