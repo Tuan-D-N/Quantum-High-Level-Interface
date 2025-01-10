@@ -95,9 +95,9 @@ void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int eve
     int ColumnOffsetIter = 0;
     int RowIter = 0;
 
-    double lowerValue;
-    double upperValue;
-    double maxDistance;
+    double lowerValue = 0;
+    double upperValue = 1;
+    double maxDistance = maxR;
     auto maskFunc = [lowerValue, upperValue, maxDistance](double distance)
     {
         return lowerValue + (upperValue - lowerValue) * (distance / maxDistance);

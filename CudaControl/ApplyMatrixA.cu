@@ -10,8 +10,6 @@
 int applyInterpolationMatrix(int evenqubits, cuDoubleComplex *rThetaVector, cuDoubleComplex *&xyVector)
 {
     // Host problem definition
-    int halfOfQubits = evenqubits / 2;
-    int svSize = 1 << evenqubits;
     int A_num_rows = 1 << evenqubits;
     int A_num_cols = 1 << evenqubits;
     int A_max_nnz = 4 * A_num_rows;
@@ -63,7 +61,6 @@ int applyInterpolationMatrix(int evenqubits, cuDoubleComplex *rThetaVector, cuDo
     // Workspace buffer
     void *dBuffer = nullptr;
     size_t bufferSize = 0;
-    float tmp_result;
     CHECK_CUSPARSE(cusparseSpMV_bufferSize(handle, CUSPARSE_OPERATION_TRANSPOSE,
                                            &alpha, matA, vectorIn, &beta, vectorOut,
                                            CUDA_C_64F, CUSPARSE_SPMV_ALG_DEFAULT, &bufferSize));
