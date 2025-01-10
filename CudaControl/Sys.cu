@@ -48,14 +48,13 @@ void applyQFTVertically(cuDoubleComplex *vector, cuDoubleComplex *workSpace, con
     {
         for (int j = 0; j < num_rows; ++j)
         {
-            workSpace[j] = vector[i * num_rows + j];
+            workSpace[j] = vector[j * num_rows + i];
         }
-
         ApplyQFTOnStateVector(workSpace, num_qubit_per_row);
 
         for (int j = 0; j < num_rows; ++j)
         {
-            vector[i * num_rows + j] = workSpace[j];
+            vector[j * num_rows + i] = workSpace[j];
         }
     }
 }
