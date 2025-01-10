@@ -16,8 +16,6 @@
 #include <string>
 #include <cassert>
 
-
-
 void getData(cuDoubleComplex *rThetaVector, const int evenqubits, const std::string fileName)
 {
     int lengthSize = 1 << (evenqubits / 2);
@@ -84,23 +82,22 @@ int runSys()
 
     getData(rThetaVector, evenqubits, "../imageFile.csv");
 
+    printDeviceArray(rThetaVector, A_num_cols);
     fftshift2D(rThetaVector, img_num_rows, img_num_columns);
     applyQFTHorizontally(rThetaVector, img_num_columns, img_num_rows, halfOfQubits);
     fftshift2D(rThetaVector, img_num_rows, img_num_columns);
+    printDeviceArray(rThetaVector, A_num_cols);
 
+    CHECK_CUDA(static_cast<cudaError_t>(applyInterpolationMatrix(evenqubits, rThetaVector, xyVector)));
+    printDeviceArray(rThetaVector, A_num_cols);
 
-    return static_cast<cudaError_t>(applyInterpolationMatrix(evenqubits,rThetaVector, xyVector));
-    
-    
     fftshift2D(xyVector, img_num_rows, img_num_columns);
     applyQFTHorizontally(xyVector, img_num_columns, img_num_rows, halfOfQubits);
     applyQFTVertically(xyVector, qftWorkSpace, img_num_columns, img_num_rows, halfOfQubits);
     fftshift2D(xyVector, img_num_rows, img_num_columns);
 
-    
     printDeviceArray(rThetaVector, A_num_cols);
     printDeviceArray(xyVector, A_num_cols);
-
 
     CHECK_CUDA(cudaFree(xyVector))
     CHECK_CUDA(cudaFree(rThetaVector))

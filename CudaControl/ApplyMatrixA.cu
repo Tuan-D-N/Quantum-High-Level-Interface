@@ -7,7 +7,7 @@
 #include "../functionality/WriteAdjMat.hpp"
 
 // theta slow, r fast
-int applyInterpolationMatrix(int evenqubits, cuDoubleComplex *rThetaVector, cuDoubleComplex *xyVector)
+int applyInterpolationMatrix(int evenqubits, cuDoubleComplex *rThetaVector, cuDoubleComplex *&xyVector)
 {
     // Host problem definition
     int halfOfQubits = evenqubits / 2;
@@ -34,9 +34,14 @@ int applyInterpolationMatrix(int evenqubits, cuDoubleComplex *rThetaVector, cuDo
 
     // Vector
     if (xyVector == nullptr)
+    {
         CHECK_CUDA(cudaMallocManaged((void **)&xyVector, A_num_cols * sizeof(cuDoubleComplex)));
+        for (int i = 0; i < A_num_cols; ++i)
+        {
+            xyVector[i] = {0, 0};
+        }
+    }
 
-   
     //--------------------------------------------------------------------------
     cusparseHandle_t handle = NULL;
     cusparseSpMatDescr_t matA;
@@ -68,9 +73,6 @@ int applyInterpolationMatrix(int evenqubits, cuDoubleComplex *rThetaVector, cuDo
     CHECK_CUSPARSE(cusparseSpMV(handle, CUSPARSE_OPERATION_TRANSPOSE,
                                 &alpha, matA, vectorIn, &beta, vectorOut,
                                 CUDA_C_64F, CUSPARSE_SPMV_ALG_DEFAULT, dBuffer));
-
-
-
 
     cusparseDestroySpMat(matA);
     cusparseDestroyDnVec(vectorIn);
