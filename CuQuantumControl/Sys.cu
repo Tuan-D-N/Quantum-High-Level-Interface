@@ -87,3 +87,75 @@ int runner2()
 
     return cudaSuccess;
 }
+
+template <int N>
+struct rangeArray
+{
+    constexpr rangeArray() : arr()
+    {
+        for (auto i = 0; i != N; ++i)
+            arr[i] = i;
+    }
+    std::array<int, N> arr;
+};
+
+int runner3()
+{
+
+     const int nIndexBits = 3;
+    const int nSvSize = (1 << nIndexBits);
+    const int adjoint = 0;
+
+    // Make the statevector -------------------------------------------------------------------------------
+    cuDoubleComplex *d_sv;
+    HANDLE_CUDA_ERROR(cudaMallocManaged((void **)&d_sv, nSvSize * sizeof(cuDoubleComplex)));
+    d_sv[0] = {1, 0};
+    for (int i = 1; i < nSvSize; ++i)
+    {
+        d_sv[i] = {0, 0};
+    }
+    // Make the statevector -------------------------------------------------------------------------------
+
+    for (int i = 0; i < nSvSize; i++)
+    {
+        std::cout << (d_sv[i].x) << "," << d_sv[i].y << " , " << static_cast<std::bitset<3>>(i) << std::endl;
+    }
+    std::cout << "\n";
+
+    // Grover ----------------------------------------------------------------------------------------
+    custatevecHandle_t handle;
+    HANDLE_ERROR(custatevecCreate(&handle));
+    void *extraWorkspace = nullptr;
+    size_t extraWorkspaceSizeInBytes = 0;
+    // Algo ------------------------------------------------------------
+    constexpr auto allQubit = rangeArray<nIndexBits>().arr;
+    constexpr auto allQubitExceptLast = rangeArray<nIndexBits - 1>().arr;
+
+    HANDLE_ERROR(applyH<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+
+    for (int i = 0; i < 10; ++i)
+    {
+        // Mark
+        constexpr int markTarget = nIndexBits - 1; // lastQubit
+        HANDLE_ERROR(applyZ<nIndexBits - 1>(handle, nIndexBits, adjoint, markTarget, allQubitExceptLast, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+
+        // Diffusion
+        HANDLE_ERROR(applyH<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+        HANDLE_ERROR(applyX<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+        HANDLE_ERROR(applyZ<nIndexBits - 1>(handle, nIndexBits, adjoint, markTarget, allQubitExceptLast, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+        HANDLE_ERROR(applyX<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+        HANDLE_ERROR(applyH<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+    }
+
+    HANDLE_ERROR(custatevecDestroy(handle));
+
+    // Algo ------------------------------------------------------------
+    // Grover ----------------------------------------------------------------------------------------
+
+    for (int i = 0; i < nSvSize; i++)
+    {
+        std::cout << (d_sv[i].x) << "," << d_sv[i].y << " , " << static_cast<std::bitset<3>>(i) << std::endl;
+    }
+    std::cout << "\n";
+    HANDLE_CUDA_ERROR(cudaFree(d_sv));
+}

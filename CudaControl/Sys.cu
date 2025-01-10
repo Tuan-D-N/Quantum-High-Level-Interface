@@ -157,3 +157,5 @@ int runSys2()
     CHECK_CUDA(cudaFree(qftWorkSpace))
     return EXIT_SUCCESS;
 }
+
+
