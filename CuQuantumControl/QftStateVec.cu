@@ -14,7 +14,6 @@
 
 int ApplyQFTOnStateVector(cuDoubleComplex *d_stateVector, int numQubits)
 {
-    const int nSvSize = (1 << numQubits);
     const int adjoint = static_cast<int>(false);
     const int nTargets = 1;
 

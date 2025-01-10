@@ -48,7 +48,7 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                                         void *extraWorkspace,                       \
                                         size_t extraWorkspaceSizeInBytes)           \
     {                                                                               \
-        return static_cast<custatevecStatus_t>(FUNC_NAME(                           \
+        HANDLE_ERROR(static_cast<custatevecStatus_t>(FUNC_NAME(                     \
             handle,                                                                 \
             nIndexBits,                                                             \
             adjoint,                                                                \
@@ -57,7 +57,8 @@ int applyGatesGeneral(custatevecHandle_t &handle,
             controls.size(),                                                        \
             d_sv,                                                                   \
             extraWorkspace,                                                         \
-            extraWorkspaceSizeInBytes));                                            \
+            extraWorkspaceSizeInBytes)));                                           \
+        return CUSTATEVEC_STATUS_SUCCESS;                                           \
     }                                                                               \
     template <int n>                                                                \
     inline custatevecStatus_t FUNC_NAME(custatevecHandle_t &handle,                 \
@@ -70,14 +71,15 @@ int applyGatesGeneral(custatevecHandle_t &handle,
     {                                                                               \
         for (int target : targets)                                                  \
         {                                                                           \
-            return static_cast<custatevecStatus_t>(FUNC_NAME(                       \
+            HANDLE_ERROR(static_cast<custatevecStatus_t>(FUNC_NAME(                 \
                 handle,                                                             \
                 nIndexBits,                                                         \
                 adjoint,                                                            \
                 target,                                                             \
                 d_sv,                                                               \
                 extraWorkspace,                                                     \
-                extraWorkspaceSizeInBytes));                                        \
+                extraWorkspaceSizeInBytes)));                                       \
+            return CUSTATEVEC_STATUS_SUCCESS;                                       \
         }                                                                           \
     }                                                                               \
     template <int n_target, int n_control>                                          \
@@ -92,7 +94,7 @@ int applyGatesGeneral(custatevecHandle_t &handle,
     {                                                                               \
         for (int target : targets)                                                  \
         {                                                                           \
-            return static_cast<custatevecStatus_t>(FUNC_NAME(                       \
+            HANDLE_ERROR(static_cast<custatevecStatus_t>(FUNC_NAME(                 \
                 handle,                                                             \
                 nIndexBits,                                                         \
                 adjoint,                                                            \
@@ -101,7 +103,8 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                 controls.size(),                                                    \
                 d_sv,                                                               \
                 extraWorkspace,                                                     \
-                extraWorkspaceSizeInBytes));                                        \
+                extraWorkspaceSizeInBytes)));                                       \
+            return CUSTATEVEC_STATUS_SUCCESS;                                       \
         }                                                                           \
     }
 
