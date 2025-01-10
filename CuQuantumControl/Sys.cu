@@ -69,10 +69,11 @@ int runner2()
     void *extraWorkspace = nullptr;
     size_t extraWorkspaceSizeInBytes = 0;
 
-    cuDoubleComplex matrix[] = XMat; 
+    cuDoubleComplex matrix[] = XMat;
     const int target[] = {0};
     const int control[] = {};
     applyGatesGeneral(handle, nIndexBits, matrix, adjoint, target, 1, control, 0, d_sv, extraWorkspace, extraWorkspaceSizeInBytes);
+    applyX(handle, nIndexBits, adjoint, target[0], control, sizeof(control) / sizeof(control[0]), d_sv, extraWorkspace, extraWorkspaceSizeInBytes);
 
     HANDLE_ERROR(custatevecDestroy(handle));
 
