@@ -49,52 +49,53 @@ int applyGatesGeneral(custatevecHandle_t &handle,
     return cudaSuccess;
 }
 
-#define DEFINE_GATE_APPLY_FUNCTION_BACKEND(FUNC_NAME, MATRIX_VALUES) \
-    custatevecStatus_t FUNC_NAME(custatevecHandle_t &handle,         \
-                                 const int nIndexBits,               \
-                                 const int adjoint,                  \
-                                 const int target,                   \
-                                 cuDoubleComplex *d_sv,              \
-                                 void *extraWorkspace,               \
-                                 size_t extraWorkspaceSizeInBytes)   \
-    {                                                                \
-        cuDoubleComplex matrix[] = MATRIX_VALUES;                    \
-        return static_cast<custatevecStatus_t>(applyGatesGeneral(    \
-            handle,                                                  \
-            nIndexBits,                                              \
-            matrix,                                                  \
-            adjoint,                                                 \
-            &target,                                                 \
-            1,                                                       \
-            {},                                                      \
-            0,                                                       \
-            d_sv,                                                    \
-            extraWorkspace,                                          \
-            extraWorkspaceSizeInBytes));                             \
-    }                                                                \
-    custatevecStatus_t FUNC_NAME(custatevecHandle_t &handle,         \
-                                 const int nIndexBits,               \
-                                 const int adjoint,                  \
-                                 const int target,                   \
-                                 const int controls[],               \
-                                 const int nControls,                \
-                                 cuDoubleComplex *d_sv,              \
-                                 void *extraWorkspace,               \
-                                 size_t extraWorkspaceSizeInBytes)   \
-    {                                                                \
-        cuDoubleComplex matrix[] = MATRIX_VALUES;                    \
-        return static_cast<custatevecStatus_t>(applyGatesGeneral(    \
-            handle,                                                  \
-            nIndexBits,                                              \
-            matrix,                                                  \
-            adjoint,                                                 \
-            &target,                                                 \
-            1,                                                       \
-            controls,                                                \
-            nControls,                                               \
-            d_sv,                                                    \
-            extraWorkspace,                                          \
-            extraWorkspaceSizeInBytes));                             \
+#define DEFINE_GATE_APPLY_FUNCTION_BACKEND(FUNC_NAME, MATRIX_VALUES)    \
+    custatevecStatus_t FUNC_NAME(custatevecHandle_t &handle,            \
+                                 const int nIndexBits,                  \
+                                 const int adjoint,                     \
+                                 const int target,                      \
+                                 cuDoubleComplex *d_sv,                 \
+                                 void *extraWorkspace,                  \
+                                 size_t extraWorkspaceSizeInBytes)      \
+    {                                                                   \
+        cuDoubleComplex matrix[] = MATRIX_VALUES;                       \
+        return static_cast<custatevecStatus_t>(applyGatesGeneral(       \
+            handle,                                                     \
+            nIndexBits,                                                 \
+            matrix,                                                     \
+            adjoint,                                                    \
+            &target,                                                    \
+            1,                                                          \
+            {},                                                         \
+            0,                                                          \
+            d_sv,                                                       \
+            extraWorkspace,                                             \
+            extraWorkspaceSizeInBytes));                                \
+    }                                                                   \
+    custatevecStatus_t FUNC_NAME(custatevecHandle_t &handle,            \
+                                 const int nIndexBits,                  \
+                                 const int adjoint,                     \
+                                 const int target,                      \
+                                 const int controls[],                  \
+                                 const int nControls,                   \
+                                 cuDoubleComplex *d_sv,                 \
+                                 void *extraWorkspace,                  \
+                                 size_t extraWorkspaceSizeInBytes)      \
+    {                                                                   \
+        cuDoubleComplex matrix[] = MATRIX_VALUES;                       \
+        HANDLE_ERROR(static_cast<custatevecStatus_t>(applyGatesGeneral( \
+            handle,                                                     \
+            nIndexBits,                                                 \
+            matrix,                                                     \
+            adjoint,                                                    \
+            &target,                                                    \
+            1,                                                          \
+            controls,                                                   \
+            nControls,                                                  \
+            d_sv,                                                       \
+            extraWorkspace,                                             \
+            extraWorkspaceSizeInBytes)));                               \
+        return CUSTATEVEC_STATUS_SUCCESS;                               \
     }
 
 DEFINE_GATE_APPLY_FUNCTION_BACKEND(applyH, HMat)
