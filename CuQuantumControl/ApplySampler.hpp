@@ -75,4 +75,4 @@ int sampleSV(custatevecHandle_t &handle,
              const int nShots,
              void *extraWorkspace,
              size_t &extraWorkspaceSizeInBytes,
-             double randnums[]);
+             double randnums[] = nullptr);
