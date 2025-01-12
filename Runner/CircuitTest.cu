@@ -52,12 +52,11 @@ int runner1()
     return cudaSuccess;
 }
 
-int grover()
+int grover(const int nIndexBits)
 {
-
-    const int nIndexBits = 3;
     const int nSvSize = (1 << nIndexBits);
     const int adjoint = 0;
+    const int nShots = 100;
     {
         Timer("Grover Cuquantum C++ qubits = " + std::to_string(nIndexBits));
 
@@ -78,29 +77,32 @@ int grover()
         size_t extraWorkspaceSizeInBytes = 0;
 
         // Algo ------------------------------------------------------------
-        constexpr auto allQubit = range(0, nIndexBits);
-        constexpr auto allQubitExceptLast = range(0, nIndexBits - 1);
+        std::vector<int> allQubit = rangeVec(0, nIndexBits);
+        std::vector<int> allQubitExceptLast = rangeVec(0, nIndexBits - 1);
 
-        CHECK_BROAD_ERROR(applyH<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+        CHECK_BROAD_ERROR(applyH(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
 
         for (int i = 0; i < 10; ++i)
         {
             // Mark
-            constexpr int markTarget = nIndexBits - 1; // lastQubit
-            CHECK_BROAD_ERROR(applyZ<nIndexBits - 1>(handle, nIndexBits, adjoint, markTarget, allQubitExceptLast, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+            int markTarget = nIndexBits - 1; // lastQubit
+            CHECK_BROAD_ERROR(applyZ(handle, nIndexBits, adjoint, markTarget, allQubitExceptLast, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
 
             // Diffusion
-            CHECK_BROAD_ERROR(applyH<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
-            CHECK_BROAD_ERROR(applyX<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
-            CHECK_BROAD_ERROR(applyZ<nIndexBits - 1>(handle, nIndexBits, adjoint, markTarget, allQubitExceptLast, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
-            CHECK_BROAD_ERROR(applyX<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
-            CHECK_BROAD_ERROR(applyH<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+            CHECK_BROAD_ERROR(applyH(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+            CHECK_BROAD_ERROR(applyX(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+            CHECK_BROAD_ERROR(applyZ(handle, nIndexBits, adjoint, markTarget, allQubitExceptLast, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+            CHECK_BROAD_ERROR(applyX(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+            CHECK_BROAD_ERROR(applyH(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
         }
 
         // Algo ------------------------------------------------------------
         CHECK_BROAD_ERROR(custatevecDestroy(handle));
         if (extraWorkspace != nullptr)
             CHECK_CUDA(cudaFree(extraWorkspace));
+        
+        std::vector<custatevecIndex_t> outBitString;
+        CHECK_BROAD_ERROR(sampleSV(handle, nIndexBits, allQubit, d_sv, outBitString, nShots, extraWorkspace, extraWorkspaceSizeInBytes));
 
         // Grover ----------------------------------------------------------------------------------------
         CHECK_CUDA(cudaFree(d_sv));
