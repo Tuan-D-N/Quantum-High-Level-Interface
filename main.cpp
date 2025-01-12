@@ -1,6 +1,5 @@
 #include <iostream>
-#include "CuSparseControl/Sys.hpp"
-#include "CuQuantumControl/Sys.hpp"
+#include "Runner/CircuitTest.hpp"
 
 int main()
 {
@@ -8,5 +7,5 @@ int main()
     // runSys2();
 
 
-    return runner3();
+    return runner1();
 }

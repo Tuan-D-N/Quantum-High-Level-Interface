@@ -42,6 +42,7 @@ add_subdirectory("functionality")
 add_subdirectory("Examples")
 add_subdirectory("CuSparseControl")
 add_subdirectory("CuQuantumControl")
+add_subdirectory("Runner")
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -51,6 +52,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     CUDA::cudart
     custatevec
     CuQuantumControl
+    Runner
 )
 
 

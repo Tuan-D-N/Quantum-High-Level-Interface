@@ -10,10 +10,10 @@
 #include "../functionality/Transpose.hpp"
 #include "../CuQuantumControl/QftStateVec.hpp"
 #include "../CudaControl/Helper.hpp"
-#include "ApplyMatrixA.hpp"
+#include "../CuSparseControl/ApplyMatrixA.hpp"
 #include <cuComplex.h>
 #include <iostream>
-#include "Sys.hpp"
+#include "ApplyIRadon.hpp"
 #include <string>
 #include <cassert>
 

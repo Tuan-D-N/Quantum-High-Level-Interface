@@ -6,11 +6,12 @@
 #include <iostream>
 #include <bitset>
 #include "../CudaControl/Helper.hpp" // HANDLE_ERROR, HANDLE_CUDA_ERROR
-#include "ApplyGates.hpp"
-#include "ApplySampler.hpp"
-#include "QftStateVec.hpp"
+#include "../CuQuantumControl/ApplyGates.hpp"
+#include "../CuQuantumControl/ApplySampler.hpp"
+#include "../CuQuantumControl/QftStateVec.hpp"
 #include "../functionality/fftShift.hpp"
 #include "../functionality/ClockTimer.hpp"
+#include "../functionality/RangeCompileTime.hpp"
 #include <cstring>
 
 int runner()
@@ -91,17 +92,6 @@ int runner2()
     return cudaSuccess;
 }
 
-template <int N>
-struct rangeArray
-{
-    constexpr rangeArray() : arr()
-    {
-        for (auto i = 0; i != N; ++i)
-            arr[i] = i;
-    }
-    std::array<int, N> arr;
-};
-
 int runner3()
 {
 
@@ -128,8 +118,8 @@ int runner3()
         size_t extraWorkspaceSizeInBytes = 0;
 
         // Algo ------------------------------------------------------------
-        constexpr auto allQubit = rangeArray<nIndexBits>().arr;
-        constexpr auto allQubitExceptLast = rangeArray<nIndexBits - 1>().arr;
+        constexpr auto allQubit = range(0, nIndexBits);
+        constexpr auto allQubitExceptLast = range(0, nIndexBits - 1);
 
         CHECK_BROAD_ERROR(applyH<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
 
