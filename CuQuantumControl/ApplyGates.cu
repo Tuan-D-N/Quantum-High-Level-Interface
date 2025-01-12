@@ -30,7 +30,7 @@ int applyGatesGeneral(custatevecHandle_t &handle,
     // allocate external workspace if necessary
     if (extraWorkspaceSizeInBytes_CHECK > extraWorkspaceSizeInBytes)
     {
-        std::cout << "Extra space needed: " << extraWorkspaceSizeInBytes_CHECK - extraWorkspaceSizeInBytes << " Bytes";
+        std::cout << "Extra space needed: " << extraWorkspaceSizeInBytes_CHECK - extraWorkspaceSizeInBytes << " Bytes\n";
         if (extraWorkspace != nullptr)
         {
             CHECK_CUDA(cudaFree(extraWorkspace));
