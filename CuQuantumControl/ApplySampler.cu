@@ -15,7 +15,7 @@ int sampleSV(custatevecHandle_t &handle,
              const int bitStringLen,  // length of bitOrdering
              cuDoubleComplex d_sv[],
              custatevecIndex_t bitStrings_out[],
-             int nShots,
+             const int nShots,
              void *extraWorkspace,
              size_t &extraWorkspaceSizeInBytes,
              double randnums[])
@@ -44,9 +44,13 @@ int sampleSV(custatevecHandle_t &handle,
         handle, sampler, extraWorkspace, extraWorkspaceSizeInBytes_CHECK));
 
     // In real appliction, random numbers in range [0, 1) will be used.
+    bool freeRandnums = false;
     if (randnums == nullptr)
+    {
+        freeRandnums = true;
         randnums = new double[nShots];
         generateRandomArray(randnums, nShots);
+    }
 
     // sample bit strings
     CHECK_CUSTATEVECTOR(custatevecSamplerSample(
@@ -56,5 +60,29 @@ int sampleSV(custatevecHandle_t &handle,
     // destroy descriptor and handle
     CHECK_CUSTATEVECTOR(custatevecSamplerDestroy(sampler));
     extraWorkspaceSizeInBytes = extraWorkspaceSizeInBytes_CHECK;
+
+    if(freeRandnums)
+    {
+        delete[] randnums;
+        randnums = nullptr;
+    }
+
     return EXIT_SUCCESS;
+}
+
+int sampleSV(custatevecHandle_t &handle, const int nIndexBits, std::vector<int> &bitOrdering, cuDoubleComplex d_sv[], custatevecIndex_t bitStrings_out[], int nShots, void *extraWorkspace, size_t &extraWorkspaceSizeInBytes, double randnums[])
+{
+    CHECK_BROAD_ERROR(
+        sampleSV(
+            handle,
+            nIndexBits,
+            bitOrdering.data(),
+            bitOrdering.size(),
+            d_sv,
+            bitStrings_out,
+            nShots,
+            extraWorkspace,
+            extraWorkspaceSizeInBytes,
+            randnums));
+    return cudaSuccess;
 }

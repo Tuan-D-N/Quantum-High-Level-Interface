@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <array>
+#include <vector>
 #include "../CudaControl/Helper.hpp"
 
 /// @brief The sampling system
@@ -25,6 +26,16 @@ int sampleSV(custatevecHandle_t &handle,
              const int bitStringLen,  // length of bitOrdering
              cuDoubleComplex d_sv[],
              custatevecIndex_t bitStrings_out[],
+             const int nShots,
+             void *extraWorkspace,
+             size_t &extraWorkspaceSizeInBytes,
+             double randnums[] = nullptr);
+
+int sampleSV(custatevecHandle_t &handle,
+             const int nIndexBits,
+             std::vector<int> bitOrdering, // Qubits to measure
+             cuDoubleComplex d_sv[],
+             custatevecIndex_t bitStrings_out[],
              int nShots,
              void *extraWorkspace,
              size_t &extraWorkspaceSizeInBytes,
@@ -33,10 +44,10 @@ int sampleSV(custatevecHandle_t &handle,
 template <int bitStringLen>
 int sampleSV(custatevecHandle_t &handle,
              const int nIndexBits,
-             std::array<int, bitStringLen> bitOrdering, // Qubits to measure
+             const std::array<int, bitStringLen> &bitOrdering, // Qubits to measure
              cuDoubleComplex d_sv[],
              custatevecIndex_t bitStrings_out[],
-             int nShots,
+             const int nShots,
              void *extraWorkspace,
              size_t &extraWorkspaceSizeInBytes,
              double randnums[] = nullptr)
@@ -46,7 +57,7 @@ int sampleSV(custatevecHandle_t &handle,
             handle,
             nIndexBits,
             bitOrdering.data(),
-            bitStringLen,
+            bitOrdering.size(),
             d_sv,
             bitStrings_out,
             nShots,

@@ -39,7 +39,7 @@ int runner1()
 
         for (int i = 0; i < nShots; ++i)
         {
-            std::cout << outBitString[i] << " , " << bitStrings_result[i] << "\n";
+            std::cout << std::bitset<64>(outBitString[i]) << " , " << bitStrings_result[i] << "\n";
         }
 
         if (extraWorkspace != nullptr)

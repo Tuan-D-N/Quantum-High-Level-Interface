@@ -6,6 +6,7 @@
 #include <stdlib.h>           // EXIT_FAILURE
 #include <iostream>
 #include <array>
+#include <vector>
 #include <bitset>
 #include "../CudaControl/Helper.hpp" // HANDLE_ERROR, HANDLE_CUDA_ERROR
 
@@ -88,6 +89,75 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                          const int adjoint,                          \
                          const std::array<int, n_target> &targets,   \
                          const std::array<int, n_control> &controls, \
+                         cuDoubleComplex *d_sv,                      \
+                         void *extraWorkspace,                       \
+                         size_t &extraWorkspaceSizeInBytes)          \
+    {                                                                \
+        for (int target : targets)                                   \
+        {                                                            \
+            CHECK_BROAD_ERROR(FUNC_NAME(                             \
+                handle,                                              \
+                nIndexBits,                                          \
+                adjoint,                                             \
+                target,                                              \
+                controls.data(),                                     \
+                controls.size(),                                     \
+                d_sv,                                                \
+                extraWorkspace,                                      \
+                extraWorkspaceSizeInBytes));                         \
+        }                                                            \
+        return CUSTATEVEC_STATUS_SUCCESS;                            \
+    }                                                                \
+                                                                     \
+    inline int FUNC_NAME(custatevecHandle_t &handle,                 \
+                         const int nIndexBits,                       \
+                         const int adjoint,                          \
+                         const int target,                           \
+                         const std::vector<int> &controls,           \
+                         cuDoubleComplex *d_sv,                      \
+                         void *extraWorkspace,                       \
+                         size_t &extraWorkspaceSizeInBytes)          \
+    {                                                                \
+        CHECK_BROAD_ERROR(FUNC_NAME(                                 \
+            handle,                                                  \
+            nIndexBits,                                              \
+            adjoint,                                                 \
+            target,                                                  \
+            controls.data(),                                         \
+            controls.size(),                                         \
+            d_sv,                                                    \
+            extraWorkspace,                                          \
+            extraWorkspaceSizeInBytes));                             \
+        return CUSTATEVEC_STATUS_SUCCESS;                            \
+    }                                                                \
+                                                                     \
+    inline int FUNC_NAME(custatevecHandle_t &handle,                 \
+                         const int nIndexBits,                       \
+                         const int adjoint,                          \
+                         const std::vector<int> &targets,            \
+                         cuDoubleComplex *d_sv,                      \
+                         void *extraWorkspace,                       \
+                         size_t &extraWorkspaceSizeInBytes)          \
+    {                                                                \
+        for (int target : targets)                                   \
+        {                                                            \
+            CHECK_BROAD_ERROR(FUNC_NAME(                             \
+                handle,                                              \
+                nIndexBits,                                          \
+                adjoint,                                             \
+                target,                                              \
+                d_sv,                                                \
+                extraWorkspace,                                      \
+                extraWorkspaceSizeInBytes));                         \
+        }                                                            \
+        return CUSTATEVEC_STATUS_SUCCESS;                            \
+    }                                                                \
+                                                                     \
+    inline int FUNC_NAME(custatevecHandle_t &handle,                 \
+                         const int nIndexBits,                       \
+                         const int adjoint,                          \
+                         const std::vector<int> &targets,            \
+                         const std::vector<int> &controls,           \
                          cuDoubleComplex *d_sv,                      \
                          void *extraWorkspace,                       \
                          size_t &extraWorkspaceSizeInBytes)          \
