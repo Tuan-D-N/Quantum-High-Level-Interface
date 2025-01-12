@@ -9,3 +9,11 @@ void set2ZeroState(cuDoubleComplex *d_sv, const int nSvSize)
     }
     d_sv[0] = make_cuDoubleComplex(1, 0);
 }
+
+void set2NoState(cuDoubleComplex *d_sv, const int nSvSize)
+{
+    for (int i = 0; i < nSvSize; ++i)
+    {
+        d_sv[i] = make_cuDoubleComplex(0, 0);
+    }
+}
