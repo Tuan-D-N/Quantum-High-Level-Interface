@@ -64,6 +64,12 @@ std::vector<std::vector<double>> cscToDense(
 template <DecimalNumber T>
 bool matricesEqual(const std::vector<std::vector<T>> &matrix1, const std::vector<std::vector<T>> &matrix2, T tolerance = 1e-5)
 {
+    return matricesEqual(matrix1, matrix2, tolerance);
+}
+
+template <typename T>
+bool matricesEqual(const std::vector<std::vector<T>> &matrix1, const std::vector<std::vector<T>> &matrix2, T tolerance = 0)
+{
     if (matrix1.size() != matrix2.size())
     {
         return false;
