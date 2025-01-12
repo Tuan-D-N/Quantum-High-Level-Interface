@@ -32,11 +32,12 @@ int runner1()
         size_t extraWorkspaceSizeInBytes = 0;
 
         custatevecIndex_t outBitString[nShots];
+        custatevecIndex_t bitStrings_result[] = {0b00, 0b01, 0b10, 0b11, 0b11};
         sampleSV<nIndexBits>(handle, nIndexBits, {0, 1, 2}, d_sv, outBitString, nShots, extraWorkspace, extraWorkspaceSizeInBytes);
 
         for (int i = 0; i < nShots; ++i)
         {
-            std::cout << outBitString[i] << " , ";
+            std::cout << outBitString[i] << " , " << bitStrings_result[i] << "\n";
         }
 
         if (extraWorkspace != nullptr)
