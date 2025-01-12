@@ -36,7 +36,7 @@ int sampleSV(custatevecHandle_t &handle,
              const std::vector<int> &bitOrdering, // Qubits to measure
              cuDoubleComplex d_sv[],
              custatevecIndex_t bitStrings_out[],
-             int nShots,
+             const int nShots,
              void *extraWorkspace,
              size_t &extraWorkspaceSizeInBytes,
              double randnums[] = nullptr);
@@ -66,3 +66,13 @@ int sampleSV(custatevecHandle_t &handle,
             randnums));
     return cudaSuccess;
 }
+
+int sampleSV(custatevecHandle_t &handle,
+             const int nIndexBits,
+             const std::vector<int> &bitOrdering,
+             cuDoubleComplex d_sv[],
+             std::vector<custatevecIndex_t> &bitStrings_out,
+             const int nShots,
+             void *extraWorkspace,
+             size_t &extraWorkspaceSizeInBytes,
+             double randnums[]);

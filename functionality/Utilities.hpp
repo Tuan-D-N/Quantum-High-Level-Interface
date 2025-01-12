@@ -4,6 +4,7 @@
 #include <cuComplex.h>
 #include <cuda_runtime.h>
 #include <iostream>
+#include <numeric>
 
 /// @brief The function speaks for itself
 /// @param num integer only
@@ -112,3 +113,6 @@ void printDeviceArray(cuDoubleComplex *d_array, int size);
 bool almost_equal(cuDoubleComplex x, cuDoubleComplex y);
 
 bool almost_equal(double x, double y);
+
+std::vector<int> rangeVec(int start, int end);
+

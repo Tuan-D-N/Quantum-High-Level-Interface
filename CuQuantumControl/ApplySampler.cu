@@ -61,7 +61,7 @@ int sampleSV(custatevecHandle_t &handle,
     CHECK_CUSTATEVECTOR(custatevecSamplerDestroy(sampler));
     extraWorkspaceSizeInBytes = extraWorkspaceSizeInBytes_CHECK;
 
-    if(freeRandnums)
+    if (freeRandnums)
     {
         delete[] randnums;
         randnums = nullptr;
@@ -70,7 +70,15 @@ int sampleSV(custatevecHandle_t &handle,
     return EXIT_SUCCESS;
 }
 
-int sampleSV(custatevecHandle_t &handle, const int nIndexBits, const std::vector<int> &bitOrdering, cuDoubleComplex d_sv[], custatevecIndex_t bitStrings_out[], int nShots, void *extraWorkspace, size_t &extraWorkspaceSizeInBytes, double randnums[])
+int sampleSV(custatevecHandle_t &handle,
+             const int nIndexBits,
+             const std::vector<int> &bitOrdering,
+             cuDoubleComplex d_sv[],
+             custatevecIndex_t bitStrings_out[],
+             const int nShots,
+             void *extraWorkspace,
+             size_t &extraWorkspaceSizeInBytes,
+             double randnums[])
 {
     CHECK_BROAD_ERROR(
         sampleSV(
@@ -80,6 +88,32 @@ int sampleSV(custatevecHandle_t &handle, const int nIndexBits, const std::vector
             bitOrdering.size(),
             d_sv,
             bitStrings_out,
+            nShots,
+            extraWorkspace,
+            extraWorkspaceSizeInBytes,
+            randnums));
+    return cudaSuccess;
+}
+
+int sampleSV(custatevecHandle_t &handle,
+             const int nIndexBits,
+             const std::vector<int> &bitOrdering,
+             cuDoubleComplex d_sv[],
+             std::vector<custatevecIndex_t> &bitStrings_out,
+             const int nShots,
+             void *extraWorkspace,
+             size_t &extraWorkspaceSizeInBytes,
+             double randnums[])
+{
+    bitStrings_out.reserve(nShots);
+    CHECK_BROAD_ERROR(
+        sampleSV(
+            handle,
+            nIndexBits,
+            bitOrdering.data(),
+            bitOrdering.size(),
+            d_sv,
+            bitStrings_out.data(),
             nShots,
             extraWorkspace,
             extraWorkspaceSizeInBytes,

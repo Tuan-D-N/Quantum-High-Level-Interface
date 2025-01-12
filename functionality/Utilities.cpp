@@ -127,3 +127,10 @@ bool almost_equal(double x, double y) {
     const double diff = x - y;
     return (abs(diff) < eps);
 }
+
+std::vector<int> rangeVec(int start, int end)
+{
+    std::vector<int> vec(end - start + 1);
+    std::iota(vec.begin(), vec.end(), start);
+    return vec;
+}
