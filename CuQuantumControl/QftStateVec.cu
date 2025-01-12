@@ -5,7 +5,7 @@
 #include <stdlib.h>           // EXIT_FAILURE
 #include <iostream>
 #include <bitset>
-#include "helper.hpp" // HANDLE_ERROR, HANDLE_CUDA_ERROR
+#include "../CudaControl/Helper.hpp" // HANDLE_ERROR, HANDLE_CUDA_ERROR
 #include "ApplyGates.hpp"
 #include <cstring>
 #include "QftStateVec.hpp"
@@ -18,7 +18,7 @@ int ApplyQFTOnStateVector(cuDoubleComplex *d_stateVector, int numQubits)
     const int nTargets = 1;
 
     custatevecHandle_t handle;
-    HANDLE_ERROR(custatevecCreate(&handle));
+    CHECK_CUSTATEVECTOR(custatevecCreate(&handle));
     void *extraWorkspace = nullptr;
     size_t extraWorkspaceSizeInBytes = 0;
 
@@ -27,27 +27,27 @@ int ApplyQFTOnStateVector(cuDoubleComplex *d_stateVector, int numQubits)
         int i_qubit_reversed = numQubits - 1 - i_qubit;
         const int targets[] = {i_qubit_reversed};
 
-        HANDLE_ERROR(
-            applyH(handle, numQubits, adjoint, i_qubit_reversed, d_stateVector, extraWorkspace, extraWorkspaceSizeInBytes));
+        CHECK_BROAD_ERROR(applyH(handle, numQubits, adjoint, i_qubit_reversed, d_stateVector, extraWorkspace, extraWorkspaceSizeInBytes));
 
+        //The controled rotation loop
         for (int j_qubit = 0; j_qubit < i_qubit_reversed; ++j_qubit)
         {
             int n = j_qubit + 2;
             const int controls[] = {i_qubit_reversed - 1 - j_qubit};
             const int ncontrols = 1;
             const cuDoubleComplex matrix[] = RKMat(n);
-            HANDLE_ERROR(
-                static_cast<custatevecStatus_t>(applyGatesGeneral(handle,
-                                                                  numQubits,
-                                                                  matrix,
-                                                                  adjoint,
-                                                                  targets,
-                                                                  nTargets,
-                                                                  controls,
-                                                                  ncontrols,
-                                                                  d_stateVector,
-                                                                  extraWorkspace,
-                                                                  extraWorkspaceSizeInBytes)));
+            CHECK_BROAD_ERROR(
+                (applyGatesGeneral(handle,
+                                   numQubits,
+                                   matrix,
+                                   adjoint,
+                                   targets,
+                                   nTargets,
+                                   controls,
+                                   ncontrols,
+                                   d_stateVector,
+                                   extraWorkspace,
+                                   extraWorkspaceSizeInBytes)));
         }
     }
 
@@ -63,7 +63,7 @@ int ApplyQFTOnStateVector(cuDoubleComplex *d_stateVector, int numQubits)
     swap(handle, numQubits, qubitsToSwap.data(), numberOfSwaps, d_stateVector);
 
     // destroy handle
-    HANDLE_ERROR(custatevecDestroy(handle));
+    CHECK_CUSTATEVECTOR(custatevecDestroy(handle));
 
     return cudaSuccess;
 }

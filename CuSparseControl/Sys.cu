@@ -9,7 +9,7 @@
 #include "../functionality/fftShift.hpp"
 #include "../functionality/Transpose.hpp"
 #include "../CuQuantumControl/QftStateVec.hpp"
-#include "Helper.hpp"
+#include "../CudaControl/Helper.hpp"
 #include "ApplyMatrixA.hpp"
 #include <cuComplex.h>
 #include <iostream>

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "CudaControl/Sys.hpp"
+#include "CuSparseControl/Sys.hpp"
 #include "CuQuantumControl/Sys.hpp"
 
 int main()

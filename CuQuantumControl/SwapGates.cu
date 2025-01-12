@@ -5,7 +5,7 @@
 #include <stdlib.h>           // EXIT_FAILURE
 #include <iostream>
 #include <bitset>
-#include "helper.hpp" // HANDLE_ERROR, HANDLE_CUDA_ERROR
+#include "../CudaControl/Helper.hpp" // HANDLE_ERROR, HANDLE_CUDA_ERROR
 #include "SwapGates.hpp"
 
 int swap(custatevecHandle_t &handle,
@@ -21,7 +21,7 @@ int swap(custatevecHandle_t &handle,
     int maskBitString[] = {};
     int maskOrdering[] = {};
     // bit swap
-    HANDLE_ERROR(custatevecSwapIndexBits(
+    CHECK_CUSTATEVECTOR(custatevecSwapIndexBits(
         handle, d_sv, CUDA_C_64F, nIndexBits, bitSwaps, nBitSwaps,
         maskBitString, maskOrdering, maskLen));
 

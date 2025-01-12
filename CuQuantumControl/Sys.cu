@@ -5,8 +5,9 @@
 #include <stdlib.h>           // EXIT_FAILURE
 #include <iostream>
 #include <bitset>
-#include "helper.hpp" // HANDLE_ERROR, HANDLE_CUDA_ERROR
+#include "../CudaControl/Helper.hpp" // HANDLE_ERROR, HANDLE_CUDA_ERROR
 #include "ApplyGates.hpp"
+#include "ApplySampler.hpp"
 #include "QftStateVec.hpp"
 #include "../functionality/fftShift.hpp"
 #include "../functionality/ClockTimer.hpp"
@@ -21,7 +22,7 @@ int runner()
 
     cuDoubleComplex h_sv[] = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
     cuDoubleComplex *d_sv;
-    HANDLE_CUDA_ERROR(cudaMallocManaged((void **)&d_sv, nSvSize * sizeof(cuDoubleComplex)));
+    CHECK_CUDA(cudaMallocManaged((void **)&d_sv, nSvSize * sizeof(cuDoubleComplex)));
 
     // Initialize the values
     std::memcpy(d_sv, &h_sv, nSvSize * sizeof(cuDoubleComplex));
@@ -33,7 +34,7 @@ int runner()
     std::cout << "\n";
 
     fftshift1D(d_sv, nSvSize);
-    HANDLE_CUDA_ERROR(static_cast<cudaError_t>(ApplyQFTOnStateVector(d_sv, nIndexBits)));
+    CHECK_CUDA(static_cast<cudaError_t>(ApplyQFTOnStateVector(d_sv, nIndexBits)));
     fftshift1D(d_sv, nSvSize);
 
     for (int i = 0; i < nSvSize; i++)
@@ -42,7 +43,7 @@ int runner()
     }
     std::cout << "\n";
 
-    HANDLE_CUDA_ERROR(cudaFree(d_sv));
+    CHECK_CUDA(cudaFree(d_sv));
 
     return cudaSuccess;
 }
@@ -55,7 +56,7 @@ int runner2()
 
     cuDoubleComplex h_sv[] = {{1, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
     cuDoubleComplex *d_sv;
-    HANDLE_CUDA_ERROR(cudaMallocManaged((void **)&d_sv, nSvSize * sizeof(cuDoubleComplex)));
+    CHECK_CUDA(cudaMallocManaged((void **)&d_sv, nSvSize * sizeof(cuDoubleComplex)));
 
     // Initialize the values
     std::memcpy(d_sv, &h_sv, nSvSize * sizeof(cuDoubleComplex));
@@ -67,7 +68,7 @@ int runner2()
     std::cout << "\n";
 
     custatevecHandle_t handle;
-    HANDLE_ERROR(custatevecCreate(&handle));
+    CHECK_CUSTATEVECTOR(custatevecCreate(&handle));
     void *extraWorkspace = nullptr;
     size_t extraWorkspaceSizeInBytes = 0;
 
@@ -78,14 +79,14 @@ int runner2()
     // applyGatesGeneral(handle, nIndexBits, matrix, adjoint, target, 1, control, 0, d_sv, extraWorkspace, extraWorkspaceSizeInBytes);
     // applyX(handle, nIndexBits, adjoint, target[0], control, sizeof(control) / sizeof(control[0]), d_sv, extraWorkspace, extraWorkspaceSizeInBytes);
 
-    HANDLE_ERROR(custatevecDestroy(handle));
+    CHECK_CUSTATEVECTOR(custatevecDestroy(handle));
 
     for (int i = 0; i < nSvSize; i++)
     {
         std::cout << (d_sv[i].x) << "," << d_sv[i].y << " , " << static_cast<std::bitset<3>>(i) << std::endl;
     }
     std::cout << "\n";
-    HANDLE_CUDA_ERROR(cudaFree(d_sv));
+    CHECK_CUDA(cudaFree(d_sv));
 
     return cudaSuccess;
 }
@@ -107,64 +108,53 @@ int runner3()
     const int nIndexBits = 3;
     const int nSvSize = (1 << nIndexBits);
     const int adjoint = 0;
-
-    // Make the statevector -------------------------------------------------------------------------------
-    cuDoubleComplex *d_sv;
-    HANDLE_CUDA_ERROR(cudaMallocManaged((void **)&d_sv, nSvSize * sizeof(cuDoubleComplex)));
-    d_sv[0] = {1, 0};
-    for (int i = 1; i < nSvSize; ++i)
-    {
-        d_sv[i] = {0, 0};
-    }
-    // Make the statevector -------------------------------------------------------------------------------
-
-    for (int i = 0; i < nSvSize; i++)
-    {
-        std::cout << (d_sv[i].x) << "," << d_sv[i].y << " , " << static_cast<std::bitset<3>>(i) << std::endl;
-    }
-    std::cout << "\n";
-
-
     {
         Timer("Grover Cuquantum C++ qubits = " + std::to_string(nIndexBits));
+
+        // Make the statevector -------------------------------------------------------------------------------
+        cuDoubleComplex *d_sv;
+        CHECK_CUDA(cudaMallocManaged((void **)&d_sv, nSvSize * sizeof(cuDoubleComplex)));
+        d_sv[0] = {1, 0};
+        for (int i = 1; i < nSvSize; ++i)
+        {
+            d_sv[i] = {0, 0};
+        }
+        // Make the statevector -------------------------------------------------------------------------------
+
         // Grover ----------------------------------------------------------------------------------------
         custatevecHandle_t handle;
-        HANDLE_ERROR(custatevecCreate(&handle));
+        CHECK_CUSTATEVECTOR(custatevecCreate(&handle));
         void *extraWorkspace = nullptr;
         size_t extraWorkspaceSizeInBytes = 0;
+
         // Algo ------------------------------------------------------------
         constexpr auto allQubit = rangeArray<nIndexBits>().arr;
         constexpr auto allQubitExceptLast = rangeArray<nIndexBits - 1>().arr;
 
-        HANDLE_ERROR(applyH<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+        CHECK_BROAD_ERROR(applyH<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
 
         for (int i = 0; i < 10; ++i)
         {
             // Mark
             constexpr int markTarget = nIndexBits - 1; // lastQubit
-            HANDLE_ERROR(applyZ<nIndexBits - 1>(handle, nIndexBits, adjoint, markTarget, allQubitExceptLast, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+            CHECK_BROAD_ERROR(applyZ<nIndexBits - 1>(handle, nIndexBits, adjoint, markTarget, allQubitExceptLast, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
 
             // Diffusion
-            HANDLE_ERROR(applyH<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
-            HANDLE_ERROR(applyX<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
-            HANDLE_ERROR(applyZ<nIndexBits - 1>(handle, nIndexBits, adjoint, markTarget, allQubitExceptLast, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
-            HANDLE_ERROR(applyX<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
-            HANDLE_ERROR(applyH<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+            CHECK_BROAD_ERROR(applyH<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+            CHECK_BROAD_ERROR(applyX<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+            CHECK_BROAD_ERROR(applyZ<nIndexBits - 1>(handle, nIndexBits, adjoint, markTarget, allQubitExceptLast, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+            CHECK_BROAD_ERROR(applyX<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+            CHECK_BROAD_ERROR(applyH<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
         }
 
-        HANDLE_ERROR(custatevecDestroy(handle));
-
         // Algo ------------------------------------------------------------
+        CHECK_BROAD_ERROR(custatevecDestroy(handle));
+        if (extraWorkspace != nullptr)
+            CHECK_CUDA(cudaFree(extraWorkspace));
+
         // Grover ----------------------------------------------------------------------------------------
+        CHECK_CUDA(cudaFree(d_sv));
     }
-
-
-    for (int i = 0; i < nSvSize; i++)
-    {
-        std::cout << (d_sv[i].x) << "," << d_sv[i].y << " , " << static_cast<std::bitset<3>>(i) << std::endl;
-    }
-    std::cout << "\n";
-    HANDLE_CUDA_ERROR(cudaFree(d_sv));
 
     return cudaSuccess;
 }

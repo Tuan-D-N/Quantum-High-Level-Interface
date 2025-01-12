@@ -17,6 +17,3 @@
                cudaGetErrorString(err), __LINE__); return err; }               \
 };
 
-bool almost_equal(cuDoubleComplex x, cuDoubleComplex y);
-
-bool almost_equal(double x, double y);

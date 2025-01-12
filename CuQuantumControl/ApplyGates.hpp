@@ -7,7 +7,7 @@
 #include <iostream>
 #include <array>
 #include <bitset>
-#include "helper.hpp" // HANDLE_ERROR, HANDLE_CUDA_ERROR
+#include "../CudaControl/Helper.hpp" // HANDLE_ERROR, HANDLE_CUDA_ERROR
 
 int applyGatesGeneral(custatevecHandle_t &handle,
                       const int nIndexBits,
@@ -18,94 +18,94 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                       const int controls[],
                       const int nControls,
                       cuDoubleComplex *d_sv,
-                      void *extraWorkspace = nullptr,
-                      size_t extraWorkspaceSizeInBytes = 0);
+                      void *extraWorkspace,
+                      size_t &extraWorkspaceSizeInBytes);
 
-#define DEFINE_GATE_APPLY_FUNCTION(FUNC_NAME, MATRIX_VALUES)                        \
-    custatevecStatus_t FUNC_NAME(custatevecHandle_t &handle,                        \
-                                 const int nIndexBits,                              \
-                                 const int adjoint,                                 \
-                                 const int target,                                  \
-                                 cuDoubleComplex *d_sv,                             \
-                                 void *extraWorkspace = nullptr,                    \
-                                 size_t extraWorkspaceSizeInBytes = 0);             \
-    custatevecStatus_t FUNC_NAME(custatevecHandle_t &handle,                        \
-                                 const int nIndexBits,                              \
-                                 const int adjoint,                                 \
-                                 const int target,                                  \
-                                 const int controls[],                              \
-                                 const int nControls,                               \
-                                 cuDoubleComplex *d_sv,                             \
-                                 void *extraWorkspace,                              \
-                                 size_t extraWorkspaceSizeInBytes);                 \
-    template <int n>                                                                \
-    inline custatevecStatus_t FUNC_NAME(custatevecHandle_t &handle,                 \
-                                        const int nIndexBits,                       \
-                                        const int adjoint,                          \
-                                        const int target,                           \
-                                        const std::array<int, n> &controls,         \
-                                        cuDoubleComplex *d_sv,                      \
-                                        void *extraWorkspace,                       \
-                                        size_t extraWorkspaceSizeInBytes)           \
-    {                                                                               \
-        HANDLE_ERROR(static_cast<custatevecStatus_t>(FUNC_NAME(                     \
-            handle,                                                                 \
-            nIndexBits,                                                             \
-            adjoint,                                                                \
-            target,                                                                 \
-            controls.data(),                                                        \
-            controls.size(),                                                        \
-            d_sv,                                                                   \
-            extraWorkspace,                                                         \
-            extraWorkspaceSizeInBytes)));                                           \
-        return CUSTATEVEC_STATUS_SUCCESS;                                           \
-    }                                                                               \
-    template <int n>                                                                \
-    inline custatevecStatus_t FUNC_NAME(custatevecHandle_t &handle,                 \
-                                        const int nIndexBits,                       \
-                                        const int adjoint,                          \
-                                        const std::array<int, n> &targets,          \
-                                        cuDoubleComplex *d_sv,                      \
-                                        void *extraWorkspace,                       \
-                                        size_t extraWorkspaceSizeInBytes)           \
-    {                                                                               \
-        for (int target : targets)                                                  \
-        {                                                                           \
-            HANDLE_ERROR(static_cast<custatevecStatus_t>(FUNC_NAME(                 \
-                handle,                                                             \
-                nIndexBits,                                                         \
-                adjoint,                                                            \
-                target,                                                             \
-                d_sv,                                                               \
-                extraWorkspace,                                                     \
-                extraWorkspaceSizeInBytes)));                                       \
-        }                                                                           \
-        return CUSTATEVEC_STATUS_SUCCESS;                                           \
-    }                                                                               \
-    template <int n_target, int n_control>                                          \
-    inline custatevecStatus_t FUNC_NAME(custatevecHandle_t &handle,                 \
-                                        const int nIndexBits,                       \
-                                        const int adjoint,                          \
-                                        const std::array<int, n_target> &targets,   \
-                                        const std::array<int, n_control> &controls, \
-                                        cuDoubleComplex *d_sv,                      \
-                                        void *extraWorkspace,                       \
-                                        size_t extraWorkspaceSizeInBytes)           \
-    {                                                                               \
-        for (int target : targets)                                                  \
-        {                                                                           \
-            HANDLE_ERROR(static_cast<custatevecStatus_t>(FUNC_NAME(                 \
-                handle,                                                             \
-                nIndexBits,                                                         \
-                adjoint,                                                            \
-                target,                                                             \
-                controls.data(),                                                    \
-                controls.size(),                                                    \
-                d_sv,                                                               \
-                extraWorkspace,                                                     \
-                extraWorkspaceSizeInBytes)));                                       \
-        }                                                                           \
-        return CUSTATEVEC_STATUS_SUCCESS;                                           \
+#define DEFINE_GATE_APPLY_FUNCTION(FUNC_NAME, MATRIX_VALUES)         \
+    int FUNC_NAME(custatevecHandle_t &handle,                        \
+                  const int nIndexBits,                              \
+                  const int adjoint,                                 \
+                  const int target,                                  \
+                  cuDoubleComplex *d_sv,                             \
+                  void *extraWorkspace,                              \
+                  size_t &extraWorkspaceSizeInBytes);                \
+    int FUNC_NAME(custatevecHandle_t &handle,                        \
+                  const int nIndexBits,                              \
+                  const int adjoint,                                 \
+                  const int target,                                  \
+                  const int controls[],                              \
+                  const int nControls,                               \
+                  cuDoubleComplex *d_sv,                             \
+                  void *extraWorkspace,                              \
+                  size_t &extraWorkspaceSizeInBytes);                \
+    template <int n>                                                 \
+    inline int FUNC_NAME(custatevecHandle_t &handle,                 \
+                         const int nIndexBits,                       \
+                         const int adjoint,                          \
+                         const int target,                           \
+                         const std::array<int, n> &controls,         \
+                         cuDoubleComplex *d_sv,                      \
+                         void *extraWorkspace,                       \
+                         size_t &extraWorkspaceSizeInBytes)          \
+    {                                                                \
+        CHECK_BROAD_ERROR(FUNC_NAME(                                 \
+            handle,                                                  \
+            nIndexBits,                                              \
+            adjoint,                                                 \
+            target,                                                  \
+            controls.data(),                                         \
+            controls.size(),                                         \
+            d_sv,                                                    \
+            extraWorkspace,                                          \
+            extraWorkspaceSizeInBytes));                             \
+        return CUSTATEVEC_STATUS_SUCCESS;                            \
+    }                                                                \
+    template <int n>                                                 \
+    inline int FUNC_NAME(custatevecHandle_t &handle,                 \
+                         const int nIndexBits,                       \
+                         const int adjoint,                          \
+                         const std::array<int, n> &targets,          \
+                         cuDoubleComplex *d_sv,                      \
+                         void *extraWorkspace,                       \
+                         size_t &extraWorkspaceSizeInBytes)          \
+    {                                                                \
+        for (int target : targets)                                   \
+        {                                                            \
+            CHECK_BROAD_ERROR(FUNC_NAME(                             \
+                handle,                                              \
+                nIndexBits,                                          \
+                adjoint,                                             \
+                target,                                              \
+                d_sv,                                                \
+                extraWorkspace,                                      \
+                extraWorkspaceSizeInBytes));                         \
+        }                                                            \
+        return CUSTATEVEC_STATUS_SUCCESS;                            \
+    }                                                                \
+    template <int n_target, int n_control>                           \
+    inline int FUNC_NAME(custatevecHandle_t &handle,                 \
+                         const int nIndexBits,                       \
+                         const int adjoint,                          \
+                         const std::array<int, n_target> &targets,   \
+                         const std::array<int, n_control> &controls, \
+                         cuDoubleComplex *d_sv,                      \
+                         void *extraWorkspace,                       \
+                         size_t &extraWorkspaceSizeInBytes)          \
+    {                                                                \
+        for (int target : targets)                                   \
+        {                                                            \
+            CHECK_BROAD_ERROR(FUNC_NAME(                             \
+                handle,                                              \
+                nIndexBits,                                          \
+                adjoint,                                             \
+                target,                                              \
+                controls.data(),                                     \
+                controls.size(),                                     \
+                d_sv,                                                \
+                extraWorkspace,                                      \
+                extraWorkspaceSizeInBytes));                         \
+        }                                                            \
+        return CUSTATEVEC_STATUS_SUCCESS;                            \
     }
 
 #define HMat                                                                      \
@@ -170,5 +170,5 @@ int applyGatesGeneral(custatevecHandle_t &handle,
 
 DEFINE_GATE_APPLY_FUNCTION(applyH, HMat)
 DEFINE_GATE_APPLY_FUNCTION(applyY, YMat)
-DEFINE_GATE_APPLY_FUNCTION(applyZ, YMat)
+DEFINE_GATE_APPLY_FUNCTION(applyZ, ZMat)
 DEFINE_GATE_APPLY_FUNCTION(applyX, XMat)

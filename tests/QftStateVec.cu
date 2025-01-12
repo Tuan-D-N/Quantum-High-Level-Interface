@@ -4,7 +4,7 @@
 #include <vector>
 #include "custatevec.h" // Include cuStateVec headers
 #include "../CuQuantumControl/QftStateVec.hpp"
-#include "../CuQuantumControl/helper.hpp"
+#include "../CudaControl/Helper.hpp"
 #include <cstring>
 
 // Test 1: Verify success of ApplyQFTOnStateVector

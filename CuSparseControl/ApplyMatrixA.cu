@@ -3,7 +3,7 @@
 #include <cuda_runtime_api.h> // cudaMalloc, cudaMemcpy, etc.
 #include <cuComplex.h>
 #include <cusparse.h>
-#include "Helper.hpp"
+#include "../CudaControl/Helper.hpp"
 #include "../functionality/WriteAdjMat.hpp"
 
 // theta slow, r fast

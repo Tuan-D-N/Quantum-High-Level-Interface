@@ -21,6 +21,9 @@ concept Streamable = requires(std::ostream &os, T value) {
     { os << value } -> std::same_as<std::ostream &>; // Ensures os << value is valid and returns std::ostream&
 };
 
+template <typename T>
+concept DecimalNumber = std::floating_point<T>;
+
 /// @brief Print a 2D vector out
 /// @tparam T a streamable type
 /// @param vec input vector
@@ -58,7 +61,7 @@ std::vector<std::vector<double>> cscToDense(
 );
 
 // Helper function to compare two matrices
-template <typename T>
+template <DecimalNumber T>
 bool matricesEqual(const std::vector<std::vector<T>> &matrix1, const std::vector<std::vector<T>> &matrix2, T tolerance = 1e-5)
 {
     if (matrix1.size() != matrix2.size())
@@ -99,3 +102,7 @@ void printDeviceArray(T *d_array, T size)
 }
 
 void printDeviceArray(cuDoubleComplex *d_array, int size);
+
+bool almost_equal(cuDoubleComplex x, cuDoubleComplex y);
+
+bool almost_equal(double x, double y);

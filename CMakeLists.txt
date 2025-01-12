@@ -40,13 +40,13 @@ message(STATUS "CUDA_LINK_LIBRARIES: ${CUDA_LINK_LIBRARIES}")
 
 add_subdirectory("functionality")
 add_subdirectory("Examples")
-add_subdirectory("CudaControl")
+add_subdirectory("CuSparseControl")
 add_subdirectory("CuQuantumControl")
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE
     radon_functionality
-    CudaControl
+    CuSparseControl
     CUDA::cusparse 
     CUDA::cudart
     custatevec
@@ -88,7 +88,7 @@ if(BUILD_TESTING)
     GTest::gtest_main
     radon_functionality
     CuQuantumControl
-    CudaControl
+    CuSparseControl
     CUDA::cusparse 
     CUDA::cudart
     custatevec
