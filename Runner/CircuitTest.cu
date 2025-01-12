@@ -58,7 +58,7 @@ int grover(const int nIndexBits)
     const int adjoint = 0;
     const int nShots = 100;
     {
-        Timer("Grover Cuquantum C++ qubits = " + std::to_string(nIndexBits));
+        auto timer = Timer("Grover Cuquantum C++ qubits = " + std::to_string(nIndexBits));
 
         // Make the statevector -------------------------------------------------------------------------------
         cuDoubleComplex *d_sv;
