@@ -62,7 +62,7 @@ message(STATUS "groverBenchmark = ${groverBenchmark}")
 if(groverBenchmark)
   add_executable(
     groverBenchmarkEXE
-    ${TestSources}
+    groverBenchmarking.cpp
   )
 
   target_link_libraries(groverBenchmarkEXE PRIVATE
