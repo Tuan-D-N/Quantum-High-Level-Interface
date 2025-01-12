@@ -25,6 +25,7 @@ int runner1()
     {
         cuDoubleComplex *d_sv;
         CHECK_CUDA(cudaMallocManaged((void **)&d_sv, nSvSize * sizeof(cuDoubleComplex)));
+        set2ZeroState(d_sv, nSvSize);
 
         custatevecHandle_t handle = NULL;
         CHECK_CUSTATEVECTOR(custatevecCreate(&handle));
