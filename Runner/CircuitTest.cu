@@ -39,7 +39,7 @@ int runner1()
         CHECK_BROAD_ERROR(applyX(handle, nIndexBits, adjoint, std::vector<int>{0, 1, 2}, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
         CHECK_BROAD_ERROR(sampleSV(handle, nIndexBits, {0, 1, 2}, d_sv, outBitString, nShots, extraWorkspace, extraWorkspaceSizeInBytes));
         printDeviceArray(d_sv, nSvSize);
-        
+
         for (int i = 0; i < nShots; ++i)
         {
             std::cout << std::bitset<nSvSize>(outBitString[i]) << " , " << bitStrings_result[i] << "\n";
@@ -95,14 +95,13 @@ int grover(const int nIndexBits)
             CHECK_BROAD_ERROR(applyX(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
             CHECK_BROAD_ERROR(applyH(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
         }
+        std::vector<custatevecIndex_t> outBitString;
+        CHECK_BROAD_ERROR(sampleSV(handle, nIndexBits, allQubit, d_sv, outBitString, nShots, extraWorkspace, extraWorkspaceSizeInBytes));
 
         // Algo ------------------------------------------------------------
         CHECK_BROAD_ERROR(custatevecDestroy(handle));
         if (extraWorkspace != nullptr)
             CHECK_CUDA(cudaFree(extraWorkspace));
-        
-        std::vector<custatevecIndex_t> outBitString;
-        CHECK_BROAD_ERROR(sampleSV(handle, nIndexBits, allQubit, d_sv, outBitString, nShots, extraWorkspace, extraWorkspaceSizeInBytes));
 
         // Grover ----------------------------------------------------------------------------------------
         CHECK_CUDA(cudaFree(d_sv));
