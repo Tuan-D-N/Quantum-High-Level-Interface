@@ -130,7 +130,7 @@ bool almost_equal(double x, double y) {
 
 std::vector<int> rangeVec(int start, int end)
 {
-    std::vector<int> vec(end - start + 1);
+    std::vector<int> vec(end - start);
     std::iota(vec.begin(), vec.end(), start);
     return vec;
 }
