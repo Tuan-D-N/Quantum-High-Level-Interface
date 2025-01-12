@@ -35,7 +35,7 @@
         custatevecStatus_t status = (func);                                      \
         if (status != CUSTATEVEC_STATUS_SUCCESS)                                 \
         {                                                                        \
-            printf("CUSPARSE API failed at line %d in file %s with error: %d\n", \
+            printf("CUSTATEVECTOR API failed at line %d in file %s with error: %d\n", \
                    __LINE__, __FILE__, status);                                  \
             return EXIT_FAILURE;                                                 \
         }                                                                        \
