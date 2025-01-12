@@ -33,11 +33,14 @@ int runner1()
 
         custatevecIndex_t outBitString[nShots];
         sampleSV<nIndexBits>(handle, nIndexBits, {0, 1, 2}, d_sv, outBitString, nShots, extraWorkspace, extraWorkspaceSizeInBytes);
-        
-        for(int i = 0; i < nShots; ++i)
+
+        for (int i = 0; i < nShots; ++i)
         {
-            std::cout << outBitString[i];
+            std::cout << outBitString[i] << " , ";
         }
+
+        if (extraWorkspace != nullptr)
+            CHECK_CUDA(cudaFree(extraWorkspace));
     }
 
     return cudaSuccess;
