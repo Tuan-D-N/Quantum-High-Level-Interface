@@ -107,3 +107,33 @@ if(BUILD_TESTING)
   include(GoogleTest)
   gtest_discover_tests(runTest)
 endif()
+
+
+set(groverBenchmark TRUE)
+
+message(STATUS "groverBenchmark = ${groverBenchmark}")
+if(groverBenchmark)
+  add_executable(
+    groverBenchmarkEXE
+    ${TestSources}
+  )
+
+  target_link_libraries(
+    groverBenchmarkEXE
+    CuQuantumControl
+    CuSparseControl
+    Runner
+    GTest::gtest_main
+    radon_functionality
+    CUDA::cusparse 
+    CUDA::cudart
+    custatevec
+    )
+
+  target_include_directories(groverBenchmarkEXE PUBLIC
+    ${CUDA_INClUDE_LIBRARIES}
+  )
+  target_link_directories(groverBenchmarkEXE PUBLIC
+    ${CUDA_LINK_LIBRARIES}
+  )
+endif()
