@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <array>
+#include "../CudaControl/Helper.hpp"
 
 /// @brief The sampling system
 /// @param handle custatevecHandle object
@@ -40,15 +41,17 @@ int sampleSV(custatevecHandle_t &handle,
              size_t &extraWorkspaceSizeInBytes,
              double randnums[] = nullptr)
 {
-    sampleSV(
-        handle,
-        nIndexBits,
-        bitOrdering.data(),
-        bitStringLen,
-        d_sv,
-        bitStrings_out,
-        nShots,
-        extraWorkspace,
-        extraWorkspaceSizeInBytes,
-        randnums);
+    CHECK_BROAD_ERROR(
+        sampleSV(
+            handle,
+            nIndexBits,
+            bitOrdering.data(),
+            bitStringLen,
+            d_sv,
+            bitStrings_out,
+            nShots,
+            extraWorkspace,
+            extraWorkspaceSizeInBytes,
+            randnums));
+    return cudaSuccess;
 }
