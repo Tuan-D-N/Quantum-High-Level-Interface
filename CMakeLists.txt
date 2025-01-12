@@ -123,7 +123,6 @@ if(groverBenchmark)
     CuQuantumControl
     CuSparseControl
     Runner
-    GTest::gtest_main
     radon_functionality
     CUDA::cusparse 
     CUDA::cudart
