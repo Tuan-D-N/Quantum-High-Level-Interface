@@ -41,7 +41,7 @@ int sampleSV(custatevecHandle_t &handle,
 
     // sample preprocess
     CHECK_CUSTATEVECTOR(custatevecSamplerPreprocess(
-        handle, sampler, extraWorkspace, extraWorkspaceSizeInBytes));
+        handle, sampler, extraWorkspace, extraWorkspaceSizeInBytes_CHECK));
 
     // In real appliction, random numbers in range [0, 1) will be used.
     if (randnums == nullptr)
