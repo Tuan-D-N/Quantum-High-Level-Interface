@@ -33,7 +33,7 @@ int sampleSV(custatevecHandle_t &handle,
 
 int sampleSV(custatevecHandle_t &handle,
              const int nIndexBits,
-             std::vector<int> bitOrdering, // Qubits to measure
+             const std::vector<int> &bitOrdering, // Qubits to measure
              cuDoubleComplex d_sv[],
              custatevecIndex_t bitStrings_out[],
              int nShots,
