@@ -90,7 +90,7 @@ message(STATUS "rawTester = ${rawTester}")
 if(rawTester)
   add_executable(
     rawTesterEXE
-    rawTestering.cpp
+    rawTestering.cu
   )
 
   target_link_libraries(rawTesterEXE PRIVATE
