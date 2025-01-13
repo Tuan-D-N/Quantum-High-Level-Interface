@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Runner/CircuitTest.hpp"
+#include "Runner/GroverTest.hpp"
 #include "CudaControl/Helper.hpp"
 
 int main(int argc, char const *argv[])
