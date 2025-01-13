@@ -112,13 +112,11 @@ int runSys2()
     // Host problem definition
     int evenqubits = 12;
     int halfOfQubits = evenqubits / 2;
-    int svSize = 1 << evenqubits;
     int img_num_rows = 1 << (halfOfQubits);
     int img_num_columns = 1 << (halfOfQubits);
     int A_num_rows = 1 << evenqubits;
     int A_num_cols = 1 << evenqubits;
-    int A_max_nnz = 4 * A_num_rows;
-
+    
     cuDoubleComplex alpha = make_cuDoubleComplex(1.0, 0.0);
     cuDoubleComplex beta = make_cuDoubleComplex(0.0, 0.0);
     //--------------------------------------------------------------------------

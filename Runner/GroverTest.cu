@@ -74,7 +74,6 @@ int grover(const int nIndexBits)
     return cudaSuccess;
 }
 
-
 int grover2(const int nIndexBits)
 {
     const int nSvSize = (1 << nIndexBits);
@@ -131,4 +130,47 @@ int grover2(const int nIndexBits)
     }
 
     return cudaSuccess;
+}
+
+int grover3(const int nIndexBits)
+{
+    const int svSize = (1 << nIndexBits);
+    cuDoubleComplex xMat[] = {{0.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}, {0.0, 0.0}};
+    cuDoubleComplex zMat[] = {{1.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}, {-1.0, 0.0}};
+    cuDoubleComplex hMat[] = {{INV_SQRT2, 0.0}, {INV_SQRT2, 0.0}, {INV_SQRT2, 0.0}, {-INV_SQRT2, 0.0}};
+
+    cuDoubleComplex *d_sv;
+    CHECK_CUDA(cudaMallocManaged((void **)&d_sv, svSize * sizeof(cuDoubleComplex)));
+
+    //----------------------------------------------------------------------------------------------
+
+    // custatevec handle initialization
+    custatevecHandle_t handle;
+    CHECK_CUSTATEVECTOR(custatevecCreate(&handle));
+    void *extraWorkspace = nullptr;
+    size_t extraWorkspaceSizeInBytes = 0;
+
+    // Init to zero state
+    d_sv[0] = {1, 0};
+    for (int i = 1; i < svSize; ++i)
+    {
+        d_sv[i] = {0, 0};
+    }
+
+    for (int i = 0; i < nIndexBits; ++i)
+    {
+        custatevecApplyMatrix(
+            handle, d_sv, CUDA_C_64F, nIndexBits, hMat, CUDA_C_64F,
+            CUSTATEVEC_MATRIX_LAYOUT_ROW, 0, (int[]){i}, 1, {}, nullptr,
+            0, CUSTATEVEC_COMPUTE_64F, extraWorkspace, extraWorkspaceSizeInBytes);
+    }
+
+    // destroy handle
+    CHECK_CUSTATEVECTOR(custatevecDestroy(handle));
+
+    //----------------------------------------------------------------------------------------------
+
+    printDeviceArray(d_sv, svSize);
+    CHECK_CUDA(cudaFree(d_sv));
+    return EXIT_SUCCESS;
 }

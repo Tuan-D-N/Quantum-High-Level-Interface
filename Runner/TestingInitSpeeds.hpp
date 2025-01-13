@@ -42,7 +42,7 @@ int initByFunction()
 }
 
 template<int nIndexBits>
-int initByHand()
+int initByHand() //Significantly faster
 {
     const int svSize = (1 << nIndexBits);
 

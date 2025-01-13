@@ -4,16 +4,18 @@ project(radon_transform LANGUAGES CXX CUDA)
 
 # Find the CUDA Toolkit
 find_package(CUDAToolkit REQUIRED)
+find_package(CUDA REQUIRED)
 
 # Set the C++ compiler
 set(CMAKE_CXX_COMPILER "/opt/nvidia/hpc_sdk/Linux_aarch64/24.5/compilers/bin/nvc++")
 set(CMAKE_CUDA_COMPILER "/opt/nvidia/hpc_sdk/Linux_aarch64/24.5/compilers/bin/nvcc")
 
 # Set C++ standard
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
-set(CMAKE_CUDA_FLAGS "-std=c++20 -rdc=true --default-stream=per-thread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 --diag_suppress=177 --diag_suppress=550 -gpu=mem:unified")
+set(CMAKE_CUDA_FLAGS "-std=c++20 -diag-suppress=550 -diag-suppress=177")
 
 message(STATUS "CXX Compiler: ${CMAKE_CXX_COMPILER}")
+message(STATUS "CUDA_LIBRARIES: ${CUDA_LIBRARIES}")
 
 # Add executable
 add_executable(${PROJECT_NAME} main.cpp)
@@ -53,7 +55,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     custatevec
     CuQuantumControl
     Runner
+    ${CUDA_LIBRARIES}
 )
+set(CMAKE_SKIP_RPATH TRUE)
 
 
 set(groverBenchmark TRUE)
@@ -111,7 +115,6 @@ if(rawTester)
   )
 endif()
 
-set(CMAKE_SKIP_RPATH TRUE)
 
 
 
