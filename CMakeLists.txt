@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(radon_transform LANGUAGES CXX)
+project(radon_transform LANGUAGES CXX CUDA)
 
 # Find the CUDA Toolkit
 find_package(CUDAToolkit REQUIRED)
