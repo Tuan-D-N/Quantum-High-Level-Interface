@@ -159,9 +159,10 @@ int grover3(const int nIndexBits)
 
     for (int i = 0; i < nIndexBits; ++i)
     {
+        int targets[] = {i};
         custatevecApplyMatrix(
             handle, d_sv, CUDA_C_64F, nIndexBits, hMat, CUDA_C_64F,
-            CUSTATEVEC_MATRIX_LAYOUT_ROW, 0, (int[]){i}, 1, {}, nullptr,
+            CUSTATEVEC_MATRIX_LAYOUT_ROW, 0, targets, 1, {}, nullptr,
             0, CUSTATEVEC_COMPUTE_64F, extraWorkspace, extraWorkspaceSizeInBytes);
     }
 
