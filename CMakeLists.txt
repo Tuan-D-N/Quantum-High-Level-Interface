@@ -83,6 +83,34 @@ if(groverBenchmark)
   )
 endif()
 
+
+set(rawTester TRUE)
+
+message(STATUS "rawTester = ${rawTester}")
+if(rawTester)
+  add_executable(
+    rawTesterEXE
+    rawTestering.cpp
+  )
+
+  target_link_libraries(rawTesterEXE PRIVATE
+    CuQuantumControl
+    CuSparseControl
+    Runner
+    radon_functionality
+    CUDA::cusparse 
+    CUDA::cudart
+    custatevec
+    )
+
+  target_include_directories(rawTesterEXE PUBLIC
+    ${CUDA_INClUDE_LIBRARIES}
+  )
+  target_link_directories(rawTesterEXE PUBLIC
+    ${CUDA_LINK_LIBRARIES}
+  )
+endif()
+
 set(CMAKE_SKIP_RPATH TRUE)
 
 
