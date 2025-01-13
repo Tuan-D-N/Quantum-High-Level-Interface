@@ -4,7 +4,6 @@
 
 int main(int argc, char const *argv[])
 {
-    auto qubit_count = 1 < argc ? atoi(argv[1]) : 25;
-    CHECK_BROAD_ERROR(grover(qubit_count));
+    CHECK_BROAD_ERROR(grover3<10>());
     return 0;
 }
