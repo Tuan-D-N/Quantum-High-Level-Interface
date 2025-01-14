@@ -6,6 +6,9 @@
 template <int nIndexBits>
 int grover3()
 {
+    const auto cuStateVecComputeType = CUSTATEVEC_COMPUTE_32F;
+    const auto cuStateVecCudaDataType = CUDA_C_32F;
+    using cuType = cuComplex;
     constexpr int svSize = (1 << nIndexBits);
 
     const int nShots = 100;
@@ -20,12 +23,12 @@ int grover3()
     double randnums[nShots] = {};
     generateRandomArray(randnums, nShots);
 
-    cuDoubleComplex xMat[] = {{0.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}, {0.0, 0.0}};
-    cuDoubleComplex zMat[] = {{1.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}, {-1.0, 0.0}};
-    cuDoubleComplex hMat[] = {{INV_SQRT2, 0.0}, {INV_SQRT2, 0.0}, {INV_SQRT2, 0.0}, {-INV_SQRT2, 0.0}};
+    cuType xMat[] = {{0.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}, {0.0, 0.0}};
+    cuType zMat[] = {{1.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}, {-1.0, 0.0}};
+    cuType hMat[] = {{INV_SQRT2, 0.0}, {INV_SQRT2, 0.0}, {INV_SQRT2, 0.0}, {-INV_SQRT2, 0.0}};
 
-    cuDoubleComplex *d_sv;
-    CHECK_CUDA(cudaMallocManaged((void **)&d_sv, svSize * sizeof(cuDoubleComplex)));
+    cuType *d_sv;
+    CHECK_CUDA(cudaMallocManaged((void **)&d_sv, svSize * sizeof(cuType)));
 
     //----------------------------------------------------------------------------------------------
 
@@ -60,9 +63,9 @@ int grover3()
         {
             int targets[] = {i};
             CHECK_CUSTATEVECTOR(custatevecApplyMatrix(
-                handle, d_sv, CUDA_C_64F, nIndexBits, hMat, CUDA_C_64F,
+                handle, d_sv, cuStateVecCudaDataType, nIndexBits, hMat, cuStateVecCudaDataType,
                 CUSTATEVEC_MATRIX_LAYOUT_ROW, 0, targets, 1, {}, nullptr,
-                0, CUSTATEVEC_COMPUTE_64F, extraWorkspace, extraWorkspaceSizeInBytes));
+                0, cuStateVecComputeType, extraWorkspace, extraWorkspaceSizeInBytes));
         }
         // H to all qubits
 
@@ -70,52 +73,52 @@ int grover3()
         {
             // mark
             CHECK_CUSTATEVECTOR(custatevecApplyMatrix(
-                handle, d_sv, CUDA_C_64F, nIndexBits, zMat, CUDA_C_64F,
+                handle, d_sv, cuStateVecCudaDataType, nIndexBits, zMat, cuStateVecCudaDataType,
                 CUSTATEVEC_MATRIX_LAYOUT_ROW, 0, markTargets, 1, controlsAllExceptLast, nullptr,
-                nIndexBits - 1, CUSTATEVEC_COMPUTE_64F, extraWorkspace, extraWorkspaceSizeInBytes));
+                nIndexBits - 1, cuStateVecComputeType, extraWorkspace, extraWorkspaceSizeInBytes));
             // Diffusion
             // H->all, X->all, cz->allexceptLast mark, x->all, H->all
             for (int j = 0; j < nIndexBits; ++j)
             {
                 int targets[] = {j};
                 CHECK_CUSTATEVECTOR(custatevecApplyMatrix(
-                    handle, d_sv, CUDA_C_64F, nIndexBits, hMat, CUDA_C_64F,
+                    handle, d_sv, cuStateVecCudaDataType, nIndexBits, hMat, cuStateVecCudaDataType,
                     CUSTATEVEC_MATRIX_LAYOUT_ROW, 0, targets, 1, {}, nullptr,
-                    0, CUSTATEVEC_COMPUTE_64F, extraWorkspace, extraWorkspaceSizeInBytes));
+                    0, cuStateVecComputeType, extraWorkspace, extraWorkspaceSizeInBytes));
             }
             for (int j = 0; j < nIndexBits; ++j)
             {
                 int targets[] = {j};
                 CHECK_CUSTATEVECTOR(custatevecApplyMatrix(
-                    handle, d_sv, CUDA_C_64F, nIndexBits, xMat, CUDA_C_64F,
+                    handle, d_sv, cuStateVecCudaDataType, nIndexBits, xMat, cuStateVecCudaDataType,
                     CUSTATEVEC_MATRIX_LAYOUT_ROW, 0, targets, 1, {}, nullptr,
-                    0, CUSTATEVEC_COMPUTE_64F, extraWorkspace, extraWorkspaceSizeInBytes));
+                    0, cuStateVecComputeType, extraWorkspace, extraWorkspaceSizeInBytes));
             }
             CHECK_CUSTATEVECTOR(custatevecApplyMatrix(
-                handle, d_sv, CUDA_C_64F, nIndexBits, zMat, CUDA_C_64F,
+                handle, d_sv, cuStateVecCudaDataType, nIndexBits, zMat, cuStateVecCudaDataType,
                 CUSTATEVEC_MATRIX_LAYOUT_ROW, 0, markTargets, 1, controlsAllExceptLast, nullptr,
-                nIndexBits - 1, CUSTATEVEC_COMPUTE_64F, extraWorkspace, extraWorkspaceSizeInBytes));
+                nIndexBits - 1, cuStateVecComputeType, extraWorkspace, extraWorkspaceSizeInBytes));
             for (int j = 0; j < nIndexBits; ++j)
             {
                 int targets[] = {j};
                 CHECK_CUSTATEVECTOR(custatevecApplyMatrix(
-                    handle, d_sv, CUDA_C_64F, nIndexBits, xMat, CUDA_C_64F,
+                    handle, d_sv, cuStateVecCudaDataType, nIndexBits, xMat, cuStateVecCudaDataType,
                     CUSTATEVEC_MATRIX_LAYOUT_ROW, 0, targets, 1, {}, nullptr,
-                    0, CUSTATEVEC_COMPUTE_64F, extraWorkspace, extraWorkspaceSizeInBytes));
+                    0, cuStateVecComputeType, extraWorkspace, extraWorkspaceSizeInBytes));
             }
             for (int j = 0; j < nIndexBits; ++j)
             {
                 int targets[] = {j};
                 CHECK_CUSTATEVECTOR(custatevecApplyMatrix(
-                    handle, d_sv, CUDA_C_64F, nIndexBits, hMat, CUDA_C_64F,
+                    handle, d_sv, cuStateVecCudaDataType, nIndexBits, hMat, cuStateVecCudaDataType,
                     CUSTATEVEC_MATRIX_LAYOUT_ROW, 0, targets, 1, {}, nullptr,
-                    0, CUSTATEVEC_COMPUTE_64F, extraWorkspace, extraWorkspaceSizeInBytes));
+                    0, cuStateVecComputeType, extraWorkspace, extraWorkspaceSizeInBytes));
             }
         }
 
         // create sampler and check the size of external workspace
         CHECK_CUSTATEVECTOR(custatevecSamplerCreate(
-            handle, d_sv, CUDA_C_64F, nIndexBits, &sampler, nMaxShots,
+            handle, d_sv, cuStateVecCudaDataType, nIndexBits, &sampler, nMaxShots,
             &extraWorkspaceSizeInBytes));
 
         // allocate external workspace if necessary
@@ -126,10 +129,9 @@ int grover3()
         CHECK_CUSTATEVECTOR(custatevecSamplerPreprocess(
             handle, sampler, extraWorkspace, extraWorkspaceSizeInBytes));
 
-
         // std::cout << nShots << "\n";
         // std::cout << bitStringLen << "\n";
-        
+
         //     for(int k = 0; k < nShots; ++k)
         //     {
         //         // std::cout << randnums[k] << "\n";
