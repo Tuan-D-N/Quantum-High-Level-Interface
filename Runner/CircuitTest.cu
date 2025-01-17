@@ -37,7 +37,7 @@ int runner1()
         custatevecIndex_t outBitString[nShots];
         custatevecIndex_t bitStrings_result[] = {0b00, 0b01, 0b10, 0b11, 0b11};
         CHECK_BROAD_ERROR(applyX(handle, nIndexBits, adjoint, std::vector<int>{0, 1, 2}, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
-        CHECK_BROAD_ERROR(sampleSV(handle, nIndexBits, {0, 1, 2}, d_sv, outBitString, nShots, extraWorkspace, extraWorkspaceSizeInBytes));
+        CHECK_BROAD_ERROR(sampleSV<precision::bit_64>(handle, nIndexBits, std::vector<int>{0, 1, 2}, d_sv, outBitString, nShots, extraWorkspace, extraWorkspaceSizeInBytes));
         printDeviceArray(d_sv, nSvSize);
 
         for (int i = 0; i < nShots; ++i)

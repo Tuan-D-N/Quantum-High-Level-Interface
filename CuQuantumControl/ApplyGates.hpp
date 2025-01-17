@@ -1,242 +1,221 @@
 #pragma once
-#include <cuda_runtime_api.h> // cudaMalloc, cudaMemcpy, etc.
-#include <cuComplex.h>        // cuDoubleComplex
-#include <custatevec.h>       // custatevecApplyMatrix
-#include <stdio.h>            // printf
-#include <stdlib.h>           // EXIT_FAILURE
+#include <cuda_runtime_api.h> 
+#include <cuComplex.h>        
+#include <custatevec.h>       
+#include <stdio.h>            
+#include <stdlib.h>           
 #include <iostream>
 #include <array>
 #include <vector>
 #include <bitset>
+#include "Precision.hpp"
 #include "../CudaControl/Helper.hpp" // HANDLE_ERROR, HANDLE_CUDA_ERROR
+#include "MatriceDefinitions.hpp"
 
+
+template <precision selectPrecision>
 int applyGatesGeneral(custatevecHandle_t &handle,
                       const int nIndexBits,
-                      const cuDoubleComplex matrix[],
+                      const PRECISION_TYPE_COMPLEX(selectPrecision) matrix[],
                       const int adjoint,
                       const int targets[],
                       const int nTargets,
                       const int controls[],
                       const int nControls,
-                      cuDoubleComplex *d_sv,
+                      PRECISION_TYPE_COMPLEX(selectPrecision) *d_sv,
                       void *extraWorkspace,
                       size_t &extraWorkspaceSizeInBytes);
 
-#define DEFINE_GATE_APPLY_FUNCTION(FUNC_NAME, MATRIX_VALUES)         \
-    int FUNC_NAME(custatevecHandle_t &handle,                        \
-                  const int nIndexBits,                              \
-                  const int adjoint,                                 \
-                  const int target,                                  \
-                  cuDoubleComplex *d_sv,                             \
-                  void *extraWorkspace,                              \
-                  size_t &extraWorkspaceSizeInBytes);                \
-    int FUNC_NAME(custatevecHandle_t &handle,                        \
-                  const int nIndexBits,                              \
-                  const int adjoint,                                 \
-                  const int target,                                  \
-                  const int controls[],                              \
-                  const int nControls,                               \
-                  cuDoubleComplex *d_sv,                             \
-                  void *extraWorkspace,                              \
-                  size_t &extraWorkspaceSizeInBytes);                \
-    template <int n>                                                 \
-    inline int FUNC_NAME(custatevecHandle_t &handle,                 \
-                         const int nIndexBits,                       \
-                         const int adjoint,                          \
-                         const int target,                           \
-                         const std::array<int, n> &controls,         \
-                         cuDoubleComplex *d_sv,                      \
-                         void *extraWorkspace,                       \
-                         size_t &extraWorkspaceSizeInBytes)          \
-    {                                                                \
-        CHECK_BROAD_ERROR(FUNC_NAME(                                 \
-            handle,                                                  \
-            nIndexBits,                                              \
-            adjoint,                                                 \
-            target,                                                  \
-            controls.data(),                                         \
-            controls.size(),                                         \
-            d_sv,                                                    \
-            extraWorkspace,                                          \
-            extraWorkspaceSizeInBytes));                             \
-        return CUSTATEVEC_STATUS_SUCCESS;                            \
-    }                                                                \
-    template <int n>                                                 \
-    inline int FUNC_NAME(custatevecHandle_t &handle,                 \
-                         const int nIndexBits,                       \
-                         const int adjoint,                          \
-                         const std::array<int, n> &targets,          \
-                         cuDoubleComplex *d_sv,                      \
-                         void *extraWorkspace,                       \
-                         size_t &extraWorkspaceSizeInBytes)          \
-    {                                                                \
-        for (int target : targets)                                   \
-        {                                                            \
-            CHECK_BROAD_ERROR(FUNC_NAME(                             \
-                handle,                                              \
-                nIndexBits,                                          \
-                adjoint,                                             \
-                target,                                              \
-                d_sv,                                                \
-                extraWorkspace,                                      \
-                extraWorkspaceSizeInBytes));                         \
-        }                                                            \
-        return CUSTATEVEC_STATUS_SUCCESS;                            \
-    }                                                                \
-    template <int n_target, int n_control>                           \
-    inline int FUNC_NAME(custatevecHandle_t &handle,                 \
-                         const int nIndexBits,                       \
-                         const int adjoint,                          \
-                         const std::array<int, n_target> &targets,   \
-                         const std::array<int, n_control> &controls, \
-                         cuDoubleComplex *d_sv,                      \
-                         void *extraWorkspace,                       \
-                         size_t &extraWorkspaceSizeInBytes)          \
-    {                                                                \
-        for (int target : targets)                                   \
-        {                                                            \
-            CHECK_BROAD_ERROR(FUNC_NAME(                             \
-                handle,                                              \
-                nIndexBits,                                          \
-                adjoint,                                             \
-                target,                                              \
-                controls.data(),                                     \
-                controls.size(),                                     \
-                d_sv,                                                \
-                extraWorkspace,                                      \
-                extraWorkspaceSizeInBytes));                         \
-        }                                                            \
-        return CUSTATEVEC_STATUS_SUCCESS;                            \
-    }                                                                \
-                                                                     \
-    inline int FUNC_NAME(custatevecHandle_t &handle,                 \
-                         const int nIndexBits,                       \
-                         const int adjoint,                          \
-                         const int target,                           \
-                         const std::vector<int> &controls,           \
-                         cuDoubleComplex *d_sv,                      \
-                         void *extraWorkspace,                       \
-                         size_t &extraWorkspaceSizeInBytes)          \
-    {                                                                \
-        CHECK_BROAD_ERROR(FUNC_NAME(                                 \
-            handle,                                                  \
-            nIndexBits,                                              \
-            adjoint,                                                 \
-            target,                                                  \
-            controls.data(),                                         \
-            controls.size(),                                         \
-            d_sv,                                                    \
-            extraWorkspace,                                          \
-            extraWorkspaceSizeInBytes));                             \
-        return CUSTATEVEC_STATUS_SUCCESS;                            \
-    }                                                                \
-                                                                     \
-    inline int FUNC_NAME(custatevecHandle_t &handle,                 \
-                         const int nIndexBits,                       \
-                         const int adjoint,                          \
-                         const std::vector<int> &targets,            \
-                         cuDoubleComplex *d_sv,                      \
-                         void *extraWorkspace,                       \
-                         size_t &extraWorkspaceSizeInBytes)          \
-    {                                                                \
-        for (int target : targets)                                   \
-        {                                                            \
-            CHECK_BROAD_ERROR(FUNC_NAME(                             \
-                handle,                                              \
-                nIndexBits,                                          \
-                adjoint,                                             \
-                target,                                              \
-                d_sv,                                                \
-                extraWorkspace,                                      \
-                extraWorkspaceSizeInBytes));                         \
-        }                                                            \
-        return CUSTATEVEC_STATUS_SUCCESS;                            \
-    }                                                                \
-                                                                     \
-    inline int FUNC_NAME(custatevecHandle_t &handle,                 \
-                         const int nIndexBits,                       \
-                         const int adjoint,                          \
-                         const std::vector<int> &targets,            \
-                         const std::vector<int> &controls,           \
-                         cuDoubleComplex *d_sv,                      \
-                         void *extraWorkspace,                       \
-                         size_t &extraWorkspaceSizeInBytes)          \
-    {                                                                \
-        for (int target : targets)                                   \
-        {                                                            \
-            CHECK_BROAD_ERROR(FUNC_NAME(                             \
-                handle,                                              \
-                nIndexBits,                                          \
-                adjoint,                                             \
-                target,                                              \
-                controls.data(),                                     \
-                controls.size(),                                     \
-                d_sv,                                                \
-                extraWorkspace,                                      \
-                extraWorkspaceSizeInBytes));                         \
-        }                                                            \
-        return CUSTATEVEC_STATUS_SUCCESS;                            \
+#define DEFINE_GATE_APPLY_FUNCTION(FUNC_NAME, MATRIX_VALUES)                              \
+    template <precision selectPrecision = precision::bit_64>                              \
+    int FUNC_NAME(custatevecHandle_t &handle,                                             \
+                  const int nIndexBits,                                                   \
+                  const int adjoint,                                                      \
+                  const int target,                                                       \
+                  PRECISION_TYPE_COMPLEX(selectPrecision) *d_sv,                                                  \
+                  void *extraWorkspace,                                                   \
+                  size_t &extraWorkspaceSizeInBytes)                                      \
+    {                                                                                     \
+        constexpr PRECISION_TYPE_COMPLEX(selectPrecision) matrix[] = MATRIX_VALUES;                               \
+        CHECK_BROAD_ERROR(applyGatesGeneral<selectPrecision>(                             \
+            handle,                                                                       \
+            nIndexBits,                                                                   \
+            matrix,                                                                       \
+            adjoint,                                                                      \
+            &target,                                                                      \
+            1,                                                                            \
+            {},                                                                           \
+            0,                                                                            \
+            d_sv,                                                                         \
+            extraWorkspace,                                                               \
+            extraWorkspaceSizeInBytes));                                                  \
+        return CUSTATEVEC_STATUS_SUCCESS;                                                 \
+    }                                                                                     \
+    template <precision selectPrecision = precision::bit_64>                              \
+    int FUNC_NAME(custatevecHandle_t &handle,                                             \
+                  const int nIndexBits,                                                   \
+                  const int adjoint,                                                      \
+                  const int target,                                                       \
+                  const int controls[],                                                   \
+                  const int nControls,                                                    \
+                  PRECISION_TYPE_COMPLEX(selectPrecision) *d_sv,                                                  \
+                  void *extraWorkspace,                                                   \
+                  size_t &extraWorkspaceSizeInBytes)                                      \
+    {                                                                                     \
+        constexpr PRECISION_TYPE_COMPLEX(selectPrecision) matrix[] = MATRIX_VALUES;                               \
+        CHECK_BROAD_ERROR(applyGatesGeneral<selectPrecision>(                             \
+            handle,                                                                       \
+            nIndexBits,                                                                   \
+            matrix,                                                                       \
+            adjoint,                                                                      \
+            &target,                                                                      \
+            1,                                                                            \
+            controls,                                                                     \
+            nControls,                                                                    \
+            d_sv,                                                                         \
+            extraWorkspace,                                                               \
+            extraWorkspaceSizeInBytes));                                                  \
+        return CUSTATEVEC_STATUS_SUCCESS;                                                 \
+    }                                                                                     \
+    template <int n, precision selectPrecision = precision::bit_64>                       \
+    inline int FUNC_NAME(custatevecHandle_t &handle,                                      \
+                         const int nIndexBits,                                            \
+                         const int adjoint,                                               \
+                         const int target,                                                \
+                         const std::array<int, n> &controls,                              \
+                         PRECISION_TYPE_COMPLEX(selectPrecision) *d_sv,                                           \
+                         void *extraWorkspace,                                            \
+                         size_t &extraWorkspaceSizeInBytes)                               \
+    {                                                                                     \
+        CHECK_BROAD_ERROR(FUNC_NAME<selectPrecision>(                                     \
+            handle,                                                                       \
+            nIndexBits,                                                                   \
+            adjoint,                                                                      \
+            target,                                                                       \
+            controls.data(),                                                              \
+            controls.size(),                                                              \
+            d_sv,                                                                         \
+            extraWorkspace,                                                               \
+            extraWorkspaceSizeInBytes));                                                  \
+        return CUSTATEVEC_STATUS_SUCCESS;                                                 \
+    }                                                                                     \
+    template <int n, precision selectPrecision = precision::bit_64>                       \
+    inline int FUNC_NAME(custatevecHandle_t &handle,                                      \
+                         const int nIndexBits,                                            \
+                         const int adjoint,                                               \
+                         const std::array<int, n> &targets,                               \
+                         PRECISION_TYPE_COMPLEX(selectPrecision) *d_sv,                                           \
+                         void *extraWorkspace,                                            \
+                         size_t &extraWorkspaceSizeInBytes)                               \
+    {                                                                                     \
+        for (int target : targets)                                                        \
+        {                                                                                 \
+            CHECK_BROAD_ERROR(FUNC_NAME<selectPrecision>(                                 \
+                handle,                                                                   \
+                nIndexBits,                                                               \
+                adjoint,                                                                  \
+                target,                                                                   \
+                d_sv,                                                                     \
+                extraWorkspace,                                                           \
+                extraWorkspaceSizeInBytes));                                              \
+        }                                                                                 \
+        return CUSTATEVEC_STATUS_SUCCESS;                                                 \
+    }                                                                                     \
+    template <int n_target, int n_control, precision selectPrecision = precision::bit_64> \
+    inline int FUNC_NAME(custatevecHandle_t &handle,                                      \
+                         const int nIndexBits,                                            \
+                         const int adjoint,                                               \
+                         const std::array<int, n_target> &targets,                        \
+                         const std::array<int, n_control> &controls,                      \
+                         PRECISION_TYPE_COMPLEX(selectPrecision) *d_sv,                                           \
+                         void *extraWorkspace,                                            \
+                         size_t &extraWorkspaceSizeInBytes)                               \
+    {                                                                                     \
+        for (int target : targets)                                                        \
+        {                                                                                 \
+            CHECK_BROAD_ERROR(FUNC_NAME<selectPrecision>(                                 \
+                handle,                                                                   \
+                nIndexBits,                                                               \
+                adjoint,                                                                  \
+                target,                                                                   \
+                controls.data(),                                                          \
+                controls.size(),                                                          \
+                d_sv,                                                                     \
+                extraWorkspace,                                                           \
+                extraWorkspaceSizeInBytes));                                              \
+        }                                                                                 \
+        return CUSTATEVEC_STATUS_SUCCESS;                                                 \
+    }                                                                                     \
+    template <precision selectPrecision = precision::bit_64>                              \
+    inline int FUNC_NAME(custatevecHandle_t &handle,                                      \
+                         const int nIndexBits,                                            \
+                         const int adjoint,                                               \
+                         const int target,                                                \
+                         const std::vector<int> &controls,                                \
+                         PRECISION_TYPE_COMPLEX(selectPrecision) *d_sv,                                           \
+                         void *extraWorkspace,                                            \
+                         size_t &extraWorkspaceSizeInBytes)                               \
+    {                                                                                     \
+        CHECK_BROAD_ERROR(FUNC_NAME<selectPrecision>(                                     \
+            handle,                                                                       \
+            nIndexBits,                                                                   \
+            adjoint,                                                                      \
+            target,                                                                       \
+            controls.data(),                                                              \
+            controls.size(),                                                              \
+            d_sv,                                                                         \
+            extraWorkspace,                                                               \
+            extraWorkspaceSizeInBytes));                                                  \
+        return CUSTATEVEC_STATUS_SUCCESS;                                                 \
+    }                                                                                     \
+    template <precision selectPrecision = precision::bit_64>                              \
+    inline int FUNC_NAME(custatevecHandle_t &handle,                                      \
+                         const int nIndexBits,                                            \
+                         const int adjoint,                                               \
+                         const std::vector<int> &targets,                                 \
+                         PRECISION_TYPE_COMPLEX(selectPrecision) *d_sv,                                           \
+                         void *extraWorkspace,                                            \
+                         size_t &extraWorkspaceSizeInBytes)                               \
+    {                                                                                     \
+        for (int target : targets)                                                        \
+        {                                                                                 \
+            CHECK_BROAD_ERROR(FUNC_NAME<selectPrecision>(                                 \
+                handle,                                                                   \
+                nIndexBits,                                                               \
+                adjoint,                                                                  \
+                target,                                                                   \
+                d_sv,                                                                     \
+                extraWorkspace,                                                           \
+                extraWorkspaceSizeInBytes));                                              \
+        }                                                                                 \
+        return CUSTATEVEC_STATUS_SUCCESS;                                                 \
+    }                                                                                     \
+    template <precision selectPrecision = precision::bit_64>                              \
+    inline int FUNC_NAME(custatevecHandle_t &handle,                                      \
+                         const int nIndexBits,                                            \
+                         const int adjoint,                                               \
+                         const std::vector<int> &targets,                                 \
+                         const std::vector<int> &controls,                                \
+                         PRECISION_TYPE_COMPLEX(selectPrecision) *d_sv,                                           \
+                         void *extraWorkspace,                                            \
+                         size_t &extraWorkspaceSizeInBytes)                               \
+    {                                                                                     \
+        for (int target : targets)                                                        \
+        {                                                                                 \
+            CHECK_BROAD_ERROR(FUNC_NAME<selectPrecision>(                                 \
+                handle,                                                                   \
+                nIndexBits,                                                               \
+                adjoint,                                                                  \
+                target,                                                                   \
+                controls.data(),                                                          \
+                controls.size(),                                                          \
+                d_sv,                                                                     \
+                extraWorkspace,                                                           \
+                extraWorkspaceSizeInBytes));                                              \
+        }                                                                                 \
+        return CUSTATEVEC_STATUS_SUCCESS;                                                 \
     }
 
-#define HMat                                                                      \
-    {                                                                             \
-        {INV_SQRT2, 0.0}, {INV_SQRT2, 0.0}, {INV_SQRT2, 0.0}, { -INV_SQRT2, 0.0 } \
-    }
-
-#define XMat                                             \
-    {                                                    \
-        {0.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}, { 0.0, 0.0 } \
-    }
-
-#define YMat                                              \
-    {                                                     \
-        {0.0, 0.0}, {0.0, 0.1}, {0.0, -0.1}, { 0.0, 0.0 } \
-    }
-
-#define ZMat                                              \
-    {                                                     \
-        {1.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}, { -1.0, 0.0 } \
-    }
-
-#define RKMat(k)                                               \
-    {                                                          \
-        {1.0, 0.0},                                            \
-            {0.0, 0.0},                                        \
-            {0.0, 0.0},                                        \
-        {                                                      \
-            cos(2 * M_PI / (1 << k)), sin(2 * M_PI / (1 << k)) \
-        }                                                      \
-    }
-
-#define RXMat(theta)                \
-    {                               \
-        {cos(theta / 2), 0.0},      \
-            {0.0, -sin(theta / 2)}, \
-            {0.0, -sin(theta / 2)}, \
-        {                           \
-            cos(theta / 2), 0.0     \
-        }                           \
-    }
-
-#define RYMat(theta)                \
-    {                               \
-        {cos(theta / 2), 0.0},      \
-            {-sin(theta / 2), 0.0}, \
-            {sin(theta / 2), 0.0},  \
-        {                           \
-            cos(theta / 2), 0.0     \
-        }                           \
-    }
-
-#define RZMat(theta)                        \
-    {                                       \
-        {cos(-theta / 2), sin(-theta / 2)}, \
-            {0.0, 0.0},                     \
-            {0.0, 0.0},                     \
-        {                                   \
-            cos(theta / 2), sin(theta / 2)  \
-        }                                   \
-    }
 
 DEFINE_GATE_APPLY_FUNCTION(applyH, HMat)
 DEFINE_GATE_APPLY_FUNCTION(applyY, YMat)

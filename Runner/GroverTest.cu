@@ -19,9 +19,9 @@
 
 int grover(const int nIndexBits)
 {
-    using cuType = cuComplex;
-    const auto cuStateVecComputeType = CUSTATEVEC_COMPUTE_32F;
-    const auto cuStateVecCudaDataType = CUDA_C_32F;
+    using cuType = cuDoubleComplex;
+    const auto cuStateVecComputeType = CUSTATEVEC_COMPUTE_64F;
+    const auto cuStateVecCudaDataType = CUDA_C_64F;
     const int nSvSize = (1 << nIndexBits);
     const int adjoint = 0;
     const int nShots = 100;
@@ -45,7 +45,7 @@ int grover(const int nIndexBits)
         // Algo ------------------------------------------------------------
         std::vector<int> allQubit = rangeVec(0, nIndexBits);
         std::vector<int> allQubitExceptLast = rangeVec(0, nIndexBits - 1);
-
+        
         CHECK_BROAD_ERROR(applyH(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
 
         for (int i = 0; i < 10; ++i)

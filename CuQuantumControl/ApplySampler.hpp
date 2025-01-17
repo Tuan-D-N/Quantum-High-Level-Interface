@@ -8,7 +8,7 @@
 #include <array>
 #include <vector>
 #include "../CudaControl/Helper.hpp"
-
+#include "Precision.hpp"
 /// @brief The sampling system
 /// @param handle custatevecHandle object
 /// @param nIndexBits number of qubits
@@ -20,32 +20,24 @@
 /// @param extraWorkspace extra workspace variable
 /// @param extraWorkspaceSizeInBytes the size of extra workspace
 /// @return error value
+
+template <precision selectPrecision = precision::bit_64>
 int sampleSV(custatevecHandle_t &handle,
              const int nIndexBits,
              const int bitOrdering[], // Qubits to measure
              const int bitStringLen,  // length of bitOrdering
-             cuDoubleComplex d_sv[],
+             PRECISION_TYPE_COMPLEX(selectPrecision) d_sv[],
              custatevecIndex_t bitStrings_out[],
              const int nShots,
              void *extraWorkspace,
              size_t &extraWorkspaceSizeInBytes,
              double randnums[] = nullptr);
 
+template <precision selectPrecision = precision::bit_64>
 int sampleSV(custatevecHandle_t &handle,
              const int nIndexBits,
-             const std::vector<int> &bitOrdering, // Qubits to measure
-             cuDoubleComplex d_sv[],
-             custatevecIndex_t bitStrings_out[],
-             const int nShots,
-             void *extraWorkspace,
-             size_t &extraWorkspaceSizeInBytes,
-             double randnums[] = nullptr);
-
-template <int bitStringLen>
-int sampleSV(custatevecHandle_t &handle,
-             const int nIndexBits,
-             const std::array<int, bitStringLen> &bitOrdering, // Qubits to measure
-             cuDoubleComplex d_sv[],
+             const std::vector<int> &bitOrdering,
+             PRECISION_TYPE_COMPLEX(selectPrecision) d_sv[],
              custatevecIndex_t bitStrings_out[],
              const int nShots,
              void *extraWorkspace,
@@ -53,7 +45,7 @@ int sampleSV(custatevecHandle_t &handle,
              double randnums[] = nullptr)
 {
     CHECK_BROAD_ERROR(
-        sampleSV(
+        sampleSV<selectPrecision>(
             handle,
             nIndexBits,
             bitOrdering.data(),
@@ -67,12 +59,55 @@ int sampleSV(custatevecHandle_t &handle,
     return cudaSuccess;
 }
 
+template <int bitStringLen, precision selectPrecision = precision::bit_64>
+int sampleSV(custatevecHandle_t &handle,
+             const int nIndexBits,
+             const std::array<int, bitStringLen> &bitOrdering, // Qubits to measure
+             PRECISION_TYPE_COMPLEX(selectPrecision) d_sv[],
+             custatevecIndex_t bitStrings_out[],
+             const int nShots,
+             void *extraWorkspace,
+             size_t &extraWorkspaceSizeInBytes,
+             double randnums[] = nullptr)
+{
+    CHECK_BROAD_ERROR(
+        sampleSV<selectPrecision>(
+            handle,
+            nIndexBits,
+            bitOrdering.data(),
+            bitOrdering.size(),
+            d_sv,
+            bitStrings_out,
+            nShots,
+            extraWorkspace,
+            extraWorkspaceSizeInBytes,
+            randnums));
+    return cudaSuccess;
+}
+
+template <precision selectPrecision = precision::bit_64>
 int sampleSV(custatevecHandle_t &handle,
              const int nIndexBits,
              const std::vector<int> &bitOrdering,
-             cuDoubleComplex d_sv[],
+             PRECISION_TYPE_COMPLEX(selectPrecision) d_sv[],
              std::vector<custatevecIndex_t> &bitStrings_out,
              const int nShots,
              void *extraWorkspace,
              size_t &extraWorkspaceSizeInBytes,
-             double randnums[] = nullptr);
+             double randnums[] = nullptr)
+{
+    bitStrings_out.reserve(nShots);
+    CHECK_BROAD_ERROR(
+        sampleSV<selectPrecision>(
+            handle,
+            nIndexBits,
+            bitOrdering.data(),
+            bitOrdering.size(),
+            d_sv,
+            bitStrings_out.data(),
+            nShots,
+            extraWorkspace,
+            extraWorkspaceSizeInBytes,
+            randnums));
+    return cudaSuccess;
+}

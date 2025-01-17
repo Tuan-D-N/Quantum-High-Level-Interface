@@ -29,13 +29,30 @@ concept DecimalNumber = std::floating_point<T>;
 /// @tparam T a streamable type
 /// @param vec input vector
 template <Streamable T>
-void print2DVector(const std::vector<std::vector<T>> &vec);
+void print2DVector(const std::vector<std::vector<T>> &vec)
+{
+    for (const auto &row : vec)
+    { // Iterate over each row
+        for (T val : row)
+        {                            // Iterate over each column in the row
+            std::cout << val << " "; // Print the element
+        }
+        std::cout << "\n"; // Move to the next line after printing a row
+    }
+}
 
 /// @brief print a 1D vector out
 /// @tparam T a streamable type
 /// @param vec input vector
 template <Streamable T>
-void printVector(const std::vector<T> &vec);
+void printVector(const std::vector<T> &vec)
+{
+    for (T val : vec)
+    { // Iterate over the vector and print each element
+        std::cout << val << " ";
+    }
+    std::cout << std::endl;
+}
 
 template <typename T>
 int sign(T value)
@@ -60,6 +77,55 @@ std::vector<std::vector<double>> cscToDense(
     int rowsCount,                  // Number of rows
     int colsCount                   // Number of columns
 );
+
+template <typename T>
+std::vector<std::vector<T>> csrToDense(
+    const T *values,                // Non-zero values
+    const std::vector<int> &rowPtr, // Row pointers
+    const std::vector<int> &cols,   // Column indices
+    int rows,                       // Number of rows
+    int colsCount                   // Number of columns
+)
+{
+    // Initialize a dense matrix with zeros
+    std::vector<std::vector<T>> dense(rows, std::vector<T>(colsCount, 0));
+
+    // Iterate through each row
+    for (int i = 0; i < rows; ++i)
+    {
+        // Non-zero elements for the row are in the range [rowPtr[i], rowPtr[i + 1])
+        for (int j = rowPtr[i]; j < rowPtr[i + 1]; ++j)
+        {
+            dense[i][cols[j]] = (values[j]);
+        }
+    }
+    return dense;
+}
+
+template <typename T>
+std::vector<std::vector<T>> cscToDense(
+    const T *values,                // Non-zero values
+    const std::vector<int> &colPtr, // Column pointers
+    const std::vector<int> &rows,   // Row indices
+    int rowsCount,                  // Number of rows
+    int colsCount                   // Number of columns
+)
+{
+    // Initialize a dense matrix with zeros
+    std::vector<std::vector<T>> dense(rowsCount, std::vector<T>(colsCount, 0));
+
+    // Iterate through each column
+    for (int j = 0; j < colsCount; ++j)
+    {
+        // Non-zero elements for the column are in the range [colPtr[j], colPtr[j + 1])
+        for (int i = colPtr[j]; i < colPtr[j + 1]; ++i)
+        {
+            dense[rows[i]][j] = (values[i]);
+        }
+    }
+
+    return dense;
+}
 
 // Helper function to compare two matrices
 template <DecimalNumber T>
@@ -115,4 +181,3 @@ bool almost_equal(cuDoubleComplex x, cuDoubleComplex y);
 bool almost_equal(double x, double y);
 
 std::vector<int> rangeVec(int start, int end);
-
