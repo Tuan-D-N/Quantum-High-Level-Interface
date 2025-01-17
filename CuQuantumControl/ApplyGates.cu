@@ -55,9 +55,9 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                   const int target,                                  \
                   cuDoubleComplex *d_sv,                             \
                   void *extraWorkspace,                              \
-                  size_t &extraWorkspaceSizeInBytes)                  \
+                  size_t &extraWorkspaceSizeInBytes)                 \
     {                                                                \
-        cuDoubleComplex matrix[] = MATRIX_VALUES;                    \
+        constexpr cuDoubleComplex matrix[] = MATRIX_VALUES;          \
         CHECK_BROAD_ERROR(applyGatesGeneral(                         \
             handle,                                                  \
             nIndexBits,                                              \
@@ -80,9 +80,9 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                   const int nControls,                               \
                   cuDoubleComplex *d_sv,                             \
                   void *extraWorkspace,                              \
-                  size_t &extraWorkspaceSizeInBytes)                  \
+                  size_t &extraWorkspaceSizeInBytes)                 \
     {                                                                \
-        cuDoubleComplex matrix[] = MATRIX_VALUES;                    \
+        constexpr cuDoubleComplex matrix[] = MATRIX_VALUES;          \
         CHECK_BROAD_ERROR(applyGatesGeneral(                         \
             handle,                                                  \
             nIndexBits,                                              \

@@ -19,27 +19,28 @@
 
 int grover(const int nIndexBits)
 {
+    using cuType = cuComplex;
+    const auto cuStateVecComputeType = CUSTATEVEC_COMPUTE_32F;
+    const auto cuStateVecCudaDataType = CUDA_C_32F;
     const int nSvSize = (1 << nIndexBits);
     const int adjoint = 0;
     const int nShots = 100;
     {
         auto timer = Timer("Grover Cuquantum C++ qubits = " + std::to_string(nIndexBits));
 
-        // Make the statevector -------------------------------------------------------------------------------
-        cuDoubleComplex *d_sv;
-        CHECK_CUDA(cudaMallocManaged((void **)&d_sv, nSvSize * sizeof(cuDoubleComplex)));
-        d_sv[0] = {1, 0};
-        for (int i = 1; i < nSvSize; ++i)
-        {
-            d_sv[i] = {0, 0};
-        }
-        // Make the statevector -------------------------------------------------------------------------------
-
         // Grover ----------------------------------------------------------------------------------------
         custatevecHandle_t handle;
         CHECK_CUSTATEVECTOR(custatevecCreate(&handle));
         void *extraWorkspace = nullptr;
         size_t extraWorkspaceSizeInBytes = 0;
+
+        // Make the statevector -------------------------------------------------------------------------------
+        cuType *d_sv;
+        CHECK_CUDA(cudaMalloc((void **)&d_sv, nSvSize * sizeof(cuType)));
+        // initialize the state vector
+        CHECK_CUSTATEVECTOR(custatevecInitializeStateVector(
+            handle, d_sv, cuStateVecCudaDataType, nIndexBits, CUSTATEVEC_STATE_VECTOR_TYPE_ZERO));
+        // Make the statevector -------------------------------------------------------------------------------
 
         // Algo ------------------------------------------------------------
         std::vector<int> allQubit = rangeVec(0, nIndexBits);
