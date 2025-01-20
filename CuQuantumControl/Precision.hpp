@@ -24,3 +24,4 @@ enum class precision
         cudaType = CUDA_C_64F;                               \
         custatevecType = CUSTATEVEC_COMPUTE_64F;             \
     }
+    

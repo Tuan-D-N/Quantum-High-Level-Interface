@@ -22,8 +22,6 @@ concept Streamable = requires(std::ostream &os, T value) {
     { os << value } -> std::same_as<std::ostream &>; // Ensures os << value is valid and returns std::ostream&
 };
 
-template <typename T>
-concept DecimalNumber = std::floating_point<T>;
 
 /// @brief Print a 2D vector out
 /// @tparam T a streamable type
@@ -127,15 +125,18 @@ std::vector<std::vector<T>> cscToDense(
     return dense;
 }
 
-// Helper function to compare two matrices
-template <DecimalNumber T>
-bool matricesEqual(const std::vector<std::vector<T>> &matrix1, const std::vector<std::vector<T>> &matrix2, T tolerance = 1e-5)
-{
-    return matricesEqual(matrix1, matrix2, tolerance);
+// Helper to get default tolerance based on type
+template <typename T>
+constexpr T getDefaultToleranceForMatricesEqual() {
+    if constexpr (std::is_floating_point_v<T>) {
+        return static_cast<T>(1e-5); // Default for floating-point types
+    } else {
+        return static_cast<T>(0);    // Default for other types
+    }
 }
 
 template <typename T>
-bool matricesEqual(const std::vector<std::vector<T>> &matrix1, const std::vector<std::vector<T>> &matrix2, T tolerance = 0)
+bool matricesEqual(const std::vector<std::vector<T>> &matrix1, const std::vector<std::vector<T>> &matrix2, T tolerance = getDefaultToleranceForMatricesEqual<T>())
 {
     if (matrix1.size() != matrix2.size())
     {
