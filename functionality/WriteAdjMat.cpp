@@ -104,14 +104,14 @@ void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int eve
 
     if (mask)
     {
-        auto maskFunc = [lowerValue, upperValue, maxDistance](double distance)
+        maskFunc = [lowerValue, upperValue, maxDistance](double distance)
         {
             return lowerValue + (upperValue - lowerValue) * (abs(distance) / maxDistance);
         };
     }
     else
     {
-        auto maskFunc = [](double distance)
+        maskFunc = [](double distance)
         {
             return 1;
         };
