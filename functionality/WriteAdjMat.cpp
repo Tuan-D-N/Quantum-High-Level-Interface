@@ -51,7 +51,7 @@ template std::vector<std::tuple<double, double>> allPermuteOfVectors<double, dou
 
 int getRowOffsetSizeMini(int evenQubits)
 {
-    return 1 << evenQubits; // 2^evenqubits
+    return (1 << evenQubits) + 1; // 2^evenqubits and 1 for end wrapping
 }
 int getColumnIndexSizeMini(int evenQubits)
 {
