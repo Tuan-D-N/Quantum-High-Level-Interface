@@ -25,8 +25,8 @@ TEST(applyGates, X1_Base)
 
     std::array<cuDoubleComplex, nSvSize> input({{1, 0}, {0, 0}});
     std::array<cuDoubleComplex, nSvSize> output({{0, 0}, {1, 0}});
-    std::vector<int> targets = {0};
-    std::vector<int> control = {};
+    int targets[] = {0};
+    int control[] = {};
 
     cuDoubleComplex *d_sv;
     THROW_CUDA(cudaMallocManaged((void **)&d_sv, nSvSize * sizeof(cuDoubleComplex)));
