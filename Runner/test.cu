@@ -16,9 +16,26 @@
 #include "ApplyIRadon.hpp"
 #include <string>
 #include <cassert>
+#include <span>
+#include <iostream>
 
+void printSpan(std::span<const int> span)
+{
+    for (int value : span)
+    {
+        std::cout << value << " ";
+    }
+    std::cout << "\n";
+}
 
-void func(){
+void printSpan(int span)
+{
+    std::cout << "\n";
+}
 
-    
+int main()
+{
+    printSpan(std::array<int,5>{1, 2, 3, 4, 5}); // Compiler deduces the size as 5
+
+    return 0;
 }

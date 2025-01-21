@@ -4,6 +4,7 @@
 #include "WriteAdjMat.hpp"
 #include "Utilities.hpp"
 #include "Linspace.hpp"
+#include <functional>
 #include "OddRound.hpp"
 #include <cassert>
 #include <iostream>
@@ -50,7 +51,7 @@ template std::vector<std::tuple<double, double>> allPermuteOfVectors<double, dou
 
 int getRowOffsetSizeMini(int evenQubits)
 {
-    return 1 << evenQubits; // 2^evenqubits
+    return (1 << evenQubits) + 1; // 2^evenqubits and 1 for end wrapping
 }
 int getColumnIndexSizeMini(int evenQubits)
 {
@@ -98,10 +99,23 @@ void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int eve
     double lowerValue = 0;
     double upperValue = 1;
     double maxDistance = maxR;
-    auto maskFunc = [lowerValue, upperValue, maxDistance](double distance)
+
+    std::function<double(double)> maskFunc;
+
+    if (mask)
     {
-        return lowerValue + (upperValue - lowerValue) * (abs(distance) / maxDistance);
-    };
+        maskFunc = [lowerValue, upperValue, maxDistance](double distance)
+        {
+            return lowerValue + (upperValue - lowerValue) * (abs(distance) / maxDistance);
+        };
+    }
+    else
+    {
+        maskFunc = [](double distance)
+        {
+            return 1;
+        };
+    }
 
     for (int i_theta = 0; i_theta < thetaLen; ++i_theta)
     {
@@ -123,7 +137,7 @@ void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int eve
                 ++ColumnOffsetIter;
 
                 int index1 = toXYIndex(lx, ly); // one value
-                values[ValueIter] = complex(1* maskFunc(rValue));
+                values[ValueIter] = complex(1 * maskFunc(rValue));
                 ++ValueIter;
                 rowIndex[RowIter] = index1;
                 ++RowIter;
@@ -134,13 +148,13 @@ void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int eve
                 ++ColumnOffsetIter;
 
                 int index1 = toXYIndex(lx, ly); // smaller value first
-                values[ValueIter] = complex(CorrelationHelper(ly, y)* maskFunc(rValue));
+                values[ValueIter] = complex(CorrelationHelper(ly, y) * maskFunc(rValue));
                 ++ValueIter;
                 rowIndex[RowIter] = index1;
                 ++RowIter;
 
                 int index2 = toXYIndex(lx, uy); // larger value second
-                values[ValueIter] = complex(CorrelationHelper(uy, y)* maskFunc(rValue));
+                values[ValueIter] = complex(CorrelationHelper(uy, y) * maskFunc(rValue));
                 ++ValueIter;
                 rowIndex[RowIter] = index2;
                 ++RowIter;
@@ -151,13 +165,13 @@ void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int eve
                 ++ColumnOffsetIter;
 
                 int index1 = toXYIndex(lx, ly); // smaller value first
-                values[ValueIter] = complex(CorrelationHelper(lx, x)* maskFunc(rValue));
+                values[ValueIter] = complex(CorrelationHelper(lx, x) * maskFunc(rValue));
                 ++ValueIter;
                 rowIndex[RowIter] = index1;
                 ++RowIter;
 
                 int index2 = toXYIndex(ux, ly); // larger value second
-                values[ValueIter] = complex(CorrelationHelper(ux, x)* maskFunc(rValue));
+                values[ValueIter] = complex(CorrelationHelper(ux, x) * maskFunc(rValue));
                 ++ValueIter;
                 rowIndex[RowIter] = index2;
                 ++RowIter;
@@ -168,25 +182,25 @@ void writeMatAMiniCSC(int *ColumnOffset, int *rowIndex, complex *values, int eve
                 ++ColumnOffsetIter;
 
                 int index1 = toXYIndex(lx, ly); // smaller value first
-                values[ValueIter] = complex(CorrelationHelper(lx, x) * CorrelationHelper(ly, y)* maskFunc(rValue));
+                values[ValueIter] = complex(CorrelationHelper(lx, x) * CorrelationHelper(ly, y) * maskFunc(rValue));
                 ++ValueIter;
                 rowIndex[RowIter] = index1;
                 ++RowIter;
 
                 int index2 = toXYIndex(lx, uy); // y changes faster than x
-                values[ValueIter] = complex(CorrelationHelper(lx, x) * CorrelationHelper(uy, y)* maskFunc(rValue));
+                values[ValueIter] = complex(CorrelationHelper(lx, x) * CorrelationHelper(uy, y) * maskFunc(rValue));
                 ++ValueIter;
                 rowIndex[RowIter] = index2;
                 ++RowIter;
 
                 int index3 = toXYIndex(ux, ly); // x changes slower
-                values[ValueIter] = complex(CorrelationHelper(ux, x) * CorrelationHelper(ly, y)* maskFunc(rValue));
+                values[ValueIter] = complex(CorrelationHelper(ux, x) * CorrelationHelper(ly, y) * maskFunc(rValue));
                 ++ValueIter;
                 rowIndex[RowIter] = index3;
                 ++RowIter;
 
                 int index4 = toXYIndex(ux, uy); // large value
-                values[ValueIter] = complex(CorrelationHelper(ux, x) * CorrelationHelper(uy, y)* maskFunc(rValue));
+                values[ValueIter] = complex(CorrelationHelper(ux, x) * CorrelationHelper(uy, y) * maskFunc(rValue));
                 ++ValueIter;
                 rowIndex[RowIter] = index4;
                 ++RowIter;

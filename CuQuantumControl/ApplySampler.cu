@@ -8,25 +8,40 @@
 
 #include "../functionality/randomArray.hpp"
 #include "ApplySampler.hpp"
+#include "Precision.hpp"
 
+template <precision SelectPrecision>
 int sampleSV(custatevecHandle_t &handle,
              const int nIndexBits,
              const int bitOrdering[], // Qubits to measure
              const int bitStringLen,  // length of bitOrdering
-             cuDoubleComplex d_sv[],
+             PRECISION_TYPE_COMPLEX(SelectPrecision) d_sv[],
              custatevecIndex_t bitStrings_out[],
              const int nShots,
              void *extraWorkspace,
              size_t &extraWorkspaceSizeInBytes,
              double randnums[])
 {
+    cudaDataType_t cudaType;
+    custatevecComputeType_t custatevecType;
+    if constexpr (SelectPrecision == precision::bit_32)
+    {
+        cudaType = CUDA_C_32F;
+        custatevecType = CUSTATEVEC_COMPUTE_32F;
+    }
+    else if constexpr (SelectPrecision == precision::bit_64)
+    {
+        cudaType = CUDA_C_64F;
+        custatevecType = CUSTATEVEC_COMPUTE_64F;
+    }
+
     size_t extraWorkspaceSizeInBytes_CHECK = extraWorkspaceSizeInBytes;
     int nMaxShots = nShots;
 
     custatevecSamplerDescriptor_t sampler;
     // create sampler and check the size of external workspace
     CHECK_CUSTATEVECTOR(custatevecSamplerCreate(
-        handle, d_sv, CUDA_C_64F, nIndexBits, &sampler, nMaxShots,
+        handle, d_sv, cudaType, nIndexBits, &sampler, nMaxShots,
         &extraWorkspaceSizeInBytes_CHECK));
 
     if (extraWorkspaceSizeInBytes_CHECK > extraWorkspaceSizeInBytes)
@@ -70,53 +85,23 @@ int sampleSV(custatevecHandle_t &handle,
     return EXIT_SUCCESS;
 }
 
-int sampleSV(custatevecHandle_t &handle,
-             const int nIndexBits,
-             const std::vector<int> &bitOrdering,
-             cuDoubleComplex d_sv[],
-             custatevecIndex_t bitStrings_out[],
-             const int nShots,
-             void *extraWorkspace,
-             size_t &extraWorkspaceSizeInBytes,
-             double randnums[])
-{
-    CHECK_BROAD_ERROR(
-        sampleSV(
-            handle,
-            nIndexBits,
-            bitOrdering.data(),
-            bitOrdering.size(),
-            d_sv,
-            bitStrings_out,
-            nShots,
-            extraWorkspace,
-            extraWorkspaceSizeInBytes,
-            randnums));
-    return cudaSuccess;
-}
-
-int sampleSV(custatevecHandle_t &handle,
-             const int nIndexBits,
-             const std::vector<int> &bitOrdering,
-             cuDoubleComplex d_sv[],
-             std::vector<custatevecIndex_t> &bitStrings_out,
-             const int nShots,
-             void *extraWorkspace,
-             size_t &extraWorkspaceSizeInBytes,
-             double randnums[])
-{
-    bitStrings_out.reserve(nShots);
-    CHECK_BROAD_ERROR(
-        sampleSV(
-            handle,
-            nIndexBits,
-            bitOrdering.data(),
-            bitOrdering.size(),
-            d_sv,
-            bitStrings_out.data(),
-            nShots,
-            extraWorkspace,
-            extraWorkspaceSizeInBytes,
-            randnums));
-    return cudaSuccess;
-}
+template int sampleSV<precision::bit_32>(custatevecHandle_t &handle,
+                                         const int nIndexBits,
+                                         const int bitOrdering[], // Qubits to measure
+                                         const int bitStringLen,  // length of bitOrdering
+                                         PRECISION_TYPE_COMPLEX(precision::bit_32) d_sv[],
+                                         custatevecIndex_t bitStrings_out[],
+                                         const int nShots,
+                                         void *extraWorkspace,
+                                         size_t &extraWorkspaceSizeInBytes,
+                                         double randnums[]);
+template int sampleSV<precision::bit_64>(custatevecHandle_t &handle,
+                                         const int nIndexBits,
+                                         const int bitOrdering[], // Qubits to measure
+                                         const int bitStringLen,  // length of bitOrdering
+                                         PRECISION_TYPE_COMPLEX(precision::bit_64) d_sv[],
+                                         custatevecIndex_t bitStrings_out[],
+                                         const int nShots,
+                                         void *extraWorkspace,
+                                         size_t &extraWorkspaceSizeInBytes,
+                                         double randnums[]);
