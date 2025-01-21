@@ -4,7 +4,6 @@
 #include <stdio.h>            
 #include <stdlib.h>           
 #include <iostream>
-#include <array>
 #include <bitset>
 #include "Precision.hpp"
 #include "../CudaControl/Helper.hpp" // HANDLE_ERROR, HANDLE_CUDA_ERROR

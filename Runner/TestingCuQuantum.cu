@@ -73,7 +73,7 @@ int runner2()
     void *extraWorkspace = nullptr;
     size_t extraWorkspaceSizeInBytes = 0;
 
-    applyX<3>(handle, nIndexBits, adjoint, {0, 1, 2}, d_sv, extraWorkspace, extraWorkspaceSizeInBytes);
+    applyX(handle, nIndexBits, adjoint, std::array<int, 3>{0, 1, 2}, d_sv, extraWorkspace, extraWorkspaceSizeInBytes);
     // cuDoubleComplex matrix[] = XMat;
     // const int target[] = {0};
     // const int control[] = {};
@@ -121,20 +121,20 @@ int runner3()
         constexpr auto allQubit = range(0, nIndexBits);
         constexpr auto allQubitExceptLast = range(0, nIndexBits - 1);
 
-        CHECK_BROAD_ERROR(applyH<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+        CHECK_BROAD_ERROR(applyH(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
 
         for (int i = 0; i < 10; ++i)
         {
             // Mark
             constexpr int markTarget = nIndexBits - 1; // lastQubit
-            CHECK_BROAD_ERROR(applyZ<nIndexBits - 1>(handle, nIndexBits, adjoint, markTarget, allQubitExceptLast, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+            CHECK_BROAD_ERROR(applyZ(handle, nIndexBits, adjoint, markTarget, allQubitExceptLast, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
 
             // Diffusion
-            CHECK_BROAD_ERROR(applyH<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
-            CHECK_BROAD_ERROR(applyX<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
-            CHECK_BROAD_ERROR(applyZ<nIndexBits - 1>(handle, nIndexBits, adjoint, markTarget, allQubitExceptLast, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
-            CHECK_BROAD_ERROR(applyX<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
-            CHECK_BROAD_ERROR(applyH<nIndexBits>(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+            CHECK_BROAD_ERROR(applyH(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+            CHECK_BROAD_ERROR(applyX(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+            CHECK_BROAD_ERROR(applyZ(handle, nIndexBits, adjoint, markTarget, allQubitExceptLast, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+            CHECK_BROAD_ERROR(applyX(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
+            CHECK_BROAD_ERROR(applyH(handle, nIndexBits, adjoint, allQubit, d_sv, extraWorkspace, extraWorkspaceSizeInBytes));
         }
 
         // Algo ------------------------------------------------------------
