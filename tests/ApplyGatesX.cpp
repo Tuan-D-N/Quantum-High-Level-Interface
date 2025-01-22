@@ -3,7 +3,7 @@
 #include "../CudaControl/Helper.hpp"
 #include <string>
 
-class ApplyXTestSpanBased : public ::testing::Test
+class ApplyXTestSpan : public ::testing::Test
 {
 private:
     void runTestVector(const std::vector<cuDoubleComplex> &inputState,
@@ -119,7 +119,7 @@ protected:
     }
 };
 
-TEST_F(ApplyXTestSpanBased, X1_Base)
+TEST_F(ApplyXTestSpan, X1_Base)
 {
     const int nQubits = 2;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}};
@@ -130,7 +130,7 @@ TEST_F(ApplyXTestSpanBased, X1_Base)
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTestSpanBased, X2_Base)
+TEST_F(ApplyXTestSpan, X2_Base)
 {
     const int nQubits = 2;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}};
@@ -141,7 +141,7 @@ TEST_F(ApplyXTestSpanBased, X2_Base)
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTestSpanBased, X_MultipleQubits)
+TEST_F(ApplyXTestSpan, X_MultipleQubits)
 {
     const int nQubits = 2;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}};
@@ -152,7 +152,7 @@ TEST_F(ApplyXTestSpanBased, X_MultipleQubits)
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTestSpanBased, X_Controlled)
+TEST_F(ApplyXTestSpan, X_Controlled)
 {
     const int nQubits = 2;
     std::vector<cuDoubleComplex> input = {{1, 0}, {0, 0}, {0, 0}, {0, 0}};
@@ -163,7 +163,7 @@ TEST_F(ApplyXTestSpanBased, X_Controlled)
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTestSpanBased, X_MultiControlled)
+TEST_F(ApplyXTestSpan, X_MultiControlled)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
@@ -174,7 +174,7 @@ TEST_F(ApplyXTestSpanBased, X_MultiControlled)
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTestSpanBased, X_MultipleTargets3)
+TEST_F(ApplyXTestSpan, X_MultipleTargets3)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
@@ -185,7 +185,7 @@ TEST_F(ApplyXTestSpanBased, X_MultipleTargets3)
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTestSpanBased, X_MultipleTargets2)
+TEST_F(ApplyXTestSpan, X_MultipleTargets2)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
@@ -196,7 +196,7 @@ TEST_F(ApplyXTestSpanBased, X_MultipleTargets2)
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTestSpanBased, X_MultipleTargets1)
+TEST_F(ApplyXTestSpan, X_MultipleTargets1)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
@@ -207,13 +207,13 @@ TEST_F(ApplyXTestSpanBased, X_MultipleTargets1)
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTestSpanBased, X_MultipleTargets_MultipleControls)
+TEST_F(ApplyXTestSpan, X_MultipleTargets_MultipleControls)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
     std::vector<cuDoubleComplex> expectedOutput = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {8, 0}, {7, 0}, {6, 0}, {5, 0}};
-    std::vector<int> targets = {2, 1};
-    std::vector<int> controls = {3};
+    std::vector<int> targets = {1, 0};
+    std::vector<int> controls = {2};
 
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
