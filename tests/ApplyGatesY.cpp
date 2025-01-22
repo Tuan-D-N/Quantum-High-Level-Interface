@@ -189,7 +189,7 @@ TEST_F(ApplyYGates, Y_MultipleTargets2)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
-    std::vector<cuDoubleComplex> expectedOutput = {{-4, 0}, {3, 0}, {2, 0}, {-1, 0}, {-8, 0}, {7, 0}, {6, 0}, {-5, 0}};
+    std::vector<cuDoubleComplex> expectedOutput = {{-7, 0}, {-8, 0}, {5, 0}, {6, 0}, {3, 0}, {4, 0}, {-1, 0}, {-2, 0}};
     std::vector<int> targets = {1, 2};
     std::vector<int> controls = {};
 
