@@ -123,7 +123,7 @@ TEST_F(ApplyHGates, H_Base1)
 {
     const int nQubits = 2;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}};
-    std::vector<cuDoubleComplex> expectedOutput = {{1 / INV_SQRT2 + INV_SQRT2, 0}, {1 / INV_SQRT2 - INV_SQRT2, 0}, {3 / INV_SQRT2 + 2 * INV_SQRT2, 0}, {3 / INV_SQRT2 - 2 * INV_SQRT2, 0}};
+    std::vector<cuDoubleComplex> expectedOutput = {{1 * INV_SQRT2 + SQRT2, 0}, {1 * INV_SQRT2 - SQRT2, 0}, {3 * INV_SQRT2 + 2 * SQRT2, 0}, {3 * INV_SQRT2 - 2 * SQRT2, 0}};
     std::vector<int> targets = {0};
     std::vector<int> controls = {};
 
@@ -145,7 +145,7 @@ TEST_F(ApplyHGates, H_MultipleQubits)
 {
     const int nQubits = 2;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}};
-    std::vector<cuDoubleComplex> expectedOutput = {{2 * INV_SQRT2, 0}, {3 * INV_SQRT2, 0}, {-INV_SQRT2, 0}, {-INV_SQRT2, 0}};
+    std::vector<cuDoubleComplex> expectedOutput = {{2 * SQRT2, 0}, {3 * SQRT2, 0}, {-SQRT2, 0}, {-SQRT2, 0}};
     std::vector<int> targets = {1};
     std::vector<int> controls = {};
 
@@ -167,7 +167,7 @@ TEST_F(ApplyHGates, H_MultiControlled)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
-    std::vector<cuDoubleComplex> expectedOutput = {{1, 0}, {2, 0}, {3, 0}, {6 * INV_SQRT2, 0}, {5, 0}, {6, 0}, {7, 0}, {-2 * INV_SQRT2, 0}};
+    std::vector<cuDoubleComplex> expectedOutput = {{1, 0}, {2, 0}, {3, 0}, {6 * SQRT2, 0}, {5, 0}, {6, 0}, {7, 0}, {-2 * SQRT2, 0}};
     std::vector<int> targets = {2};
     std::vector<int> controls = {0, 1};
 
@@ -178,7 +178,7 @@ TEST_F(ApplyHGates, H_MultipleTargets3)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
-    std::vector<cuDoubleComplex> expectedOutput = {{9 * INV_SQRT2, 0}, {-INV_SQRT2, 0}, {-2 * INV_SQRT2, 0}, {0, 0}, {-4 * INV_SQRT2, 0}, {0, 0}, {0, 0}, {0, 0}};
+    std::vector<cuDoubleComplex> expectedOutput = {{9 * SQRT2, 0}, {-SQRT2, 0}, {-2 * SQRT2, 0}, {0, 0}, {-4 * SQRT2, 0}, {0, 0}, {0, 0}, {0, 0}};
     std::vector<int> targets = {0, 1, 2};
     std::vector<int> controls = {};
 
