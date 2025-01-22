@@ -61,7 +61,7 @@ int ApplyQFTOnStateVector(PRECISION_TYPE_COMPLEX(SelectPrecision) *d_stateVector
         int swapB = numQubits - i - 1;
         qubitsToSwap[i] = {swapA, swapB};
     }
-    swap<SelectPrecision>(handle, numQubits, qubitsToSwap.data(), numberOfSwaps, d_stateVector);
+    applySwap<SelectPrecision>(handle, numQubits, qubitsToSwap.data(), numberOfSwaps, d_stateVector);
 
     // destroy handle
     CHECK_CUSTATEVECTOR(custatevecDestroy(handle));

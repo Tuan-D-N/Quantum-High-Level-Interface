@@ -10,7 +10,7 @@
 #include "Precision.hpp"
 
 template <precision SelectPrecision>
-int swap(custatevecHandle_t &handle,
+int applySwap(custatevecHandle_t &handle,
          const int nIndexBits,
          const int2 bitSwaps[],
          const int nBitSwaps,
@@ -30,11 +30,11 @@ int swap(custatevecHandle_t &handle,
         custatevecType = CUSTATEVEC_COMPUTE_64F;
     }
 
-    // swap the state vector elements only if 1st qubit is 1
+    // applySwap the state vector elements only if 1st qubit is 1
     const int maskLen = 0;
     int maskBitString[] = {};
     int maskOrdering[] = {};
-    // bit swap
+    // bit applySwap
     CHECK_CUSTATEVECTOR(custatevecSwapIndexBits(
         handle, d_sv, cudaType, nIndexBits, bitSwaps, nBitSwaps,
         maskBitString, maskOrdering, maskLen));
@@ -42,13 +42,13 @@ int swap(custatevecHandle_t &handle,
     return cudaSuccess;
 }
 
-template int swap<precision::bit_32>(custatevecHandle_t &handle,
+template int applySwap<precision::bit_32>(custatevecHandle_t &handle,
          const int nIndexBits,
          const int2 bitSwaps[],
          const int nBitSwaps,
          PRECISION_TYPE_COMPLEX(precision::bit_32) *d_sv);
 
-template int swap<precision::bit_64>(custatevecHandle_t &handle,
+template int applySwap<precision::bit_64>(custatevecHandle_t &handle,
          const int nIndexBits,
          const int2 bitSwaps[],
          const int nBitSwaps,
