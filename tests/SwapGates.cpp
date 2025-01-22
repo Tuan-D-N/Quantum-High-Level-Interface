@@ -111,25 +111,7 @@ TEST_F(ApplySwapGates, SwapOnce4Qubits)
 
     runTest(input, expectedOutput, bitSwaps, nQubits);
 }
-TEST_F(ApplySwapGates, SwapTwice4Qubits1)
-{
-    const int nQubits = 4;
-    std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0}, {10, 0}, {11, 0}, {12, 0}, {13, 0}, {14, 0}, {15, 0}, {16, 0}};
-    std::vector<cuDoubleComplex> expectedOutput = {{1, 0}, {2, 0}, {9, 0}, {10, 0}, {3, 0}, {4, 0}, {11, 0}, {12, 0}, {5, 0}, {6, 0}, {13, 0}, {14, 0}, {7, 0}, {8, 0}, {15, 0}, {16, 0}};
-    int2 bitSwaps[] = {{3, 2}, {2, 1}};
-
-    runTest(input, expectedOutput, bitSwaps, nQubits);
-}
-TEST_F(ApplySwapGates, SwapTwice4Qubits2)
-{
-    const int nQubits = 4;
-    std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0}, {10, 0}, {11, 0}, {12, 0}, {13, 0}, {14, 0}, {15, 0}, {16, 0}};
-    std::vector<cuDoubleComplex> expectedOutput = {{1, 0}, {2, 0}, {5, 0}, {6, 0}, {9, 0}, {10, 0}, {13, 0}, {14, 0}, {3, 0}, {4, 0}, {7, 0}, {8, 0}, {11, 0}, {12, 0}, {15, 0}, {16, 0}};
-    int2 bitSwaps[] = {{3, 1}, {2, 1}};
-
-    runTest(input, expectedOutput, bitSwaps, nQubits);
-}
-TEST_F(ApplySwapGates, SwapTwice4Qubits3)
+TEST_F(ApplySwapGates, SwapTwice4Qubits)
 {
     const int nQubits = 4;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0}, {10, 0}, {11, 0}, {12, 0}, {13, 0}, {14, 0}, {15, 0}, {16, 0}};
@@ -144,15 +126,6 @@ TEST_F(ApplySwapGates, SwapTwice4Qubits4)
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0}, {10, 0}, {11, 0}, {12, 0}, {13, 0}, {14, 0}, {15, 0}, {16, 0}};
     std::vector<cuDoubleComplex> expectedOutput = {{1, 0}, {9, 0}, {5, 0}, {13, 0}, {3, 0}, {11, 0}, {7, 0}, {15, 0}, {2, 0}, {10, 0}, {6, 0}, {14, 0}, {4, 0}, {12, 0}, {8, 0}, {16, 0}};
     int2 bitSwaps[] = {{3, 0}, {2, 1}};
-
-    runTest(input, expectedOutput, bitSwaps, nQubits);
-}
-TEST_F(ApplySwapGates, SwapMulti4Qubits)
-{
-    const int nQubits = 4;
-    std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0}, {10, 0}, {11, 0}, {12, 0}, {13, 0}, {14, 0}, {15, 0}, {16, 0}};
-    std::vector<cuDoubleComplex> expectedOutput = {{1, 0}, {3, 0}, {9, 0}, {11, 0}, {5, 0}, {7, 0}, {13, 0}, {15, 0}, {2, 0}, {4, 0}, {10, 0}, {12, 0}, {6, 0}, {8, 0}, {14, 0}, {16, 0}};
-    int2 bitSwaps[] = {{3, 0}, {2, 1}, {2, 3}, {0, 1}, {3, 2}, {2, 0}};
 
     runTest(input, expectedOutput, bitSwaps, nQubits);
 }

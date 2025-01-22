@@ -9,7 +9,7 @@
 /// @tparam SelectPrecision Precision
 /// @param handle the handle obj
 /// @param nIndexBits number of qubtis
-/// @param bitSwaps array of array to applySwap bits, Swap qubit 1 <-> 2 and 3 <-> 4: {{1,2},{3,4}}
+/// @param bitSwaps array of array to applySwap bits, Swap qubit 1 <-> 2 and 3 <-> 4: {{1,2},{3,4}}. Cannot overlap in qubits
 /// @param nBitSwaps number of swaps that there are
 /// @param d_sv input statevector
 /// @return
@@ -24,7 +24,7 @@ int applySwap(custatevecHandle_t &handle,
 /// @tparam SelectPrecision Precision
 /// @param handle the handle obj
 /// @param nIndexBits number of qubtis
-/// @param bitSwap span object of qubits to applySwap, Swap qubit 1 <-> 2 and 3 <-> 4: {{1,2},{3,4}}
+/// @param bitSwap span object of qubits to applySwap, Swap qubit 1 <-> 2 and 3 <-> 4: {{1,2},{3,4}}. Cannot overlap in qubits
 /// @param d_sv input statevector
 /// @return 
 template <precision SelectPrecision = precision::bit_64>
