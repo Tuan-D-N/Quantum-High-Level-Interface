@@ -3,20 +3,15 @@
 #include "../CudaControl/Helper.hpp"
 #include <string>
 
-class ApplyXTest : public ::testing::Test
+class ApplyXTestSpanBased : public ::testing::Test
 {
-protected:
-    void SetUp() override {}
-
-    void TearDown() override {}
-
-    void runTest(
-        const std::vector<cuDoubleComplex> &inputState,
-        const std::vector<cuDoubleComplex> &expectedOutput,
-        const std::vector<int> &targets,
-        const std::vector<int> &controls,
-        int nQubits,
-        int adjoint = false)
+private:
+    void runTestVector(const std::vector<cuDoubleComplex> &inputState,
+                       const std::vector<cuDoubleComplex> &expectedOutput,
+                       const std::vector<int> &targets,
+                       const std::vector<int> &controls,
+                       int nQubits,
+                       int adjoint = false)
     {
         const int nSvSize = (1 << nQubits);
 
@@ -51,14 +46,80 @@ protected:
 
         for (int i = 0; i < nSvSize; i++)
         {
-            EXPECT_DOUBLE_EQ(d_sv[i].x, expectedOutput[i].x) << "Mismatch at index " << i;
-            EXPECT_DOUBLE_EQ(d_sv[i].y, expectedOutput[i].y) << "Mismatch at index " << i;
+            EXPECT_DOUBLE_EQ(d_sv[i].x, expectedOutput[i].x) << "Mismatch at index " << i << " in test Vector";
+            EXPECT_DOUBLE_EQ(d_sv[i].y, expectedOutput[i].y) << "Mismatch at index " << i << " in test Vector";
         }
         THROW_CUDA(cudaFree(d_sv));
     }
+    void runTestBase(const std::vector<cuDoubleComplex> &inputState,
+                     const std::vector<cuDoubleComplex> &expectedOutput,
+                     const std::vector<int> &targets,
+                     const std::vector<int> &controls,
+                     int nQubits,
+                     int adjoint = false)
+    {
+        const int nSvSize = (1 << nQubits);
+
+        ASSERT_EQ(inputState.size(), nSvSize);
+        ASSERT_EQ(expectedOutput.size(), nSvSize);
+
+        cuDoubleComplex *d_sv;
+        THROW_CUDA(cudaMallocManaged((void **)&d_sv, nSvSize * sizeof(cuDoubleComplex)));
+
+        custatevecHandle_t handle = NULL;
+        THROW_CUSTATEVECTOR(custatevecCreate(&handle));
+
+        void *extraWorkspace = nullptr;
+        size_t extraWorkspaceSizeInBytes = 0;
+
+        memcpy(d_sv, inputState.data(), nSvSize * sizeof(cuDoubleComplex));
+
+        for (int target : targets)
+        {
+            THROW_BROAD_ERROR(applyX(
+                handle,
+                nQubits,
+                adjoint,
+                target,
+                controls.data(),
+                controls.size(),
+                d_sv,
+                extraWorkspace,
+                extraWorkspaceSizeInBytes));
+        }
+
+        if (extraWorkspace != nullptr)
+            THROW_CUDA(cudaFree(extraWorkspace));
+
+        THROW_CUSTATEVECTOR(custatevecDestroy(handle));
+
+        for (int i = 0; i < nSvSize; i++)
+        {
+            EXPECT_DOUBLE_EQ(d_sv[i].x, expectedOutput[i].x) << "Mismatch at index " << i  << " in test base";
+            EXPECT_DOUBLE_EQ(d_sv[i].y, expectedOutput[i].y) << "Mismatch at index " << i  << " in test base";
+        }
+        THROW_CUDA(cudaFree(d_sv));
+    }
+
+protected:
+    void SetUp() override {}
+
+    void TearDown() override {}
+
+    void runTest(
+        const std::vector<cuDoubleComplex> &inputState,
+        const std::vector<cuDoubleComplex> &expectedOutput,
+        const std::vector<int> &targets,
+        const std::vector<int> &controls,
+        int nQubits,
+        int adjoint = false)
+    {
+       runTestVector(inputState, expectedOutput, targets, controls, nQubits,adjoint);
+       runTestBase(inputState, expectedOutput, targets, controls, nQubits,adjoint);
+    }
 };
 
-TEST_F(ApplyXTest, X1_Base)
+TEST_F(ApplyXTestSpanBased, X1_Base)
 {
     const int nQubits = 2;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}};
@@ -69,7 +130,7 @@ TEST_F(ApplyXTest, X1_Base)
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTest, X2_Base)
+TEST_F(ApplyXTestSpanBased, X2_Base)
 {
     const int nQubits = 2;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}};
@@ -80,7 +141,7 @@ TEST_F(ApplyXTest, X2_Base)
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTest, X_MultipleQubits)
+TEST_F(ApplyXTestSpanBased, X_MultipleQubits)
 {
     const int nQubits = 2;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}};
@@ -91,7 +152,7 @@ TEST_F(ApplyXTest, X_MultipleQubits)
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTest, X_Controlled)
+TEST_F(ApplyXTestSpanBased, X_Controlled)
 {
     const int nQubits = 2;
     std::vector<cuDoubleComplex> input = {{1, 0}, {0, 0}, {0, 0}, {0, 0}};
@@ -102,7 +163,7 @@ TEST_F(ApplyXTest, X_Controlled)
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTest, X_MultiControlled)
+TEST_F(ApplyXTestSpanBased, X_MultiControlled)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
@@ -113,7 +174,7 @@ TEST_F(ApplyXTest, X_MultiControlled)
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTest, X_MultipleTargets3)
+TEST_F(ApplyXTestSpanBased, X_MultipleTargets3)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
@@ -124,7 +185,7 @@ TEST_F(ApplyXTest, X_MultipleTargets3)
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTest, X_MultipleTargets2)
+TEST_F(ApplyXTestSpanBased, X_MultipleTargets2)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
@@ -135,13 +196,24 @@ TEST_F(ApplyXTest, X_MultipleTargets2)
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTest, X_MultipleTargets1)
+TEST_F(ApplyXTestSpanBased, X_MultipleTargets1)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
     std::vector<cuDoubleComplex> expectedOutput = {{6, 0}, {5, 0}, {8, 0}, {7, 0}, {2, 0}, {1, 0}, {4, 0}, {3, 0}};
     std::vector<int> targets = {0, 2};
     std::vector<int> controls = {};
+
+    runTest(input, expectedOutput, targets, controls, nQubits);
+}
+
+TEST_F(ApplyXTestSpanBased, X_MultipleTargets_MultipleControls)
+{
+    const int nQubits = 3;
+    std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
+    std::vector<cuDoubleComplex> expectedOutput = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {8, 0}, {7, 0}, {6, 0}, {5, 0}};
+    std::vector<int> targets = {2, 1};
+    std::vector<int> controls = {3};
 
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
