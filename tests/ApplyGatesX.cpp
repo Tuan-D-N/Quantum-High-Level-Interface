@@ -39,27 +39,28 @@ protected:
             nQubits,
             adjoint,
             targets,
+            controls,
             d_sv,
             extraWorkspace,
             extraWorkspaceSizeInBytes));
 
-        for (int i = 0; i < nSvSize; i++)
-        {
-            EXPECT_DOUBLE_EQ(d_sv[i].x, expectedOutput[i].x);
-            EXPECT_DOUBLE_EQ(d_sv[i].y, expectedOutput[i].y);
-        }
-
         if (extraWorkspace != nullptr)
             THROW_CUDA(cudaFree(extraWorkspace));
 
-        THROW_CUDA(cudaFree(d_sv));
         THROW_CUSTATEVECTOR(custatevecDestroy(handle));
+
+        for (int i = 0; i < nSvSize; i++)
+        {
+            EXPECT_DOUBLE_EQ(d_sv[i].x, expectedOutput[i].x) << "Mismatch at index " << i;
+            EXPECT_DOUBLE_EQ(d_sv[i].y, expectedOutput[i].y) << "Mismatch at index " << i;
+        }
+        THROW_CUDA(cudaFree(d_sv));
     }
 };
 
 TEST_F(ApplyXTest, X1_Base)
 {
-    const int nQubits = 1;
+    const int nQubits = 2;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}};
     std::vector<cuDoubleComplex> expectedOutput = {{2, 0}, {1, 0}, {4, 0}, {3, 0}};
     std::vector<int> targets = {0};
@@ -70,7 +71,7 @@ TEST_F(ApplyXTest, X1_Base)
 
 TEST_F(ApplyXTest, X2_Base)
 {
-    const int nQubits = 1;
+    const int nQubits = 2;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}};
     std::vector<cuDoubleComplex> expectedOutput = {{1, 0}, {2, 0}, {3, 0}, {4, 0}};
     std::vector<int> targets = {0, 0};
@@ -133,7 +134,6 @@ TEST_F(ApplyXTest, X_MultipleTargets2)
 
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
-
 
 TEST_F(ApplyXTest, X_MultipleTargets1)
 {
