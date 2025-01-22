@@ -3,6 +3,7 @@
 #include <cuComplex.h>
 #include <custatevec.h>
 #include "Precision.hpp"
+#include "../CudaControl/Helper.hpp"
 
 /// @brief applySwap the qubits data
 /// @tparam SelectPrecision Precision
@@ -32,10 +33,11 @@ int applySwap(custatevecHandle_t &handle,
          const std::span<const int2> bitSwap,
          PRECISION_TYPE_COMPLEX(SelectPrecision) * d_sv)
 {
-    applySwap<SelectPrecision>(
+    CHECK_BROAD_ERROR(applySwap<SelectPrecision>(
         handle,
         nIndexBits,
         bitSwap.data(),
         bitSwap.size(),
-        d_sv);
+        d_sv));
+    return cudaSuccess;
 }
