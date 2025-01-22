@@ -20,7 +20,6 @@
 /// @param extraWorkspace extra workspace variable
 /// @param extraWorkspaceSizeInBytes the size of extra workspace
 /// @return error value
-
 template <precision selectPrecision = precision::bit_64>
 int sampleSV(custatevecHandle_t &handle,
              const int nIndexBits,
