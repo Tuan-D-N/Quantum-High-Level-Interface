@@ -95,8 +95,8 @@ private:
 
         for (int i = 0; i < nSvSize; i++)
         {
-            EXPECT_DOUBLE_EQ(d_sv[i].x, expectedOutput[i].x) << "Mismatch at index " << i  << " in test base";
-            EXPECT_DOUBLE_EQ(d_sv[i].y, expectedOutput[i].y) << "Mismatch at index " << i  << " in test base";
+            EXPECT_DOUBLE_EQ(d_sv[i].x, expectedOutput[i].x) << "Mismatch at index " << i << " in test base";
+            EXPECT_DOUBLE_EQ(d_sv[i].y, expectedOutput[i].y) << "Mismatch at index " << i << " in test base";
         }
         THROW_CUDA(cudaFree(d_sv));
     }
@@ -114,8 +114,8 @@ protected:
         int nQubits,
         int adjoint = false)
     {
-       runTestVector(inputState, expectedOutput, targets, controls, nQubits,adjoint);
-       runTestBase(inputState, expectedOutput, targets, controls, nQubits,adjoint);
+        runTestVector(inputState, expectedOutput, targets, controls, nQubits, adjoint);
+        runTestBase(inputState, expectedOutput, targets, controls, nQubits, adjoint);
     }
 };
 
@@ -207,13 +207,24 @@ TEST_F(ApplyXTestSpan, X_MultipleTargets1)
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTestSpan, X_MultipleTargets_MultipleControls)
+TEST_F(ApplyXTestSpan, X_MultipleTargets_SingleControls)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
     std::vector<cuDoubleComplex> expectedOutput = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {8, 0}, {7, 0}, {6, 0}, {5, 0}};
     std::vector<int> targets = {1, 0};
     std::vector<int> controls = {2};
+
+    runTest(input, expectedOutput, targets, controls, nQubits);
+}
+
+TEST_F(ApplyXTestSpan, X_MultipleTargets_MultipleControls)
+{
+    const int nQubits = 3;
+    std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0}, {10, 0}, {11, 0}, {12, 0}, {13, 0}, {14, 0}, {15, 0}, {16, 0}};
+    std::vector<cuDoubleComplex> expectedOutput = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0}, {10, 0}, {11, 0}, {12, 0}, {16, 0}, {15, 0}, {14, 0}, {13, 0}};
+    std::vector<int> targets = {1, 0};
+    std::vector<int> controls = {2, 3};
 
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
