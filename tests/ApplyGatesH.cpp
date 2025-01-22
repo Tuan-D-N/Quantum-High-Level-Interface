@@ -3,7 +3,7 @@
 #include "../CudaControl/Helper.hpp"
 #include <string>
 
-class ApplyXTest : public ::testing::Test
+class ApplyHGates : public ::testing::Test
 {
 private:
     void runTestVector(const std::vector<cuDoubleComplex> &inputState,
@@ -29,7 +29,7 @@ private:
 
         memcpy(d_sv, inputState.data(), nSvSize * sizeof(cuDoubleComplex));
 
-        THROW_BROAD_ERROR(applyX(
+        THROW_BROAD_ERROR(applyH(
             handle,
             nQubits,
             adjoint,
@@ -76,7 +76,7 @@ private:
 
         for (int target : targets)
         {
-            THROW_BROAD_ERROR(applyX(
+            THROW_BROAD_ERROR(applyH(
                 handle,
                 nQubits,
                 adjoint,
@@ -119,18 +119,18 @@ protected:
     }
 };
 
-TEST_F(ApplyXTest, X_Base1)
+TEST_F(ApplyHGates, H_Base1)
 {
     const int nQubits = 2;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}};
-    std::vector<cuDoubleComplex> expectedOutput = {{2, 0}, {1, 0}, {4, 0}, {3, 0}};
+    std::vector<cuDoubleComplex> expectedOutput = {{1 / INV_SQRT2 + INV_SQRT2, 0}, {1 / INV_SQRT2 - INV_SQRT2, 0}, {3 / INV_SQRT2 + 2 * INV_SQRT2, 0}, {3 / INV_SQRT2 - 2 * INV_SQRT2, 0}};
     std::vector<int> targets = {0};
     std::vector<int> controls = {};
 
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTest, X_Base2)
+TEST_F(ApplyHGates, H_Base2)
 {
     const int nQubits = 2;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}};
@@ -141,18 +141,18 @@ TEST_F(ApplyXTest, X_Base2)
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTest, X_MultipleQubits)
+TEST_F(ApplyHGates, H_MultipleQubits)
 {
     const int nQubits = 2;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}};
-    std::vector<cuDoubleComplex> expectedOutput = {{3, 0}, {4, 0}, {1, 0}, {2, 0}};
+    std::vector<cuDoubleComplex> expectedOutput = {{2 * INV_SQRT2, 0}, {3 * INV_SQRT2, 0}, {-INV_SQRT2, 0}, {-INV_SQRT2, 0}};
     std::vector<int> targets = {1};
     std::vector<int> controls = {};
 
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTest, X_Controlled)
+TEST_F(ApplyHGates, H_Controlled)
 {
     const int nQubits = 2;
     std::vector<cuDoubleComplex> input = {{1, 0}, {0, 0}, {0, 0}, {0, 0}};
@@ -163,66 +163,66 @@ TEST_F(ApplyXTest, X_Controlled)
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTest, X_MultiControlled)
+TEST_F(ApplyHGates, H_MultiControlled)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
-    std::vector<cuDoubleComplex> expectedOutput = {{1, 0}, {2, 0}, {3, 0}, {8, 0}, {5, 0}, {6, 0}, {7, 0}, {4, 0}};
+    std::vector<cuDoubleComplex> expectedOutput = {{1, 0}, {2, 0}, {3, 0}, {6 * INV_SQRT2, 0}, {5, 0}, {6, 0}, {7, 0}, {-2 * INV_SQRT2, 0}};
     std::vector<int> targets = {2};
     std::vector<int> controls = {0, 1};
 
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTest, X_MultipleTargets3)
+TEST_F(ApplyHGates, H_MultipleTargets3)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
-    std::vector<cuDoubleComplex> expectedOutput = {{8, 0}, {7, 0}, {6, 0}, {5, 0}, {4, 0}, {3, 0}, {2, 0}, {1, 0}};
+    std::vector<cuDoubleComplex> expectedOutput = {{9 * INV_SQRT2, 0}, {-INV_SQRT2, 0}, {-2 * INV_SQRT2, 0}, {0, 0}, {-4 * INV_SQRT2, 0}, {0, 0}, {0, 0}, {0, 0}};
     std::vector<int> targets = {0, 1, 2};
     std::vector<int> controls = {};
 
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTest, X_MultipleTargets2)
+TEST_F(ApplyHGates, H_MultipleTargets2)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
-    std::vector<cuDoubleComplex> expectedOutput = {{7, 0}, {8, 0}, {5, 0}, {6, 0}, {3, 0}, {4, 0}, {1, 0}, {2, 0}};
+    std::vector<cuDoubleComplex> expectedOutput = {{8, 0}, {10, 0}, {-2, 0}, {-2, 0}, {-4, 0}, {-4, 0}, {0, 0}, {0, 0}};
     std::vector<int> targets = {1, 2};
     std::vector<int> controls = {};
 
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTest, X_MultipleTargets1)
+TEST_F(ApplyHGates, H_MultipleTargets1)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
-    std::vector<cuDoubleComplex> expectedOutput = {{6, 0}, {5, 0}, {8, 0}, {7, 0}, {2, 0}, {1, 0}, {4, 0}, {3, 0}};
+    std::vector<cuDoubleComplex> expectedOutput = {{7, 0}, {-1, 0}, {11, 0}, {-1, 0}, {-4, 0}, {0, 0}, {-4, 0}, {0, 0}};
     std::vector<int> targets = {0, 2};
     std::vector<int> controls = {};
 
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTest, X_MultipleTargets_SingleControls)
+TEST_F(ApplyHGates, H_MultipleTargets_SingleControls)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
-    std::vector<cuDoubleComplex> expectedOutput = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {8, 0}, {7, 0}, {6, 0}, {5, 0}};
+    std::vector<cuDoubleComplex> expectedOutput = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {13, 0}, {-1, 0}, {-2, 0}, {0, 0}};
     std::vector<int> targets = {1, 0};
     std::vector<int> controls = {2};
 
     runTest(input, expectedOutput, targets, controls, nQubits);
 }
 
-TEST_F(ApplyXTest, X_MultipleTargets_MultipleControls)
+TEST_F(ApplyHGates, H_MultipleTargets_MultipleControls)
 {
     const int nQubits = 4;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0}, {10, 0}, {11, 0}, {12, 0}, {13, 0}, {14, 0}, {15, 0}, {16, 0}};
-    std::vector<cuDoubleComplex> expectedOutput = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0}, {10, 0}, {11, 0}, {12, 0}, {16, 0}, {15, 0}, {14, 0}, {13, 0}};
+    std::vector<cuDoubleComplex> expectedOutput = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0}, {10, 0}, {11, 0}, {12, 0}, {29, 0}, {-1, 0}, {-2, 0}, {0, 0}};
     std::vector<int> targets = {1, 0};
     std::vector<int> controls = {2, 3};
 
