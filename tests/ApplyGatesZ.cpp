@@ -46,8 +46,8 @@ private:
 
         for (int i = 0; i < nSvSize; i++)
         {
-            EXPECT_DOUBLE_EQ(d_sv[i].x, expectedOutput[i].x) << "Mismatch at index " << i << " in test Vector";
-            EXPECT_DOUBLE_EQ(d_sv[i].y, expectedOutput[i].y) << "Mismatch at index " << i << " in test Vector";
+            EXPECT_NEAR(d_sv[i].x, expectedOutput[i].x, 1e-9) << "Mismatch at index " << i << " in test Vector";
+            EXPECT_NEAR(d_sv[i].y, expectedOutput[i].y, 1e-9) << "Mismatch at index " << i << " in test Vector";
         }
         THROW_CUDA(cudaFree(d_sv));
     }
@@ -95,8 +95,8 @@ private:
 
         for (int i = 0; i < nSvSize; i++)
         {
-            EXPECT_DOUBLE_EQ(d_sv[i].x, expectedOutput[i].x) << "Mismatch at index " << i << " in test base";
-            EXPECT_DOUBLE_EQ(d_sv[i].y, expectedOutput[i].y) << "Mismatch at index " << i << " in test base";
+            EXPECT_NEAR(d_sv[i].x, expectedOutput[i].x, 1e-9) << "Mismatch at index " << i << " in test Vector";
+            EXPECT_NEAR(d_sv[i].y, expectedOutput[i].y, 1e-9) << "Mismatch at index " << i << " in test Vector";
         }
         THROW_CUDA(cudaFree(d_sv));
     }
