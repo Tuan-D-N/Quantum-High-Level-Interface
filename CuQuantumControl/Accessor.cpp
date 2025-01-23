@@ -9,18 +9,18 @@
 
 template <precision SelectPrecision>
 int applyAccessorGet(custatevecHandle_t &handle,
-                const int nIndexBits,
-                const int bitOrderingLen,
-                const int bitOrdering[],
-                const int maskLen,
-                const int maskBitString[],
-                const int maskOrdering[],
-                PRECISION_TYPE_COMPLEX(SelectPrecision) * d_sv,
-                const int buffer_access_begin,
-                const int buffer_access_end,
-                PRECISION_TYPE_COMPLEX(SelectPrecision) * out_buffer,
-                void *extraWorkspace,
-                size_t &extraWorkspaceSizeInBytes)
+                     const int nIndexBits,
+                     const int bitOrderingLen,
+                     const int bitOrdering[],
+                     const int maskLen,
+                     const int maskBitString[],
+                     const int maskOrdering[],
+                     PRECISION_TYPE_COMPLEX(SelectPrecision) * d_sv,
+                     const int buffer_access_begin,
+                     const int buffer_access_end,
+                     PRECISION_TYPE_COMPLEX(SelectPrecision) * out_buffer,
+                     void *extraWorkspace,
+                     size_t &extraWorkspaceSizeInBytes)
 {
     // Precision generate -----------------------------------------------------
     cudaDataType_t cudaType;
@@ -65,3 +65,31 @@ int applyAccessorGet(custatevecHandle_t &handle,
 
     return cudaSuccess;
 }
+
+template int applyAccessorGet<precision::bit_32>(custatevecHandle_t &handle,
+                                                 const int nIndexBits,
+                                                 const int bitOrderingLen,
+                                                 const int bitOrdering[],
+                                                 const int maskLen,
+                                                 const int maskBitString[],
+                                                 const int maskOrdering[],
+                                                 PRECISION_TYPE_COMPLEX(precision::bit_32) * d_sv,
+                                                 const int buffer_access_begin,
+                                                 const int buffer_access_end,
+                                                 PRECISION_TYPE_COMPLEX(precision::bit_32) * out_buffer,
+                                                 void *extraWorkspace,
+                                                 size_t &extraWorkspaceSizeInBytes);
+
+template int applyAccessorGet<precision::bit_64>(custatevecHandle_t &handle,
+                                                 const int nIndexBits,
+                                                 const int bitOrderingLen,
+                                                 const int bitOrdering[],
+                                                 const int maskLen,
+                                                 const int maskBitString[],
+                                                 const int maskOrdering[],
+                                                 PRECISION_TYPE_COMPLEX(precision::bit_64) * d_sv,
+                                                 const int buffer_access_begin,
+                                                 const int buffer_access_end,
+                                                 PRECISION_TYPE_COMPLEX(precision::bit_64) * out_buffer,
+                                                 void *extraWorkspace,
+                                                 size_t &extraWorkspaceSizeInBytes);
