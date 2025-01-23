@@ -55,7 +55,7 @@ int applyAccessorGet(custatevecHandle_t &handle,
                 size_t &extraWorkspaceSizeInBytes)
 {
     assert(maskBitString.size() == maskOrdering.size());
-    const int bufferSize = buffer_start - buffer_end;
+    const int bufferSize = buffer_end - buffer_start;
     out_buffer.reserve(bufferSize);
     CHECK_BROAD_ERROR(applyAccessorGet(handle,
                                   nIndexBits,
@@ -88,7 +88,6 @@ int applyAccessorGet(custatevecHandle_t &handle,
     const int bufferSize = 2 << (nIndexBits - maskOrdering.size());
     const int buffer_start = 0;
     const int buffer_end = bufferSize;
-    out_buffer.reserve(bufferSize);
     CHECK_BROAD_ERROR(applyAccessorGet(handle,
                                   nIndexBits,
                                   bitOrdering,
