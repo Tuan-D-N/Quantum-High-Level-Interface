@@ -41,6 +41,8 @@ target_link_directories(${PROJECT_NAME} PUBLIC
 message(STATUS "CUDA_LINK_LIBRARIES: ${CUDA_LINK_LIBRARIES}")
 
 add_subdirectory("functionality")
+add_subdirectory("functionality_image")
+add_subdirectory("CudaQControl")
 add_subdirectory("Examples")
 add_subdirectory("CuSparseControl")
 add_subdirectory("CuQuantumControl")
