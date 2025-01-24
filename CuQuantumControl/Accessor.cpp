@@ -55,7 +55,7 @@ int applyAccessorGet(custatevecHandle_t &handle,
 
     // set external workspace
     CHECK_CUSTATEVECTOR(custatevecAccessorSetExtraWorkspace(
-        handle, accessor, extraWorkspace, extraWorkspaceSizeInBytes));
+        handle, accessor, extraWorkspace, extraWorkspaceSizeInBytes_CHECK));
 
     // get state vector components
     CHECK_CUSTATEVECTOR(custatevecAccessorGet(

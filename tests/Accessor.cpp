@@ -50,7 +50,7 @@ TEST_F(AccessorGetTest, oneMask1)
     int bitOrdering[] = {1, 2};
     int maskBitString[] = {1};
     int maskOrdering[] = {0};
-    std::vector<cuDoubleComplex> outBuffer(1 << nQubits);
+    std::vector<cuDoubleComplex> outBuffer(1 << (nQubits - std::span(maskOrdering).size()));
     const int out_begin = 0;
     const int out_end = outBuffer.size();
     THROW_BROAD_ERROR(
