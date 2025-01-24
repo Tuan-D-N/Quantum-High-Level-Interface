@@ -151,10 +151,9 @@ if(BUILD_TESTING)
     ${TestSources}
   )
 
-  target_link_libraries(
+  target_link_libraries(runTest PRIVATE
     CudaQControl
     functionality_image
-    runTest
     GTest::gtest_main
     radon_functionality
     CuQuantumControl
