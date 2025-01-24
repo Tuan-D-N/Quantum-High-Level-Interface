@@ -48,6 +48,8 @@ add_subdirectory("Runner")
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE
+    CudaQControl
+    functionality_image
     radon_functionality
     CuSparseControl
     CUDA::cusparse 
@@ -70,6 +72,8 @@ if(groverBenchmark)
   )
 
   target_link_libraries(groverBenchmarkEXE PRIVATE
+    CudaQControl
+    functionality_image
     CuQuantumControl
     CuSparseControl
     Runner
@@ -98,6 +102,8 @@ if(rawTester)
   )
 
   target_link_libraries(rawTesterEXE PRIVATE
+    CudaQControl
+    functionality_image
     CuQuantumControl
     CuSparseControl
     Runner
@@ -144,6 +150,8 @@ if(BUILD_TESTING)
   )
 
   target_link_libraries(
+    CudaQControl
+    functionality_image
     runTest
     GTest::gtest_main
     radon_functionality
