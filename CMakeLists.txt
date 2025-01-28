@@ -25,6 +25,8 @@ set(CUDA_LINK_LIBRARIES "/opt/nvidia/hpc_sdk/Linux_aarch64/24.5/cuda/../math_lib
 set(CUDA_INClUDE_LIBRARIES "/opt/nvidia/hpc_sdk/Linux_aarch64/24.5/cuda/../math_libs/include")
 set(CUDA_INClUDE_LIBRARIES "${CUDA_INClUDE_LIBRARIES}:/opt/nvidia/hpc_sdk/Linux_aarch64/24.5/cuda/12.4/targets/sbsa-linux/include")
 
+link_directories(/software/ella/software/2024.10/py-3.12.4-cudaq-0.8.0/cudaq/lib)
+
 include_directories(/opt/nvidia/hpc_sdk/Linux_aarch64/24.5/cuda/12.4/targets/sbsa-linux/include)
 # Include directories
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -113,6 +115,18 @@ if(rawTester)
     CUDA::cusparse 
     CUDA::cudart
     custatevec
+
+    cudaq
+    cudaq-common
+    cudaq-mlir-runtime
+    cudaq-builder
+    cudaq-ensmallen
+    cudaq-nlopt
+    cudaq-spin
+    cudaq-em-default
+    cudaq-platform-default
+    nvqir
+    nvqir-custatevec-fp32
     )
 
   target_include_directories(rawTesterEXE PUBLIC
