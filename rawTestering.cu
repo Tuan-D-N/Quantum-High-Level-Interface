@@ -1,6 +1,8 @@
+#include <optional>
 #include <iostream>
 #include <type_traits>
 #include <cuComplex.h>
+#include <tuple>
 #include "CudaQControl/optimizingSystem.hpp"
 #include "CuQuantumControl/ApplyGates.hpp"
 #include "functionality_image/LoadImage.hpp"
@@ -8,6 +10,8 @@
 #include "functionality/SquareNorm.hpp"
 #include "functionality/SaveVectors.hpp"
 #include "functionality_image/ImageUtil.hpp"
+
+#include <cudaq/optimizers.h>
 
 class circuitClass
 {
@@ -169,6 +173,6 @@ int main()
     auto result = optimizer.optimize(circuitOBJ.getNumberOfParams(), cudaq::optimizable_function(optimizerOBJ.getObjectiveFunction()));
     auto energy = std::get<0>(result);
     auto params = std::get<1>(result);
-    
+
     return 0;
 }
