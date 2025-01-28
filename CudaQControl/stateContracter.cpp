@@ -12,11 +12,11 @@ template <precision SelectPrecision>
 std::pair<double, double>
 measure1QubitUnified(std::span<PRECISION_TYPE_COMPLEX(SelectPrecision)> dataLocation)
 {
-    if (dataLocation.size % 2 != 0)
+    if (dataLocation.size() % 2 != 0)
     {
         throw std::invalid_argument("measure1QubitUnified: Not even");
     }
-    else if (dataLocation.size == 0)
+    else if (dataLocation.size() == 0)
     {
         throw std::invalid_argument("measure1QubitUnified: No input");
     }
@@ -41,3 +41,7 @@ measure1QubitUnified(std::span<PRECISION_TYPE_COMPLEX(SelectPrecision)> dataLoca
 
     return std::pair<double, double>(results[0], results[1]);
 }
+
+template std::pair<double, double> measure1QubitUnified<precision::bit_32>(std::span<PRECISION_TYPE_COMPLEX(precision::bit_32)> dataLocation);
+
+template std::pair<double, double> measure1QubitUnified<precision::bit_64>(std::span<PRECISION_TYPE_COMPLEX(precision::bit_64)> dataLocation);
