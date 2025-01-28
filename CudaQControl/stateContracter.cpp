@@ -8,6 +8,8 @@
 #include "../CudaControl/Helper.hpp"
 #include "stateContracter.hpp"
 
+
+
 template <precision SelectPrecision>
 std::pair<double, double>
 measure1QubitUnified(std::span<PRECISION_TYPE_COMPLEX(SelectPrecision)> dataLocation)

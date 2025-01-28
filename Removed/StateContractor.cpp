@@ -6,9 +6,14 @@
 #include "../CuQuantumControl/Precision.hpp"
 #include "../CudaControl/Helper.hpp"
 
+template <precision SelectPrecision = precision::bit_64>
+int GetStateProbability(int nQubits,
+                        PRECISION_TYPE_COMPLEX(SelectPrecision) * d_sv,
+                        std::span<const int> qubitsToCare,
+                        std::vector<double> &out_AssociatedProbability);
 
 // TODO: FIX LATER
-// TODO: NO IDEA HAVE THE QUBIT MEASURED LISTS WAS WRITTEN
+// TODO: NO IDEA HOW THE QUBIT MEASURED LISTS WAS WRITTEN
 template <precision SelectPrecision>
 int GetStateProbability(int nQubits,
                         PRECISION_TYPE_COMPLEX(SelectPrecision) * d_sv,
