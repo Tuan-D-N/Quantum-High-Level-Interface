@@ -59,3 +59,44 @@
             cos(theta / 2), sin(theta / 2)  \
         }                                   \
     }
+
+
+#define RKMatF(k)                                               \
+    {                                                          \
+        {1.0, 0.0},                                            \
+            {0.0, 0.0},                                        \
+            {0.0, 0.0},                                        \
+        {                                                      \
+            cosf(2 * M_PI / (1 << k)), sinf(2 * M_PI / (1 << k)) \
+        }                                                      \
+    }
+
+#define RXMatF(theta)                \
+    {                               \
+        {cosf(theta / 2), 0.0},      \
+            {0.0, -sinf(theta / 2)}, \
+            {0.0, -sinf(theta / 2)}, \
+        {                           \
+            cosf(theta / 2), 0.0     \
+        }                           \
+    }
+
+#define RYMatF(theta)                \
+    {                               \
+        {cosf(theta / 2), 0.0},      \
+            {-sinf(theta / 2), 0.0}, \
+            {sinf(theta / 2), 0.0},  \
+        {                           \
+            cosf(theta / 2), 0.0     \
+        }                           \
+    }
+
+#define RZMatF(theta)                        \
+    {                                       \
+        {cosf(-theta / 2), sinf(-theta / 2)}, \
+            {0.0, 0.0},                     \
+            {0.0, 0.0},                     \
+        {                                   \
+            cosf(theta / 2), sinf(theta / 2)  \
+        }                                   \
+    }

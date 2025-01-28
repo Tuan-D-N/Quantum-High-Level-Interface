@@ -25,6 +25,33 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                       void *extraWorkspace,
                       size_t &extraWorkspaceSizeInBytes);
 
+template <precision selectPrecision>
+int applyGatesGeneral(custatevecHandle_t &handle,
+                      const int nIndexBits,
+                      const std::span<const PRECISION_TYPE_COMPLEX(selectPrecision)> matrix,
+                      const int adjoint,
+                      const std::span<const int> targets,
+                      const std::span<const int> controls,
+                      PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,
+                      void *extraWorkspace,
+                      size_t &extraWorkspaceSizeInBytes)
+{
+    CHECK_BROAD_ERROR(applyGatesGeneral<selectPrecision>(
+        handle,
+        nIndexBits,
+        matrix.data(),
+        adjoint,
+        targets.data(),
+        targets.size(),
+        controls.data(),
+        controls.size(),
+        d_sv,
+        extraWorkspace,
+        extraWorkspaceSizeInBytes));
+
+    return cudaSuccess;
+}
+
 #define DEFINE_GATE_APPLY_FUNCTION(FUNC_NAME, MATRIX_VALUES)                        \
     template <precision selectPrecision = precision::bit_64>                        \
     int FUNC_NAME(custatevecHandle_t &handle,                                       \
@@ -82,7 +109,7 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                          const int nIndexBits,                                      \
                          const int adjoint,                                         \
                          const int target,                                          \
-                         const std::span<const int> &controls,                            \
+                         const std::span<const int> &controls,                      \
                          PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,            \
                          void *extraWorkspace,                                      \
                          size_t &extraWorkspaceSizeInBytes)                         \
@@ -103,7 +130,7 @@ int applyGatesGeneral(custatevecHandle_t &handle,
     inline int FUNC_NAME(custatevecHandle_t &handle,                                \
                          const int nIndexBits,                                      \
                          const int adjoint,                                         \
-                         const std::span<const int> &targets,                             \
+                         const std::span<const int> &targets,                       \
                          PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,            \
                          void *extraWorkspace,                                      \
                          size_t &extraWorkspaceSizeInBytes)                         \
@@ -125,8 +152,8 @@ int applyGatesGeneral(custatevecHandle_t &handle,
     inline int FUNC_NAME(custatevecHandle_t &handle,                                \
                          const int nIndexBits,                                      \
                          const int adjoint,                                         \
-                         const std::span<const int> &targets,                             \
-                         const std::span<const int> &controls,                            \
+                         const std::span<const int> &targets,                       \
+                         const std::span<const int> &controls,                      \
                          PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,            \
                          void *extraWorkspace,                                      \
                          size_t &extraWorkspaceSizeInBytes)                         \
