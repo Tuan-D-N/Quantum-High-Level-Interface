@@ -96,3 +96,45 @@ constexpr double SQRT2(1.41421356237309504880168872421);      // Approximation o
             throw std::runtime_error("Broad CUDA Error");             \
         }                                                             \
     }
+
+// Macro to check CUDA API errors
+#define ALERT_CUDA(func)                                                          \
+    {                                                                             \
+        cudaError_t status = (func);                                              \
+        if (status != cudaSuccess)                                                \
+        {                                                                         \
+            printf("CUDA API failed at line %d in file %s with error: %s (%d)\n", \
+                   __LINE__, __FILE__, cudaGetErrorString(status), status);       \
+        }                                                                         \
+    }
+
+// Macro to check cuSPARSE API errors
+#define ALERT_CUSPARSE(func)                                                     \
+    {                                                                            \
+        cusparseStatus_t status = (func);                                        \
+        if (status != CUSPARSE_STATUS_SUCCESS)                                   \
+        {                                                                        \
+            printf("CUSPARSE API failed at line %d in file %s with error: %d\n", \
+                   __LINE__, __FILE__, status);                                  \
+        }                                                                        \
+    }
+
+// Macro to check cuStateVec API errors
+#define ALERT_CUSTATEVECTOR(func)                                                     \
+    {                                                                                 \
+        custatevecStatus_t status = (func);                                           \
+        if (status != CUSTATEVEC_STATUS_SUCCESS)                                      \
+        {                                                                             \
+            printf("CUSTATEVECTOR API failed at line %d in file %s with error: %d\n", \
+                   __LINE__, __FILE__, status);                                       \
+        }                                                                             \
+    }
+// Macro to check broad errors
+#define ALERT_BROAD_ERROR(integer)                                    \
+    {                                                                 \
+        if (integer != 0)                                             \
+        {                                                             \
+            printf("Broad CUDA ERROR failed at line %d in file %s\n", \
+                   __LINE__, __FILE__);                               \
+        }                                                             \
+    }
