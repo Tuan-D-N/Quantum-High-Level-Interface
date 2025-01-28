@@ -1,5 +1,12 @@
 #include "optimizingSystem.hpp"
 
+std::function<double(const std::vector<double> &, std::vector<double> &)> optimizingSystem::getObjectiveFunction()
+{
+    return [this](const std::vector<double> &inputVector, std::vector<double> &gradient)
+    {
+        return this->objectiveFunction(inputVector, gradient);
+    };
+}
 
 optimizingSystemBase::optimizingSystemBase(
     const std::vector<std::vector<float>> &x_data,
@@ -12,8 +19,8 @@ optimizingSystemBase::optimizingSystemBase(
 optimizingSystemBase::optimizingSystemBase(
     std::vector<std::vector<float>> &&x_data,
     std::vector<int> &&y_labels,
-    circuitFunctionParams &circuit)
-    : m_x_data(std::move(x_data)), m_y_labels(std::move(y_labels)), m_circuit(circuit)
+    circuitFunctionParams &&circuit)
+    : m_x_data(std::move(x_data)), m_y_labels(std::move(y_labels)), m_circuit(std::move(circuit))
 {
 }
 
