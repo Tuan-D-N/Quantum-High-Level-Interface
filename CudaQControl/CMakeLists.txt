@@ -1,6 +1,7 @@
 # Find the CUDA Toolkit package
 find_package(CUDAToolkit REQUIRED)
 
+set(CMAKE_CXX_COMPILER "/software/ella/software/2024.10/py-3.12.4-cudaq-0.8.0/cudaq/bin/nvq++")
 
 # Explicitly tell CMake you're using C++ and CUDA by setting languages
 project(CudaQControl LANGUAGES CXX CUDA)
