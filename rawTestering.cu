@@ -163,8 +163,7 @@ int main()
 
     optimizingSystemBase optimizerOBJ = loadDataReader(circuitOBJ);
     auto optimizer = cudaq::optimizers::adam();
-    optimizer.step_size = 1;
-    optimizer.max_eval = 100;
+    optimizer.max_eval = 2;
     optimizer.initial_parameters = std::vector<double>{-1.04636, -11.247, -28.1384, -25.2752, 9.91089, 43.9357, -15.5106, 5.88025, 10.6416, -9.45491, 24.5154, -33.4887, 6.31566, 18.5741, 9.52134, 8.17428, -3.59727, -36.4042, 0.688819, -23.659, -26.5258, 29.6948, -1.63063, 35.7586, 17.3797, 5.47379, -11.5945, 19.4702, 4.38039, 3.18327};
 
     std::vector<double> gradient;
@@ -172,7 +171,7 @@ int main()
     auto objectiveFunction = (optimizerOBJ.getObjectiveFunction());
     auto result = optimizer.optimize(circuitOBJ.getNumberOfParams(), cudaq::optimizable_function(objectiveFunction));
     std::cout << "\ndone\n";
-    double value = objectiveFunction(init, gradient);
+    double value = optimizerOBJ.getObjectiveFunction()(init, gradient);
     std::cout << "final value: " << value << "\n";
 
     auto energy = std::get<0>(result);
