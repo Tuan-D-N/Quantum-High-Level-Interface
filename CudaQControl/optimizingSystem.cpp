@@ -58,6 +58,8 @@ double optimizingSystemBase::lossFunction(const std::vector<double> &paramsVecto
 
 double optimizingSystemBase::objectiveFunction(const std::vector<double> &inputVector, std::vector<double> &gradient)
 {
+    static int iter = 0;
+    ++iter;
     double resultAtX = lossFunction(inputVector);
     auto gradientFunction = cudaq::gradients::central_difference();
     auto lossFunctionCallable = [this](const std::vector<double> &inputVector)
@@ -65,5 +67,22 @@ double optimizingSystemBase::objectiveFunction(const std::vector<double> &inputV
         return this->lossFunction(inputVector);
     };
     gradient = gradientFunction.compute(inputVector, lossFunctionCallable, resultAtX);
+
+    std::cout << "params: ";
+    for (auto param : inputVector)
+    {
+        std::cout << param << " , ";
+    }
+    std::cout << "\n";
+
+    std::cout << "gradient: ";
+    for (auto param : gradient)
+    {
+        std::cout << param << " , ";
+    }
+    std::cout << "\n";
+    std::cout << "Looped " << iter << ": " << resultAtX << "\n ";
+    std::cout << "\n\n\n\n";
+
     return resultAtX;
 }
