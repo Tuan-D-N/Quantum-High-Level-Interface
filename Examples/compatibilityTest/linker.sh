@@ -1,0 +1,7 @@
+nvc++ main.cpp cudaQ.o cuQuantum.o \
+ -L/software/ella/software/2024.10/py-3.12.4-cudaq-0.8.0/cudaq/lib -L/software/ella/software/2024.10/py-3.12.4-cudaq-0.8.0/cudaq/lib/plugins \
+ -lcudaq -lcudaq-common -lcudaq-mlir-runtime -lcudaq-builder -lcudaq-ensmallen -lcudaq-nlopt -lcudaq-spin \
+ -lcudaq-em-default -lcudaq-platform-default -lnvqir -lnvqir-custatevec-fp32 \
+ -L/software/hpcx/2.20/ompi/lib -L/software/hpcx/2.20/nccl_rdma_sharp_plugin/lib -L/software/hpcx/2.20/sharp/lib -L/software/hpcx/2.20/hcoll/lib -L/software/hpcx/2.20/ucc/lib -L/software/hpcx/2.20/ucx/mt/lib -L/software/ella/software/2024.10/py-3.12.4-cuquantum-24.03.0/lib -L/software/ella/software/2024.10/py-3.12.4-cupy-13.2.0/lib -L/software/ella/software/2024.10/python-3.12.4/lib -L/software/ella/software/2024.10/gcc-13.3.0/lib64 -L/software/ella/software/2024.10/gcc-13.3.0/lib -L/software/ella/software/2024.10/cutensor-2.0.1/lib/12 -L/software/ella/software/2024.10/cuquantum-24.03.0/lib -L/opt/nvidia/hpc_sdk/Linux_aarch64/24.5/compilers/lib -L/usr/lib64 -L/usr/lib/gcc/aarch64-redhat-linux/11/ \
+ -L/opt/nvidia/hpc_sdk/Linux_aarch64/24.5/cuda/12.4/bin/../targets/sbsa-linux/lib \
+ -lcudadevrt  -lcudart_static  -lrt -lpthread  -ldl 
