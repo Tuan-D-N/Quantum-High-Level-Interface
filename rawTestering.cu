@@ -125,16 +125,19 @@ optimizingSystemBase loadDataReader(circuitClass &circuitOBJ)
     x_test.resize(std::min(x_test.size(), size_t(100)));
     y_test.resize(std::min(y_test.size(), size_t(100)));
 
+    normalize_and_pad(x_train, INPUTWIDTH, INPUTHEIGHT, TARGETWIDTH, TARGETHEIGHT);
+    normalize_and_pad(x_test, INPUTWIDTH, INPUTHEIGHT, TARGETWIDTH, TARGETHEIGHT);
+
     square_normalise_all(x_train);
     square_normalise_all(x_test);
 
-    normalize_and_pad(x_train, INPUTWIDTH, INPUTHEIGHT, TARGETWIDTH, TARGETHEIGHT);
-    normalize_and_pad(x_test, INPUTWIDTH, INPUTHEIGHT, TARGETWIDTH, TARGETHEIGHT);
 
     save_vector_of_vectors(x_train, "x_train");
     save_vector(y_train, "y_train");
     save_vector_of_vectors(x_test, "x_test");
     save_vector(y_test, "y_test");
+
+    display_images(x_train, y_train, 32, 32, 10);
 
     optimizingSystemBase optimizerOBJ = optimizingSystemBase(
         std::move(x_train),
