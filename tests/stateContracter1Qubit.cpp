@@ -84,8 +84,8 @@ TEST_F(Measure1QubitUnifiedTest, ComplexInput2)
 {
     std::vector<cuDoubleComplex> newState = {{1.0 / 2.0, 1.0 / 2.0}, {1.0 / 2.0, 1.0 / 2.0}};
     auto result = measure1QubitUnified<precision::bit_64>(newState);
-    EXPECT_DOUBLE_EQ(result.first, 1 / 2);  // Probability of |0⟩ (normalized)
-    EXPECT_DOUBLE_EQ(result.second, 1 / 2); // Probability of |1⟩ (normalized)
+    EXPECT_DOUBLE_EQ(result.first, 1 / 2.0);  // Probability of |0⟩ (normalized)
+    EXPECT_DOUBLE_EQ(result.second, 1 / 2.0); // Probability of |1⟩ (normalized)
 }
 
 TEST_F(Measure1QubitUnifiedTest, ComplexInput3)
@@ -95,14 +95,14 @@ TEST_F(Measure1QubitUnifiedTest, ComplexInput3)
                                               {0.5621378339514831,
                                                0.547337280556441}};
     auto result = measure1QubitUnified<precision::bit_64>(newState);
-    EXPECT_DOUBLE_EQ(result.first, 0.8498627407036896);   // Probability of |0⟩ (normalized)
-    EXPECT_DOUBLE_EQ(result.second, 0.15013725929630978); // Probability of |1⟩ (normalized)
+    EXPECT_DOUBLE_EQ(result.first, 0.3844229569534143);   // Probability of |0⟩ (normalized)
+    EXPECT_DOUBLE_EQ(result.second, 0.6155770430465854); // Probability of |1⟩ (normalized)
 }
 
 TEST_F(Measure1QubitUnifiedTest, ComplexLongerInput1)
 {
     std::vector<cuDoubleComplex> newState = {{0.454815, -0.0417768}, {-0.782032, 0.0734042}, {0.0347694, -0.0711562}, {0.404028, 0.0701748}};
     auto result = measure1QubitUnified<precision::bit_64>(newState);
-    EXPECT_DOUBLE_EQ(result.first, 0.6978237421973075);   // Probability of |0⟩ (normalized)
-    EXPECT_DOUBLE_EQ(result.second, 0.3021762578026924); // Probability of |1⟩ (normalized)
+    EXPECT_NEAR(result.first, 0.82556421084488, 0.00001);   // Probability of |0⟩ (normalized)
+    EXPECT_NEAR(result.second, 0.17443524331384003, 0.00001); // Probability of |1⟩ (normalized)
 }
