@@ -3,8 +3,8 @@
 #include <vector>
 #include <array>
 #include <vector>
+#include <cuComplex.h>
 #include "../CuQuantumControl/Precision.hpp"
-#include "../CuQuantumControl/Accessor.hpp"
 #include "../CudaControl/Helper.hpp"
 
 template <precision SelectPrecision = precision::bit_64>

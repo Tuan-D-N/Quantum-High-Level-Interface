@@ -1,8 +1,7 @@
 #pragma once
+#include <iostream>
 #include <functional>
 #include <vector>
-#include <cudaq/algorithm.h>
-#include <cudaq/optimizers.h>
 #include "stateContracter.hpp"
 
 class optimizingSystem
