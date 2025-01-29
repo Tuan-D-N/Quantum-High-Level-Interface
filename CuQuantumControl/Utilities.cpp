@@ -32,3 +32,13 @@ void set2NoState(cuComplex *d_sv, const int nSvSize)
         d_sv[i] = make_cuComplex(0, 0);
     }
 }
+
+double magnitude(cuDoubleComplex complexNumber)
+{
+    return cuCabs(complexNumber);    
+}
+
+float magnitude(cuFloatComplex complexNumber)
+{
+    return cuCabsf(complexNumber);
+}

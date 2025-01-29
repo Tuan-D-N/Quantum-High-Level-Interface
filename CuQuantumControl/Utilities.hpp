@@ -7,3 +7,6 @@ void set2ZeroState(cuComplex *d_sv, const int nSvSize);
 
 void set2NoState(cuDoubleComplex *d_sv, const int nSvSize);
 void set2NoState(cuComplex *d_sv, const int nSvSize);
+
+double magnitude(cuDoubleComplex complexNumber);
+float magnitude(cuFloatComplex complexNumber);
