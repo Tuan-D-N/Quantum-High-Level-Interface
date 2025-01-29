@@ -9,7 +9,7 @@ class AccessorGetTest : public ::testing::Test
 protected:
     int m_nQubits;
     custatevecHandle_t handle = NULL;
-    cuDoubleComplex *d_sv;
+    cuDoubleComplex *d_sv = nullptr;
     void *extraWorkspace = nullptr;
     size_t extraWorkspaceSizeInBytes = 0;
     void SetUp() override
@@ -85,6 +85,7 @@ TEST_F(AccessorGetTest, oneMask1)
     int bitOrdering[] = {1, 2};
     int maskBitString[] = {1};
     int maskOrdering[] = {0};
+    runCheck(nQubits, input, expectedOutput, bitOrdering, maskBitString, maskOrdering);
 }
 
 TEST_F(AccessorGetTest, oneMask2)
@@ -95,6 +96,7 @@ TEST_F(AccessorGetTest, oneMask2)
     int bitOrdering[] = {0, 1};
     int maskBitString[] = {1};
     int maskOrdering[] = {2};
+    runCheck(nQubits, input, expectedOutput, bitOrdering, maskBitString, maskOrdering);
 }
 
 TEST_F(AccessorGetTest, oneMask3)
@@ -105,6 +107,7 @@ TEST_F(AccessorGetTest, oneMask3)
     int bitOrdering[] = {0, 2};
     int maskBitString[] = {0};
     int maskOrdering[] = {1};
+    runCheck(nQubits, input, expectedOutput, bitOrdering, maskBitString, maskOrdering);
 }
 
 TEST_F(AccessorGetTest, oneMask4)
@@ -112,7 +115,8 @@ TEST_F(AccessorGetTest, oneMask4)
     const int nQubits = 3;
     cuDoubleComplex input[] = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
     cuDoubleComplex expectedOutput[] = {{2, 0}, {6, 0}, {4, 0}, {8, 0}};
-    int bitOrdering[] = {2,1};
+    int bitOrdering[] = {2, 1};
     int maskBitString[] = {1};
     int maskOrdering[] = {0};
+    runCheck(nQubits, input, expectedOutput, bitOrdering, maskBitString, maskOrdering);
 }
