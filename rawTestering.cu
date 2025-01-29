@@ -121,7 +121,7 @@ class optimizingSystemLoader : public optimizingSystemBase
 
             for (int label_index = 0; label_index < binaryResult.size(); ++label_index)
             {
-                double diff = binaryResult[label_index] * m_x_data_test[train_index][label_index];
+                double diff = binaryResult[label_index] * label[label_index];
                 totalLoss -= std::log(std::abs(diff + 0.01));
             }
         }
