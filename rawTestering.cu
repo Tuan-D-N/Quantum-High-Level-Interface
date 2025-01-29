@@ -53,17 +53,27 @@ public:
     int getNumberOfParams() { return m_blocks * m_nQubits; }
     void RY(float RYParam, int target)
     {
-        cuComplex mat[] = RYMatF(RYParam);
-        THROW_BROAD_ERROR(applyGatesGeneral<precision::bit_32>(
+        // cuComplex mat[] = RYMat(RYParam, float);
+        // THROW_BROAD_ERROR(applyGatesGeneral<precision::bit_32>(
+        //     handle,
+        //     m_nQubits,
+        //     mat,
+        //     adjoint,
+        //     std::array<int, 1>{target},
+        //     std::array<int, 0>{},
+        //     dsv,
+        //     extraWorkspace,
+        //     extraWorkspaceSizeInBytes));
+        THROW_BROAD_ERROR(applyRY<precision::bit_32>(
             handle,
             m_nQubits,
-            mat,
             adjoint,
             std::array<int, 1>{target},
             std::array<int, 0>{},
             dsv,
             extraWorkspace,
-            extraWorkspaceSizeInBytes));
+            extraWorkspaceSizeInBytes,
+            RYParam));
     }
     void CX(int target, int control)
     {

@@ -11,6 +11,7 @@
 #include "../CudaControl/Helper.hpp" // HANDLE_ERROR, HANDLE_CUDA_ERROR
 #include "MatriceDefinitions.hpp"
 #include <span>
+#include "../functionality/FUNCTION_MACRO_UTIL.hpp"
 
 template <precision selectPrecision>
 int applyGatesGeneral(custatevecHandle_t &handle,
@@ -52,129 +53,142 @@ int applyGatesGeneral(custatevecHandle_t &handle,
     return cudaSuccess;
 }
 
-#define DEFINE_GATE_APPLY_FUNCTION(FUNC_NAME, MATRIX_VALUES)                        \
-    template <precision selectPrecision = precision::bit_64>                        \
-    int FUNC_NAME(custatevecHandle_t &handle,                                       \
-                  const int nIndexBits,                                             \
-                  const int adjoint,                                                \
-                  const int target,                                                 \
-                  PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,                   \
-                  void *extraWorkspace,                                             \
-                  size_t &extraWorkspaceSizeInBytes)                                \
-    {                                                                               \
-        constexpr PRECISION_TYPE_COMPLEX(selectPrecision) matrix[] = MATRIX_VALUES; \
-        CHECK_BROAD_ERROR(applyGatesGeneral<selectPrecision>(                       \
-            handle,                                                                 \
-            nIndexBits,                                                             \
-            matrix,                                                                 \
-            adjoint,                                                                \
-            &target,                                                                \
-            1,                                                                      \
-            {},                                                                     \
-            0,                                                                      \
-            d_sv,                                                                   \
-            extraWorkspace,                                                         \
-            extraWorkspaceSizeInBytes));                                            \
-        return CUSTATEVEC_STATUS_SUCCESS;                                           \
-    }                                                                               \
-    template <precision selectPrecision = precision::bit_64>                        \
-    int FUNC_NAME(custatevecHandle_t &handle,                                       \
-                  const int nIndexBits,                                             \
-                  const int adjoint,                                                \
-                  const int target,                                                 \
-                  const int controls[],                                             \
-                  const int nControls,                                              \
-                  PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,                   \
-                  void *extraWorkspace,                                             \
-                  size_t &extraWorkspaceSizeInBytes)                                \
-    {                                                                               \
-        constexpr PRECISION_TYPE_COMPLEX(selectPrecision) matrix[] = MATRIX_VALUES; \
-        CHECK_BROAD_ERROR(applyGatesGeneral<selectPrecision>(                       \
-            handle,                                                                 \
-            nIndexBits,                                                             \
-            matrix,                                                                 \
-            adjoint,                                                                \
-            &target,                                                                \
-            1,                                                                      \
-            controls,                                                               \
-            nControls,                                                              \
-            d_sv,                                                                   \
-            extraWorkspace,                                                         \
-            extraWorkspaceSizeInBytes));                                            \
-        return CUSTATEVEC_STATUS_SUCCESS;                                           \
-    }                                                                               \
-                                                                                    \
-    template <precision selectPrecision = precision::bit_64>                        \
-    inline int FUNC_NAME(custatevecHandle_t &handle,                                \
-                         const int nIndexBits,                                      \
-                         const int adjoint,                                         \
-                         const int target,                                          \
-                         const std::span<const int> &controls,                      \
-                         PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,            \
-                         void *extraWorkspace,                                      \
-                         size_t &extraWorkspaceSizeInBytes)                         \
-    {                                                                               \
-        CHECK_BROAD_ERROR(FUNC_NAME<selectPrecision>(                               \
-            handle,                                                                 \
-            nIndexBits,                                                             \
-            adjoint,                                                                \
-            target,                                                                 \
-            controls.data(),                                                        \
-            controls.size(),                                                        \
-            d_sv,                                                                   \
-            extraWorkspace,                                                         \
-            extraWorkspaceSizeInBytes));                                            \
-        return CUSTATEVEC_STATUS_SUCCESS;                                           \
-    }                                                                               \
-    template <precision selectPrecision = precision::bit_64>                        \
-    inline int FUNC_NAME(custatevecHandle_t &handle,                                \
-                         const int nIndexBits,                                      \
-                         const int adjoint,                                         \
-                         const std::span<const int> &targets,                       \
-                         PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,            \
-                         void *extraWorkspace,                                      \
-                         size_t &extraWorkspaceSizeInBytes)                         \
-    {                                                                               \
-        for (int target : targets)                                                  \
-        {                                                                           \
-            CHECK_BROAD_ERROR(FUNC_NAME<selectPrecision>(                           \
-                handle,                                                             \
-                nIndexBits,                                                         \
-                adjoint,                                                            \
-                target,                                                             \
-                d_sv,                                                               \
-                extraWorkspace,                                                     \
-                extraWorkspaceSizeInBytes));                                        \
-        }                                                                           \
-        return CUSTATEVEC_STATUS_SUCCESS;                                           \
-    }                                                                               \
-    template <precision selectPrecision = precision::bit_64>                        \
-    inline int FUNC_NAME(custatevecHandle_t &handle,                                \
-                         const int nIndexBits,                                      \
-                         const int adjoint,                                         \
-                         const std::span<const int> &targets,                       \
-                         const std::span<const int> &controls,                      \
-                         PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,            \
-                         void *extraWorkspace,                                      \
-                         size_t &extraWorkspaceSizeInBytes)                         \
-    {                                                                               \
-        for (int target : targets)                                                  \
-        {                                                                           \
-            CHECK_BROAD_ERROR(FUNC_NAME<selectPrecision>(                           \
-                handle,                                                             \
-                nIndexBits,                                                         \
-                adjoint,                                                            \
-                target,                                                             \
-                controls.data(),                                                    \
-                controls.size(),                                                    \
-                d_sv,                                                               \
-                extraWorkspace,                                                     \
-                extraWorkspaceSizeInBytes));                                        \
-        }                                                                           \
-        return CUSTATEVEC_STATUS_SUCCESS;                                           \
+#define DEFINE_GATE_APPLY_FUNCTION(FUNC_NAME, MATRIX_VALUES, NUMBER_OF_EXTRA_PARAMS)                                                                       \
+    template <precision selectPrecision = precision::bit_64>                                                                                               \
+    int FUNC_NAME(custatevecHandle_t &handle,                                                                                                              \
+                  const int nIndexBits,                                                                                                                    \
+                  const int adjoint,                                                                                                                       \
+                  const int target,                                                                                                                        \
+                  PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,                                                                                          \
+                  void *extraWorkspace,                                                                                                                    \
+                  size_t &extraWorkspaceSizeInBytes                                                                                                        \
+                      SELECT_EXTRA_ARGS(NUMBER_OF_EXTRA_PARAMS))                                                                                           \
+    {                                                                                                                                                      \
+        const PRECISION_TYPE_COMPLEX(selectPrecision) matrix[] = MATRIX_VALUES(SELECT_VARS(NUMBER_OF_EXTRA_PARAMS), PRECISION_TYPE_REAL(selectPrecision)); \
+        CHECK_BROAD_ERROR(applyGatesGeneral<selectPrecision>(                                                                                              \
+            handle,                                                                                                                                        \
+            nIndexBits,                                                                                                                                    \
+            matrix,                                                                                                                                        \
+            adjoint,                                                                                                                                       \
+            &target,                                                                                                                                       \
+            1,                                                                                                                                             \
+            {},                                                                                                                                            \
+            0,                                                                                                                                             \
+            d_sv,                                                                                                                                          \
+            extraWorkspace,                                                                                                                                \
+            extraWorkspaceSizeInBytes));                                                                                                                   \
+        return CUSTATEVEC_STATUS_SUCCESS;                                                                                                                  \
+    }                                                                                                                                                      \
+    template <precision selectPrecision = precision::bit_64>                                                                                               \
+    int FUNC_NAME(custatevecHandle_t &handle,                                                                                                              \
+                  const int nIndexBits,                                                                                                                    \
+                  const int adjoint,                                                                                                                       \
+                  const int target,                                                                                                                        \
+                  const int controls[],                                                                                                                    \
+                  const int nControls,                                                                                                                     \
+                  PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,                                                                                          \
+                  void *extraWorkspace,                                                                                                                    \
+                  size_t &extraWorkspaceSizeInBytes                                                                                                        \
+                      SELECT_EXTRA_ARGS(NUMBER_OF_EXTRA_PARAMS))                                                                                           \
+    {                                                                                                                                                      \
+        const PRECISION_TYPE_COMPLEX(selectPrecision) matrix[] = MATRIX_VALUES(SELECT_VARS(NUMBER_OF_EXTRA_PARAMS), PRECISION_TYPE_REAL(selectPrecision)); \
+        CHECK_BROAD_ERROR(applyGatesGeneral<selectPrecision>(                                                                                              \
+            handle,                                                                                                                                        \
+            nIndexBits,                                                                                                                                    \
+            matrix,                                                                                                                                        \
+            adjoint,                                                                                                                                       \
+            &target,                                                                                                                                       \
+            1,                                                                                                                                             \
+            controls,                                                                                                                                      \
+            nControls,                                                                                                                                     \
+            d_sv,                                                                                                                                          \
+            extraWorkspace,                                                                                                                                \
+            extraWorkspaceSizeInBytes));                                                                                                                   \
+        return CUSTATEVEC_STATUS_SUCCESS;                                                                                                                  \
+    }                                                                                                                                                      \
+                                                                                                                                                           \
+    template <precision selectPrecision = precision::bit_64>                                                                                               \
+    inline int FUNC_NAME(custatevecHandle_t &handle,                                                                                                       \
+                         const int nIndexBits,                                                                                                             \
+                         const int adjoint,                                                                                                                \
+                         const int target,                                                                                                                 \
+                         const std::span<const int> &controls,                                                                                             \
+                         PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,                                                                                   \
+                         void *extraWorkspace,                                                                                                             \
+                         size_t &extraWorkspaceSizeInBytes                                                                                                 \
+                             SELECT_EXTRA_ARGS(NUMBER_OF_EXTRA_PARAMS))                                                                                    \
+    {                                                                                                                                                      \
+        CHECK_BROAD_ERROR(FUNC_NAME<selectPrecision>(                                                                                                      \
+            handle,                                                                                                                                        \
+            nIndexBits,                                                                                                                                    \
+            adjoint,                                                                                                                                       \
+            target,                                                                                                                                        \
+            controls.data(),                                                                                                                               \
+            controls.size(),                                                                                                                               \
+            d_sv,                                                                                                                                          \
+            extraWorkspace,                                                                                                                                \
+            extraWorkspaceSizeInBytes                                                                                                                      \
+                SELECT_EXTRA_VARS(NUMBER_OF_EXTRA_PARAMS)));                                                                                               \
+        return CUSTATEVEC_STATUS_SUCCESS;                                                                                                                  \
+    }                                                                                                                                                      \
+    template <precision selectPrecision = precision::bit_64>                                                                                               \
+    inline int FUNC_NAME(custatevecHandle_t &handle,                                                                                                       \
+                         const int nIndexBits,                                                                                                             \
+                         const int adjoint,                                                                                                                \
+                         const std::span<const int> &targets,                                                                                              \
+                         PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,                                                                                   \
+                         void *extraWorkspace,                                                                                                             \
+                         size_t &extraWorkspaceSizeInBytes                                                                                                 \
+                             SELECT_EXTRA_ARGS(NUMBER_OF_EXTRA_PARAMS))                                                                                    \
+    {                                                                                                                                                      \
+        for (int target : targets)                                                                                                                         \
+        {                                                                                                                                                  \
+            CHECK_BROAD_ERROR(FUNC_NAME<selectPrecision>(                                                                                                  \
+                handle,                                                                                                                                    \
+                nIndexBits,                                                                                                                                \
+                adjoint,                                                                                                                                   \
+                target,                                                                                                                                    \
+                d_sv,                                                                                                                                      \
+                extraWorkspace,                                                                                                                            \
+                extraWorkspaceSizeInBytes                                                                                                                  \
+                    SELECT_EXTRA_VARS(NUMBER_OF_EXTRA_PARAMS)));                                                                                           \
+        }                                                                                                                                                  \
+        return CUSTATEVEC_STATUS_SUCCESS;                                                                                                                  \
+    }                                                                                                                                                      \
+    template <precision selectPrecision = precision::bit_64>                                                                                               \
+    inline int FUNC_NAME(custatevecHandle_t &handle,                                                                                                       \
+                         const int nIndexBits,                                                                                                             \
+                         const int adjoint,                                                                                                                \
+                         const std::span<const int> &targets,                                                                                              \
+                         const std::span<const int> &controls,                                                                                             \
+                         PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,                                                                                   \
+                         void *extraWorkspace,                                                                                                             \
+                         size_t &extraWorkspaceSizeInBytes                                                                                                 \
+                             SELECT_EXTRA_ARGS(NUMBER_OF_EXTRA_PARAMS))                                                                                    \
+    {                                                                                                                                                      \
+        for (int target : targets)                                                                                                                         \
+        {                                                                                                                                                  \
+            CHECK_BROAD_ERROR(FUNC_NAME<selectPrecision>(                                                                                                  \
+                handle,                                                                                                                                    \
+                nIndexBits,                                                                                                                                \
+                adjoint,                                                                                                                                   \
+                target,                                                                                                                                    \
+                controls.data(),                                                                                                                           \
+                controls.size(),                                                                                                                           \
+                d_sv,                                                                                                                                      \
+                extraWorkspace,                                                                                                                            \
+                extraWorkspaceSizeInBytes                                                                                                                  \
+                    SELECT_EXTRA_VARS(NUMBER_OF_EXTRA_PARAMS)));                                                                                           \
+        }                                                                                                                                                  \
+        return CUSTATEVEC_STATUS_SUCCESS;                                                                                                                  \
     }
 
-DEFINE_GATE_APPLY_FUNCTION(applyH, HMat)
-DEFINE_GATE_APPLY_FUNCTION(applyY, YMat)
-DEFINE_GATE_APPLY_FUNCTION(applyX, XMat) 
-DEFINE_GATE_APPLY_FUNCTION(applyZ, ZMat)
+DEFINE_GATE_APPLY_FUNCTION(applyH, HMat, 0)
+DEFINE_GATE_APPLY_FUNCTION(applyY, YMat, 0)
+DEFINE_GATE_APPLY_FUNCTION(applyX, XMat, 0)
+DEFINE_GATE_APPLY_FUNCTION(applyZ, ZMat, 0)
+
+DEFINE_GATE_APPLY_FUNCTION(applyRK, RKMat, 1)
+DEFINE_GATE_APPLY_FUNCTION(applyRX, RXMat, 1)
+DEFINE_GATE_APPLY_FUNCTION(applyRZ, RZMat, 1)
+DEFINE_GATE_APPLY_FUNCTION(applyRY, RYMat, 1)

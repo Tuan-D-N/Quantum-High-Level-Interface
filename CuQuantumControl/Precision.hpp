@@ -10,6 +10,7 @@ enum class precision
 #undef X
 
 #define PRECISION_TYPE_COMPLEX(selectPrecision) typename std::conditional<selectPrecision == precision::bit_64, cuDoubleComplex, cuComplex>::type
+#define PRECISION_TYPE_REAL(selectPrecision) typename std::conditional<selectPrecision == precision::bit_64, double, float>::type
 
 #define PRECISION_VARIABLES_DEFINE                           \
     cudaDataType_t cudaType;                                 \
