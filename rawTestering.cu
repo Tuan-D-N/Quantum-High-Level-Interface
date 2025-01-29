@@ -7,6 +7,7 @@
 #include "CuQuantumControl/ApplyGates.hpp"
 #include "CuQuantumControl/Utilities.hpp"
 #include "functionality_image/LoadImage.hpp"
+#include "functionality/Utilities.hpp"
 #include "functionality_image/FilterAndLabel.hpp"
 #include "functionality/SquareNorm.hpp"
 #include "functionality/SaveVectors.hpp"
@@ -125,6 +126,8 @@ class optimizingSystemLoader : public optimizingSystemBase
             // {
             //     totalLoss -= std::log(std::abs(binaryResult.second + 0.01));
             // }
+            std::cout << "out_SV: ";
+            printDeviceArray(out_SV.data(), out_SV.size());
             if (label == 0)
             {
                 totalLoss -= std::log(magnitude(out_SV.front()) + 0.01);
