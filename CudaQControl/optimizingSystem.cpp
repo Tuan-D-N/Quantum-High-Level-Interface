@@ -111,11 +111,11 @@ double optimizingSystemBase::accuracy(const std::vector<double> &paramsVector)
 
         auto binaryResult = measure1QubitUnified<precision::bit_32>(result);
         ++totalResult;
-        if (label == 0 && binaryResult.first > binaryResult.second)
+        if (label == 0 && (binaryResult.first) > (binaryResult.second))
         {
             ++totalCorrect;
         }
-        else if (label == 1 && binaryResult.first > binaryResult.second)
+        else if (label == 1 && (binaryResult.first) > (binaryResult.second))
         {
            ++totalCorrect;
         }

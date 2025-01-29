@@ -48,7 +48,7 @@ public:
         {
             dsv[i] = {inputState[i], 0};
         }
-    }
+            }
     int getNumberOfParams() { return m_blocks * m_nQubits; }
     void RY(float RYParam, int target)
     {
@@ -58,7 +58,7 @@ public:
             m_nQubits,
             mat,
             adjoint,
-            std::array<int, 1>{0},
+            std::array<int, 1>{target},
             std::array<int, 0>{},
             dsv,
             extraWorkspace,
@@ -126,8 +126,9 @@ class optimizingSystemLoader : public optimizingSystemBase
             // {
             //     totalLoss -= std::log(std::abs(binaryResult.second + 0.01));
             // }
-            std::cout << "out_SV: ";
-            printDeviceArray(out_SV.data(), out_SV.size());
+            // std::cout << "out_SV: ";
+            // printDeviceArray(out_SV.data(), out_SV.size());
+            // printVector(in_SV);
             if (label == 0)
             {
                 totalLoss -= std::log(magnitude(out_SV.front()) + 0.01);
