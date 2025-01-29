@@ -48,7 +48,7 @@ public:
         {
             dsv[i] = {inputState[i], 0};
         }
-            }
+    }
     int getNumberOfParams() { return m_blocks * m_nQubits; }
     void RY(float RYParam, int target)
     {
@@ -130,12 +130,12 @@ class optimizingSystemLoader : public optimizingSystemBase
             // printDeviceArray(out_SV.data(), out_SV.size());
             // printVector(in_SV);
             if (label == 0)
-            {
-                totalLoss -= std::log(magnitude(out_SV.front()) + 0.01);
+            {            
+                totalLoss -= std::log(magnitude(out_SV.front()) + 0.01);            
             }
             else if (label == 1)
-            {
-                totalLoss -= std::log(magnitude(out_SV.back()) + 0.01);
+            {            
+                totalLoss -= std::log(magnitude(out_SV.back()) + 0.01);            
             }
             else
             {
@@ -179,8 +179,8 @@ optimizingSystemLoader loadDataReader(circuitClass &circuitOBJ)
     normalize_and_pad(x_test, INPUTWIDTH, INPUTHEIGHT, TARGETWIDTH, TARGETHEIGHT);
 
     display_images(x_train, y_train, 32, 32, 10);
-    square_normalise_all(x_train);
-    square_normalise_all(x_test);
+    // square_normalise_all(x_train);
+    // square_normalise_all(x_test);
 
     save_vector_of_vectors(x_train, "x_train");
     save_vector(y_train, "y_train");
@@ -222,14 +222,14 @@ int main()
     auto objectiveFunction = (optimizerOBJ.getObjectiveFunction());
     std::cout << "\ndone\n";
     double value = optimizerOBJ.getObjectiveFunction()(init, gradient);
-    std::cout << "final value: " << value << "\n";
+    std::cout << "first value: " << value << "\n";
     auto result = optimizer.optimize(circuitOBJ.getNumberOfParams(), cudaq::optimizable_function(objectiveFunction));
-    std::cout << "\ndone\n";
-    value = optimizerOBJ.getObjectiveFunction()(init, gradient);
-    std::cout << "final value: " << value << "\n";
 
     auto energy = std::get<0>(result);
     auto params = std::get<1>(result);
+    std::cout << "\ndone\n";
+    value = optimizerOBJ.getObjectiveFunction()(params, gradient);
+    std::cout << "final value: " << value << "\n";
 
     std::cout << "energy: " << energy << "\n";
     std::cout << "gradient: ";
