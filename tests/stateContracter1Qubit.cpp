@@ -30,24 +30,24 @@ protected:
 TEST_F(Measure1QubitUnifiedTest, ValidInputZeroState)
 {
     auto result = measure1QubitUnified<precision::bit_64>(validState);
-    EXPECT_DOUBLE_EQ(result.first, 1.0);  // Probability of |0⟩
-    EXPECT_DOUBLE_EQ(result.second, 0.0); // Probability of |1⟩
+    EXPECT_DOUBLE_EQ(result[0], 1.0);  // Probability of |0⟩
+    EXPECT_DOUBLE_EQ(result[1], 0.0); // Probability of |1⟩
 }
 
 // Test valid input: (|0⟩ + |1⟩)/√2 state
 TEST_F(Measure1QubitUnifiedTest, ValidInputSuperpositionState)
 {
     auto result = measure1QubitUnified<precision::bit_64>(normalizedState);
-    EXPECT_DOUBLE_EQ(result.first, 0.5);  // Probability of |0⟩
-    EXPECT_DOUBLE_EQ(result.second, 0.5); // Probability of |1⟩
+    EXPECT_DOUBLE_EQ(result[0], 0.5);  // Probability of |0⟩
+    EXPECT_DOUBLE_EQ(result[1], 0.5); // Probability of |1⟩
 }
 
 // Test unnormalized input
 TEST_F(Measure1QubitUnifiedTest, UnnormalizedInput)
 {
     auto result = measure1QubitUnified<precision::bit_64>(unnormalizedState);
-    EXPECT_DOUBLE_EQ(result.first, 0.5);  // Probability of |0⟩ (normalized)
-    EXPECT_DOUBLE_EQ(result.second, 0.5); // Probability of |1⟩ (normalized)
+    EXPECT_DOUBLE_EQ(result[0], 0.5);  // Probability of |0⟩ (normalized)
+    EXPECT_DOUBLE_EQ(result[1], 0.5); // Probability of |1⟩ (normalized)
 }
 
 // Test invalid input: odd-sized state
@@ -68,24 +68,24 @@ TEST_F(Measure1QubitUnifiedTest, AllZerosInput)
 {
     std::vector<cuDoubleComplex> zeroState = {{0.0, 0.0}, {0.0, 0.0}};
     auto result = measure1QubitUnified<precision::bit_64>(zeroState);
-    EXPECT_TRUE(std::isnan(result.first));  // Probability of |0⟩ is NaN (division by zero)
-    EXPECT_TRUE(std::isnan(result.second)); // Probability of |1⟩ is NaN (division by zero)
+    EXPECT_TRUE(std::isnan(result[0]));  // Probability of |0⟩ is NaN (division by zero)
+    EXPECT_TRUE(std::isnan(result[1])); // Probability of |1⟩ is NaN (division by zero)
 }
 
 TEST_F(Measure1QubitUnifiedTest, ComplexInput)
 {
     std::vector<cuDoubleComplex> newState = {{1.0 / std::sqrt(2), 1.0 / std::sqrt(2)}, {0.0, 0.0}};
     auto result = measure1QubitUnified<precision::bit_64>(newState);
-    EXPECT_DOUBLE_EQ(result.first, 1);  // Probability of |0⟩ (normalized)
-    EXPECT_DOUBLE_EQ(result.second, 0); // Probability of |1⟩ (normalized)
+    EXPECT_DOUBLE_EQ(result[0], 1);  // Probability of |0⟩ (normalized)
+    EXPECT_DOUBLE_EQ(result[1], 0); // Probability of |1⟩ (normalized)
 }
 
 TEST_F(Measure1QubitUnifiedTest, ComplexInput2)
 {
     std::vector<cuDoubleComplex> newState = {{1.0 / 2.0, 1.0 / 2.0}, {1.0 / 2.0, 1.0 / 2.0}};
     auto result = measure1QubitUnified<precision::bit_64>(newState);
-    EXPECT_DOUBLE_EQ(result.first, 1 / 2.0);  // Probability of |0⟩ (normalized)
-    EXPECT_DOUBLE_EQ(result.second, 1 / 2.0); // Probability of |1⟩ (normalized)
+    EXPECT_DOUBLE_EQ(result[0], 1 / 2.0);  // Probability of |0⟩ (normalized)
+    EXPECT_DOUBLE_EQ(result[1], 1 / 2.0); // Probability of |1⟩ (normalized)
 }
 
 TEST_F(Measure1QubitUnifiedTest, ComplexInput3)
@@ -95,14 +95,14 @@ TEST_F(Measure1QubitUnifiedTest, ComplexInput3)
                                               {0.5621378339514831,
                                                0.547337280556441}};
     auto result = measure1QubitUnified<precision::bit_64>(newState);
-    EXPECT_DOUBLE_EQ(result.first, 0.3844229569534143);   // Probability of |0⟩ (normalized)
-    EXPECT_DOUBLE_EQ(result.second, 0.6155770430465854); // Probability of |1⟩ (normalized)
+    EXPECT_DOUBLE_EQ(result[0], 0.3844229569534143);   // Probability of |0⟩ (normalized)
+    EXPECT_DOUBLE_EQ(result[1], 0.6155770430465854); // Probability of |1⟩ (normalized)
 }
 
 TEST_F(Measure1QubitUnifiedTest, ComplexLongerInput1)
 {
     std::vector<cuDoubleComplex> newState = {{0.454815, -0.0417768}, {-0.782032, 0.0734042}, {0.0347694, -0.0711562}, {0.404028, 0.0701748}};
     auto result = measure1QubitUnified<precision::bit_64>(newState);
-    EXPECT_NEAR(result.first, 0.82556421084488, 0.00001);   // Probability of |0⟩ (normalized)
-    EXPECT_NEAR(result.second, 0.17443524331384003, 0.00001); // Probability of |1⟩ (normalized)
+    EXPECT_NEAR(result[0], 0.82556421084488, 0.00001);   // Probability of |0⟩ (normalized)
+    EXPECT_NEAR(result[1], 0.17443524331384003, 0.00001); // Probability of |1⟩ (normalized)
 }
