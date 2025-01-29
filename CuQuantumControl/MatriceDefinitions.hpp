@@ -1,21 +1,21 @@
 #pragma once
 
-#define HMat(...)                                                                 \
+#define HMat                                                                      \
     {                                                                             \
         {INV_SQRT2, 0.0}, {INV_SQRT2, 0.0}, {INV_SQRT2, 0.0}, { -INV_SQRT2, 0.0 } \
     }
 
-#define XMat(...)                                        \
+#define XMat                                             \
     {                                                    \
         {0.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}, { 0.0, 0.0 } \
     }
 
-#define YMat(...)                                         \
+#define YMat                                              \
     {                                                     \
         {0.0, 0.0}, {0.0, -1.0}, {0.0, 1.0}, { 0.0, 0.0 } \
     }
 
-#define ZMat(...)                                         \
+#define ZMat                                              \
     {                                                     \
         {1.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}, { -1.0, 0.0 } \
     }
