@@ -9,6 +9,7 @@
 #include "functionality_image/LoadImage.hpp"
 #include "functionality/Utilities.hpp"
 #include "functionality_image/FilterAndLabel.hpp"
+#include "functionality_image/OneHotCode.hpp"
 #include "functionality/SquareNorm.hpp"
 #include "functionality/SaveVectors.hpp"
 #include "functionality_image/ImageUtil.hpp"
@@ -108,39 +109,20 @@ class optimizingSystemLoader : public optimizingSystemBase
     {
         double totalLoss = 0;
 
-        for (int i = 0; i < m_x_data.size(); ++i)
+        for (int train_index = 0; train_index < m_x_data_train.size(); ++train_index)
         {
-            const auto label = m_y_labels[i];
+            const auto label = m_y_label_train[train_index];
 
-            const std::vector<float> in_SV = m_x_data[i]; // Make a copy
+            const std::vector<float> &in_SV = m_x_data_train[train_index];
 
-            std::span<cuComplex> out_SV = m_circuit(in_SV, paramsVector);
+            auto result = m_circuit(in_SV, paramsVector);
 
-            auto binaryResult = measure1QubitUnified<precision::bit_32>(out_SV);
+            auto binaryResult = measure1QubitUnified<precision::bit_32>(result); // measures qubits
 
-            // if (label == 0)
-            // {
-            //     totalLoss -= std::log(std::abs(binaryResult.first + 0.01));
-            // }
-            // else if (label == 1)
-            // {
-            //     totalLoss -= std::log(std::abs(binaryResult.second + 0.01));
-            // }
-            // std::cout << "out_SV: ";
-            // printDeviceArray(out_SV.data(), out_SV.size());
-            // printVector(in_SV);
-            if (label == 0)
-            {            
-                totalLoss -= std::log(magnitude(out_SV.front()) + 0.01);            
-            }
-            else if (label == 1)
-            {            
-                totalLoss -= std::log(magnitude(out_SV.back()) + 0.01);            
-            }
-            else
+            for (int label_index = 0; label_index < binaryResult.size(); ++label_index)
             {
-                std::cerr << "label of number: " << label << " was shown.";
-                throw std::logic_error("Expected only 2 label types");
+                double diff = binaryResult[label_index] * m_x_data_test[train_index][label_index];
+                totalLoss -= std::log(std::abs(diff + 0.01));
             }
         }
 
@@ -175,6 +157,9 @@ optimizingSystemLoader loadDataReader(circuitClass &circuitOBJ)
     x_test.resize(std::min(x_test.size(), size_t(100)));
     y_test.resize(std::min(y_test.size(), size_t(100)));
 
+    auto y_train_one_hot = one_hot_encode(y_train, 2);
+    auto y_test_one_hot = one_hot_encode(y_test, 2);
+
     normalize_and_pad(x_train, INPUTWIDTH, INPUTHEIGHT, TARGETWIDTH, TARGETHEIGHT);
     normalize_and_pad(x_test, INPUTWIDTH, INPUTHEIGHT, TARGETWIDTH, TARGETHEIGHT);
 
@@ -182,14 +167,16 @@ optimizingSystemLoader loadDataReader(circuitClass &circuitOBJ)
     // square_normalise_all(x_train);
     // square_normalise_all(x_test);
 
-    save_vector_of_vectors(x_train, "x_train");
-    save_vector(y_train, "y_train");
-    save_vector_of_vectors(x_test, "x_test");
-    save_vector(y_test, "y_test");
+    save_vector_of_vectors<float>(x_train, "x_train");
+    save_vector_of_vectors<float>(y_train_one_hot, "y_train_one_hot");
+    save_vector_of_vectors<float>(x_test, "x_test");
+    save_vector_of_vectors<float>(y_test_one_hot, "y_test_one_hot");
 
     optimizingSystemLoader optimizerOBJ = optimizingSystemLoader(
         std::move(x_train),
-        std::move(y_train),
+        std::move(y_train_one_hot),
+        std::move(x_test),
+        std::move(y_test_one_hot),
         std::move(circuitOBJ.getCircuitFunction()));
 
     return optimizerOBJ;
@@ -198,11 +185,15 @@ optimizingSystemLoader loadDataReader(circuitClass &circuitOBJ)
 optimizingSystemLoader loadDataSaved(circuitClass &circuitOBJ)
 {
     std::vector<std::vector<float>> x_train = load_vector_of_vectors<float>("x_train");
-    std::vector<int> y_train = load_vector<int>("y_train");
+    std::vector<std::vector<float>> y_train_one_hot = load_vector_of_vectors<float>("y_train_one_hot");
+    std::vector<std::vector<float>> x_test = load_vector_of_vectors<float>("x_test");
+    std::vector<std::vector<float>> y_test_one_hot = load_vector_of_vectors<float>("y_test_one_hot");
 
     optimizingSystemLoader optimizerOBJ = optimizingSystemLoader(
         std::move(x_train),
-        std::move(y_train),
+        std::move(y_train_one_hot),
+        std::move(x_test),
+        std::move(y_test_one_hot),
         std::move(circuitOBJ.getCircuitFunction()));
 
     return optimizerOBJ;

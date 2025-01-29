@@ -9,5 +9,5 @@
 
 
 template <precision SelectPrecision = precision::bit_64>
-std::pair<double, double>
+std::array<double, 2>
 measure1QubitUnified(std::span<PRECISION_TYPE_COMPLEX(SelectPrecision)> dataLocation);

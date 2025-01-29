@@ -11,7 +11,7 @@
 
 
 template <precision SelectPrecision>
-std::pair<double, double>
+std::array<double, 2>
 measure1QubitUnified(std::span<PRECISION_TYPE_COMPLEX(SelectPrecision)> dataLocation)
 {
     if (dataLocation.size() % 2 != 0)
@@ -41,9 +41,9 @@ measure1QubitUnified(std::span<PRECISION_TYPE_COMPLEX(SelectPrecision)> dataLoca
     results[0] /= total;
     results[1] /= total;
 
-    return std::pair<double, double>(results[0], results[1]);
+    return std::array<double, 2>{results[0], results[1]};
 }
 
-template std::pair<double, double> measure1QubitUnified<precision::bit_32>(std::span<PRECISION_TYPE_COMPLEX(precision::bit_32)> dataLocation);
+template std::array<double, 2> measure1QubitUnified<precision::bit_32>(std::span<PRECISION_TYPE_COMPLEX(precision::bit_32)> dataLocation);
 
-template std::pair<double, double> measure1QubitUnified<precision::bit_64>(std::span<PRECISION_TYPE_COMPLEX(precision::bit_64)> dataLocation);
+template std::array<double, 2> measure1QubitUnified<precision::bit_64>(std::span<PRECISION_TYPE_COMPLEX(precision::bit_64)> dataLocation);

@@ -19,7 +19,9 @@ public:
 
     virtual double objectiveFunction(const std::vector<double> &inputVector, std::vector<double> &gradient) = 0;
 
-    virtual double accuracy(const std::vector<double> &paramsVector) = 0;
+    virtual double accuracyTrain(const std::vector<double> &paramsVector) = 0;
+
+    virtual double accuracyTest(const std::vector<double> &paramsVector) = 0;
 
     /// @brief Returns a pointer to the objective function
     /// @return Pointer to the objective function
@@ -30,17 +32,23 @@ class optimizingSystemBase : public optimizingSystem
 {
 protected:
     using circuitFunctionParams = std::function<std::span<cuComplex>(std::span<const float>, const std::span<const double>)>; // PARAMs: input Vector, input vector
-    std::vector<std::vector<float>> m_x_data;
-    std::vector<int> m_y_labels;
+    std::vector<std::vector<float>> m_x_data_train;
+    std::vector<std::vector<float>> m_y_label_train;
+    std::vector<std::vector<float>> m_x_data_test;
+    std::vector<std::vector<float>> m_y_label_test;
     circuitFunctionParams m_circuit;
 
 public:
-    optimizingSystemBase(const std::vector<std::vector<float>> &x_data,
-                         const std::vector<int> &y_labels,
+    optimizingSystemBase(const std::vector<std::vector<float>> &x_data_train,
+                         const std::vector<std::vector<float>> &y_labels_train,
+                         const std::vector<std::vector<float>> &x_data_test,
+                         const std::vector<std::vector<float>> &y_labels_test,
                          circuitFunctionParams &circuit);
 
-    optimizingSystemBase(std::vector<std::vector<float>> &&x_data,
-                         std::vector<int> &&y_labels,
+    optimizingSystemBase(std::vector<std::vector<float>> &&x_data_train,
+                         std::vector<std::vector<float>> &&y_labels_train,
+                         std::vector<std::vector<float>> &&x_data_test,
+                         std::vector<std::vector<float>> &&y_labels_test,
                          circuitFunctionParams &&circuit);
 
     ~optimizingSystemBase() = default;
@@ -49,5 +57,7 @@ public:
 
     virtual double objectiveFunction(const std::vector<double> &inputVector, std::vector<double> &gradient) override;
 
-    virtual double accuracy(const std::vector<double> &paramsVector) override;
+    virtual double accuracyTrain(const std::vector<double> &paramsVector) override;
+
+    virtual double accuracyTest(const std::vector<double> &paramsVector) override;
 };
