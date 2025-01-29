@@ -13,17 +13,17 @@ public:
 
     /// @brief This is the function that determines the terrain. This function need to be
     /// implemented with the training data, labels etc.
-    /// @param inputVector This is the input parameters
+    /// @param paramsVector This is the input parameters
     /// @return This is the loss value, lower is better.
-    virtual double lossFunction(const std::vector<double> &inputVector) = 0;
+    virtual double lossFunction(const std::vector<double> &paramsVector) = 0;
 
     virtual double objectiveFunction(const std::vector<double> &inputVector, std::vector<double> &gradient) = 0;
-    
-    
+
+    virtual double accuracy(const std::vector<double> &paramsVector) = 0;
+
     /// @brief Returns a pointer to the objective function
     /// @return Pointer to the objective function
     std::function<double(const std::vector<double> &, std::vector<double> &)> getObjectiveFunction();
-
 };
 
 class optimizingSystemBase : public optimizingSystem
@@ -45,7 +45,9 @@ public:
 
     ~optimizingSystemBase() = default;
 
-    virtual double lossFunction(const std::vector<double> &inputVector) override;
+    virtual double lossFunction(const std::vector<double> &paramsVector) override;
 
     virtual double objectiveFunction(const std::vector<double> &inputVector, std::vector<double> &gradient) override;
+
+    virtual double accuracy(const std::vector<double> &paramsVector) override;
 };

@@ -68,6 +68,7 @@ double optimizingSystemBase::objectiveFunction(const std::vector<double> &inputV
     ++iter;
     double resultAtX = lossFunction(inputVector);
     auto gradientFunction = cudaq::gradients::central_difference();
+    gradientFunction.step = 0.01;
     auto lossFunctionCallable = [this](const std::vector<double> &inputVector)
     {
         return this->lossFunction(inputVector);
@@ -88,7 +89,37 @@ double optimizingSystemBase::objectiveFunction(const std::vector<double> &inputV
     }
     std::cout << "\n";
     std::cout << "Looped " << iter << ": " << resultAtX << "\n ";
+    double accurate = accuracy(inputVector);
+    std::cout << "Accuracy " << ": " << accurate << "\n ";
     std::cout << "\n\n\n\n";
 
     return resultAtX;
+}
+
+double optimizingSystemBase::accuracy(const std::vector<double> &paramsVector)
+{
+    double totalCorrect = 0;
+    double totalResult = 0;
+
+    for (int i = 0; i < m_x_data.size(); ++i)
+    {
+        const auto label = m_y_labels[i];
+
+        const std::vector<float> in_SV = m_x_data[i]; // Make a copy
+
+        auto result = m_circuit(in_SV, paramsVector);
+
+        auto binaryResult = measure1QubitUnified<precision::bit_32>(result);
+        ++totalResult;
+        if (label == 0 && binaryResult.first > binaryResult.second)
+        {
+            ++totalCorrect;
+        }
+        else if (label == 1 && binaryResult.first > binaryResult.second)
+        {
+           ++totalCorrect;
+        }
+    }
+
+    return totalCorrect/totalResult;
 }
