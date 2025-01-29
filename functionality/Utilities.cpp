@@ -96,10 +96,34 @@ void printDeviceArray(cuDoubleComplex *d_array, int size)
     delete[] h_array;
 }
 
+void printDeviceArray(cuFloatComplex *d_array, int size)
+{
+    cuFloatComplex *h_array = new cuFloatComplex[size];
+    cudaMemcpy(h_array, d_array, size * sizeof(cuFloatComplex), cudaMemcpyDeviceToHost);
+
+    for (int i = 0; i < size; ++i)
+    {
+        std::cout << "(" << h_array[i].x << ", " << h_array[i].y << ") ";
+        if (i != size - 1)
+        {
+            std::cout << ",";
+        }
+    }
+    std::cout << std::endl;
+
+    delete[] h_array;
+}
+
 bool almost_equal(cuDoubleComplex x, cuDoubleComplex y) {
     const double eps = 1.0e-5;
     const cuDoubleComplex diff = cuCsub(x, y);
     return (cuCabs(diff) < eps);
+}
+
+bool almost_equal(cuFloatComplex x, cuFloatComplex y) {
+    const double eps = 1.0e-5;
+    const cuFloatComplex diff = cuCsubf(x, y);
+    return (cuCabsf(diff) < eps);
 }
 
 bool almost_equal(double x, double y) {

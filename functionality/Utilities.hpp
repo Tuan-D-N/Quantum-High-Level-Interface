@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <span>
 #include <complex>
 #include <cuComplex.h>
 #include <cuda_runtime.h>
@@ -51,6 +52,8 @@ void printVector(const std::vector<T> &vec)
     }
     std::cout << std::endl;
 }
+
+
 
 template <typename T>
 int sign(T value)
@@ -165,7 +168,7 @@ bool matricesEqual(const std::vector<std::vector<T>> &matrix1, const std::vector
 }
 
 template <typename T>
-void printDeviceArray(T *d_array, T size)
+void printDeviceArray(T *d_array, int size)
 {
     T *h_array = new T[size];
     cudaMemcpy(h_array, d_array, size * sizeof(T), cudaMemcpyDeviceToHost);
@@ -176,8 +179,10 @@ void printDeviceArray(T *d_array, T size)
 }
 
 void printDeviceArray(cuDoubleComplex *d_array, int size);
+void printDeviceArray(cuFloatComplex *d_array, int size);
 
 bool almost_equal(cuDoubleComplex x, cuDoubleComplex y);
+bool almost_equal(cuFloatComplex x, cuFloatComplex y);
 
 bool almost_equal(double x, double y);
 
