@@ -1,21 +1,21 @@
 #pragma once
 
-#define HMat                                                                      \
+#define HMat(...)                                                                 \
     {                                                                             \
         {INV_SQRT2, 0.0}, {INV_SQRT2, 0.0}, {INV_SQRT2, 0.0}, { -INV_SQRT2, 0.0 } \
     }
 
-#define XMat                                             \
+#define XMat(...)                                        \
     {                                                    \
         {0.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}, { 0.0, 0.0 } \
     }
 
-#define YMat                                              \
+#define YMat(...)                                         \
     {                                                     \
         {0.0, 0.0}, {0.0, -1.0}, {0.0, 1.0}, { 0.0, 0.0 } \
     }
 
-#define ZMat                                              \
+#define ZMat(...)                                         \
     {                                                     \
         {1.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}, { -1.0, 0.0 } \
     }
@@ -60,43 +60,42 @@
         }                                   \
     }
 
-
-#define RKMatF(k)                                               \
-    {                                                          \
-        {1.0, 0.0},                                            \
-            {0.0, 0.0},                                        \
-            {0.0, 0.0},                                        \
-        {                                                      \
+#define RKMatF(k)                                                \
+    {                                                            \
+        {1.0, 0.0},                                              \
+            {0.0, 0.0},                                          \
+            {0.0, 0.0},                                          \
+        {                                                        \
             cosf(2 * M_PI / (1 << k)), sinf(2 * M_PI / (1 << k)) \
-        }                                                      \
+        }                                                        \
     }
 
 #define RXMatF(theta)                \
-    {                               \
+    {                                \
         {cosf(theta / 2), 0.0},      \
             {0.0, -sinf(theta / 2)}, \
             {0.0, -sinf(theta / 2)}, \
-        {                           \
+        {                            \
             cosf(theta / 2), 0.0     \
-        }                           \
+        }                            \
     }
 
 #define RYMatF(theta)                \
-    {                               \
+    {                                \
         {cosf(theta / 2), 0.0},      \
             {-sinf(theta / 2), 0.0}, \
             {sinf(theta / 2), 0.0},  \
-        {                           \
+        {                            \
             cosf(theta / 2), 0.0     \
-        }                           \
+        }                            \
     }
 
-#define RZMatF(theta)                        \
-    {                                       \
+#define RZMatF(theta)                         \
+    {                                         \
         {cosf(-theta / 2), sinf(-theta / 2)}, \
-            {0.0, 0.0},                     \
-            {0.0, 0.0},                     \
-        {                                   \
+            {0.0, 0.0},                       \
+            {0.0, 0.0},                       \
+        {                                     \
             cosf(theta / 2), sinf(theta / 2)  \
-        }                                   \
+        }                                     \
     }
