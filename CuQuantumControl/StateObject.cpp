@@ -28,6 +28,26 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGateUnsafe(std::span<const
                                         m_extraWorkspaceSizeInBytes));
 }
 
+
+template <precision selectedPrecision>
+quantumState_SV<selectedPrecision>::quantumState_SV(size_t nQubits)
+{
+    setNumberOfQubits(nQubits);
+}
+
+template <precision selectedPrecision>
+quantumState_SV<selectedPrecision>::quantumState_SV(std::span<complex_t> stateVector)
+{
+    setStateVector(stateVector);
+}
+
+template <precision selectedPrecision>
+quantumState_SV<selectedPrecision>::~quantumState_SV()
+{
+    freeWorkspace();
+    freeStateVector();
+}
+
 template <precision selectedPrecision>
 void quantumState_SV<selectedPrecision>::setStateVector(std::span<complex_t> stateVector)
 {
@@ -126,7 +146,6 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::initializer_list
                       std::span(matrix));
 }
 
-
 #define MAKE_GATES_BACKEND(GATE_NAME, NUMBER_OF_EXTRA_PARAMS)                                                \
     template <precision selectedPrecision>                                                                   \
     void quantumState_SV<selectedPrecision>::GATE_NAME(________SELECT_EXTRA_ARGS_PRE(NUMBER_OF_EXTRA_PARAMS) \
@@ -172,5 +191,3 @@ MAKE_GATES_BACKEND(H, 0)
 MAKE_GATES_BACKEND(RX, 1)
 MAKE_GATES_BACKEND(RY, 1)
 MAKE_GATES_BACKEND(RZ, 1)
-
-

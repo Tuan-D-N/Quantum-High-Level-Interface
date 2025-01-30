@@ -35,7 +35,8 @@ protected:
                                  std::span<complex_t> matrix);
 
 public:
-    quantumState_SV();
+    quantumState_SV(size_t nQubits);
+    quantumState_SV(std::span<complex_t> stateVector);
     ~quantumState_SV();
 
     std::span<complex_t> getStateVector();
