@@ -133,7 +133,7 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::span<const int> 
     {
         throw std::logic_error("matrix size is missmatch with target's size");
     }
-    applyArbitaryGateUnsafe<selectedPrecision>(targets, controls, matrix);
+    applyArbitaryGateUnsafe(targets, controls, matrix);
 }
 
 template <precision selectedPrecision>
