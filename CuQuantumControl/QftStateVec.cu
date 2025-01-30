@@ -36,19 +36,15 @@ int ApplyQFTOnStateVector(PRECISION_TYPE_COMPLEX(SelectPrecision) * d_stateVecto
             int n = j_qubit + 2;
             const int controls[] = {i_qubit_reversed - 1 - j_qubit};
             const int ncontrols = 1;
-            const PRECISION_TYPE_COMPLEX(SelectPrecision) matrix[] = RKMat(n, double);
-            
-            CHECK_BROAD_ERROR(applyGatesGeneral<precision::bit_64>(handle,
-                                                      numQubits,
-                                                      matrix,
-                                                      adjoint,
-                                                      targets,
-                                                      nTargets,
-                                                      controls,
-                                                      ncontrols,
-                                                      d_stateVector,
-                                                      extraWorkspace,
-                                                      extraWorkspaceSizeInBytes));
+
+            CHECK_BROAD_ERROR(applyRK(handle, 
+            numQubits,
+            adjoint,
+            targets,
+            d_stateVector,
+            extraWorkspace,
+            extraWorkspaceSizeInBytes,
+            n))
         }
     }
 
