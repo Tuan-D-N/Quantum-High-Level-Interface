@@ -66,7 +66,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 set(CMAKE_SKIP_RPATH TRUE)
 
 
-set(groverBenchmark TRUE)
+set(groverBenchmark FALSE)
 
 message(STATUS "groverBenchmark = ${groverBenchmark}")
 if(groverBenchmark)
@@ -138,7 +138,46 @@ if(rawTester)
 endif()
 
 
+set(BenchmarkData TRUE)
 
+message(STATUS "BenchmarkData = ${BenchmarkData}")
+if(BenchmarkData)
+  add_executable(
+    BenchmarkDataEXE
+    benchmarkingData.cpp
+  )
+
+  target_link_libraries(BenchmarkDataEXE PRIVATE
+    CudaQControl
+    functionality_image
+    CuQuantumControl
+    CuSparseControl
+    Runner
+    radon_functionality
+    CUDA::cusparse 
+    CUDA::cudart
+    custatevec
+
+    cudaq
+    cudaq-common
+    cudaq-mlir-runtime
+    cudaq-builder
+    cudaq-ensmallen
+    cudaq-nlopt
+    cudaq-spin
+    cudaq-em-default
+    cudaq-platform-default
+    nvqir
+    nvqir-custatevec-fp32
+    )
+
+  target_include_directories(BenchmarkDataEXE PUBLIC
+    ${CUDA_INClUDE_LIBRARIES}
+  )
+  target_link_directories(BenchmarkDataEXE PUBLIC
+    ${CUDA_LINK_LIBRARIES}
+  )
+endif()
 
 
 
