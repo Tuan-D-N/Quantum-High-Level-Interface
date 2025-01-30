@@ -32,7 +32,7 @@ private:
 protected:
     void applyArbitaryGateUnsafe(std::span<const int> targets,
                                  std::span<const int> controls,
-                                 std::span<complex_t> matrix);
+                                 std::span<const complex_t> matrix);
 
 public:
     quantumState_SV(size_t nQubits);
@@ -54,7 +54,7 @@ public:
                            std::span<const complex_t> matrix);
     void applyArbitaryGate(std::initializer_list<const int> targets,
                            std::initializer_list<const int> controls,
-                           std::initializer_list<complex_t> matrix);
+                           std::initializer_list<const complex_t> matrix);
     // clang-format off
 #define MAKE_GATES(GATE_NAME, NUMBER_OF_EXTRA_PARAMS)                     \
     void GATE_NAME(________SELECT_EXTRA_ARGS_PRE(NUMBER_OF_EXTRA_PARAMS)  \

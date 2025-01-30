@@ -15,19 +15,18 @@
 #include "StateObject.hpp"
 
 template <precision selectedPrecision>
-void quantumState_SV<selectedPrecision>::applyArbitaryGateUnsafe(std::span<const int> targets, std::span<const int> controls, std::span<complex_t> matrix)
+void quantumState_SV<selectedPrecision>::applyArbitaryGateUnsafe(std::span<const int> targets, std::span<const int> controls, std::span<const complex_t> matrix)
 {
-    THROW_BROAD_ERROR(applyGatesGeneral(m_handle,
-                                        m_numberQubits,
-                                        matrix,
-                                        m_adjoint,
-                                        targets,
-                                        controls,
-                                        m_stateVector,
-                                        m_extraWorkspace,
-                                        m_extraWorkspaceSizeInBytes));
+    THROW_BROAD_ERROR(applyGatesGeneral<selectedPrecision>(m_handle,
+                                                           m_numberQubits,
+                                                           matrix,
+                                                           m_adjoint,
+                                                           targets,
+                                                           controls,
+                                                           m_stateVector,
+                                                           m_extraWorkspace,
+                                                           m_extraWorkspaceSizeInBytes));
 }
-
 
 template <precision selectedPrecision>
 quantumState_SV<selectedPrecision>::quantumState_SV(size_t nQubits)
@@ -51,7 +50,7 @@ quantumState_SV<selectedPrecision>::~quantumState_SV()
 template <precision selectedPrecision>
 void quantumState_SV<selectedPrecision>::setStateVector(std::span<const complex_t> stateVector)
 {
-    if (!isPowerOf2(stateVector))
+    if (!isPowerOf2(stateVector.size()))
     {
         throw std::runtime_error("Statevector is not a power of 2");
     }
@@ -134,11 +133,11 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::span<const int> 
     {
         throw std::logic_error("matrix size is missmatch with target's size");
     }
-    applyArbitaryGateUnsafe(targets, controls, matrix);
+    applyArbitaryGateUnsafe<selectedPrecision>(targets, controls, matrix);
 }
 
 template <precision selectedPrecision>
-void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::initializer_list<const int> targets, std::initializer_list<const int> controls, std::initializer_list<complex_t> matrix)
+void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::initializer_list<const int> targets, std::initializer_list<const int> controls, std::initializer_list<const complex_t> matrix)
 {
     // always remember that there is an alternative function of this that could cause this to be called recursively.
     applyArbitaryGate(std::span(targets),
