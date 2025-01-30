@@ -38,6 +38,7 @@ struct MathFunctions<float>
 };
 
 // Generic RKMat macro (uses correct math functions for type)
+//No tests for this matrix
 #define RKMat(k, T)                                                          \
     {                                                                        \
         {1.0, 0.0},                                                          \
