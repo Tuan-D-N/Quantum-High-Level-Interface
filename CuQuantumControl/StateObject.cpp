@@ -15,6 +15,20 @@
 #include "StateObject.hpp"
 
 template <precision selectedPrecision>
+void quantumState_SV<selectedPrecision>::applyArbitaryGateUnsafe(std::span<const int> targets, std::span<const int> controls, std::span<complex_t> matrix)
+{
+    THROW_BROAD_ERROR(applyGatesGeneral(m_handle,
+                                        m_numberQubits,
+                                        matrix.data(),
+                                        m_adjoint,
+                                        targets,
+                                        controls,
+                                        m_stateVector,
+                                        m_extraWorkspace,
+                                        m_extraWorkspaceSizeInBytes));
+}
+
+template <precision selectedPrecision>
 void quantumState_SV<selectedPrecision>::setStateVector(std::span<complex_t> stateVector)
 {
     if (!isPowerOf2(stateVector))
@@ -83,6 +97,33 @@ void quantumState_SV<selectedPrecision>::prefetchToCPU()
 {
     size_t nSV = 1 << m_numberQubits;
     cudaMemPrefetchAsync(m_stateVector, nSV * sizeof(complex_t), cudaCpuDeviceId);
+}
+
+template <precision selectedPrecision>
+void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::span<const int> targets, std::span<const int> controls, std::span<complex_t> matrix)
+{
+    if (targets.size() <= 0)
+    {
+        throw std::logic_error("zero targets to run");
+    }
+    if (!are_disjoint(targets, controls))
+    {
+        throw std::logic_error("targets and controls are not independent set");
+    }
+    if (matrix.size() == std::pow((1 << targets.size()), 2))
+    {
+        throw std::logic_error("matrix size is missmatch with target's size");
+    }
+    applyArbitaryGateUnsafe(targets, controls, matrix);
+}
+
+template <precision selectedPrecision>
+void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::initializer_list<const int> targets, std::initializer_list<const int> controls, std::initializer_list<complex_t> matrix)
+{
+    //always remember that there is an alternative function of this that could cause this to be called recursively.
+    applyArbitaryGate(std::span(targets),
+                      std::span(controls),
+                      std::span(matrix));
 }
 
 #define MAKE_GATES_BACKEND(GATE_NAME, NUMBER_OF_EXTRA_PARAMS)                                                 \

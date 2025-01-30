@@ -29,6 +29,11 @@ private:
     void *m_extraWorkspace = nullptr;
     size_t m_extraWorkspaceSizeInBytes = 0;
 
+protected:
+    void applyArbitaryGateUnsafe(std::span<const int> targets,
+                                 std::span<const int> controls,
+                                 std::span<complex_t> matrix);
+
 public:
     quantumState_SV();
     ~quantumState_SV();
@@ -42,6 +47,13 @@ public:
     void freeStateVector();
     void prefetchToDevice(int deviceNumber = 0);
     void prefetchToCPU();
+
+    void applyArbitaryGate(std::span<const int> targets,
+                           std::span<const int> controls,
+                           std::span<complex_t> matrix);
+    void applyArbitaryGate(std::initializer_list<const int> targets,
+                           std::initializer_list<const int> controls,
+                           std::initializer_list<complex_t> matrix);
 
 #define MAKE_GATES(GATE_NAME, NUMBER_OF_EXTRA_PARAMS)                     \
     void GATE_NAME(std::span<const int> targets                           \
