@@ -153,7 +153,7 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::initializer_list
                                                        std::span<const int>                                  \
                                                            controls)                                         \
     {                                                                                                        \
-        apply##GATE_NAME<selectedPrecision>(                                                                 \
+        THROW_BROAD_ERROR(apply##GATE_NAME<selectedPrecision>(                                               \
             m_handle,                                                                                        \
             m_numberQubits,                                                                                  \
             m_adjoint,                                                                                       \
@@ -161,7 +161,7 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::initializer_list
             m_stateVector,                                                                                   \
             m_extraWorkspace,                                                                                \
             m_extraWorkspaceSizeInBytes                                                                      \
-                ________SELECT_EXTRA_VARS_POST(NUMBER_OF_EXTRA_PARAMS));                                     \
+                ________SELECT_EXTRA_VARS_POST(NUMBER_OF_EXTRA_PARAMS)));                                    \
     }                                                                                                        \
                                                                                                              \
     template <precision selectedPrecision>                                                                   \
@@ -171,7 +171,7 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::initializer_list
                                                        std::initializer_list<const int>                      \
                                                            controls)                                         \
     {                                                                                                        \
-        apply##GATE_NAME<selectedPrecision>(                                                                 \
+        THROW_BROAD_ERROR(apply##GATE_NAME<selectedPrecision>(                                               \
             m_handle,                                                                                        \
             m_numberQubits,                                                                                  \
             m_adjoint,                                                                                       \
@@ -179,7 +179,7 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::initializer_list
             m_stateVector,                                                                                   \
             m_extraWorkspace,                                                                                \
             m_extraWorkspaceSizeInBytes                                                                      \
-                ________SELECT_EXTRA_VARS_POST(NUMBER_OF_EXTRA_PARAMS));                                     \
+                ________SELECT_EXTRA_VARS_POST(NUMBER_OF_EXTRA_PARAMS)));                                    \
     }
 
 MAKE_GATES_BACKEND(X, 0)

@@ -36,9 +36,11 @@ void time_execution(int nQubits)
 
 int main(int argc, char const *argv[])
 {
+    std::cout << "begin" << std::endl;
     for(int i = 1; i < 30; ++i)
     {
         time_execution(i);
     }
+    std::cout << "end" << std::endl;
     return 0;
 }

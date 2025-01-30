@@ -119,7 +119,7 @@ if(rawTester)
     cudaq
     cudaq-common
     cudaq-mlir-runtime
-    cudaq-builder
+     # cudaq-builder  Has memory leaks??????
     cudaq-ensmallen
     cudaq-nlopt
     cudaq-spin
@@ -158,17 +158,17 @@ if(BenchmarkData)
     CUDA::cudart
     custatevec
 
-    cudaq
-    cudaq-common
-    cudaq-mlir-runtime
-    cudaq-builder
-    cudaq-ensmallen
-    cudaq-nlopt
-    cudaq-spin
-    cudaq-em-default
-    cudaq-platform-default
-    nvqir
-    nvqir-custatevec-fp32
+    # cudaq
+    # cudaq-common
+    # cudaq-mlir-runtime
+    # # cudaq-builder  Has memory leaks??????
+    # cudaq-ensmallen
+    # cudaq-nlopt
+    # cudaq-spin
+    # cudaq-em-default
+    # cudaq-platform-default
+    # nvqir
+    # nvqir-custatevec-fp32
     )
 
   target_include_directories(BenchmarkDataEXE PUBLIC
