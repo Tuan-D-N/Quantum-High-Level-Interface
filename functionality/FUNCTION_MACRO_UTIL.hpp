@@ -18,8 +18,8 @@
 #define EXPAND_ARGS_5 EXPAND_ARGS_4, double p5
 // Extend as needed...
 
-#define SELECT_ARGS(N) EXPAND_ARGS_##N
-#define SELECT_EXTRA_ARGS(N) IF_ELSE(N)(, SELECT_ARGS(N))
+#define ________SELECT_ARGS(N) EXPAND_ARGS_##N
+#define ________SELECT_EXTRA_ARGS(N) IF_ELSE(N)(, ________SELECT_ARGS(N))
 
 #define EXPAND_VARS_0 
 #define EXPAND_VARS_1 p1
@@ -27,14 +27,14 @@
 #define EXPAND_VARS_3 EXPAND_VARS_2, p3
 #define EXPAND_VARS_4 EXPAND_VARS_3, p4
 #define EXPAND_VARS_5 EXPAND_VARS_4, p5
-#define SELECT_VARS(N) EXPAND_VARS_##N
-#define SELECT_EXTRA_VARS(N) IF_ELSE(N)(, SELECT_VARS(N))
+#define ________SELECT_VARS(N) EXPAND_VARS_##N
+#define ________SELECT_EXTRA_VARS(N) IF_ELSE(N)(, ________SELECT_VARS(N))
 
 
 // how to use:
 //
 // #define FUNC(FUNC_NAME, NUMBEROFINPUTS)  \
-//     void FUNC_NAME(SELECT_ARGS(NUMBEROFINPUTS)) \
+//     void FUNC_NAME(________SELECT_ARGS(NUMBEROFINPUTS)) \
 //     {  \
 //     }
 //
