@@ -200,7 +200,7 @@ TEST_F(ApplyRYGates, RY_MultipleTargets2)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
-    std::vector<cuDoubleComplex> expectedOutput = {{3.63219, 0.}, {-3.18666, 0.}, {-2.18666, 0.}, {1.36781, 0.}, {7.06771, 0.}, {-7.14663, 0.}, {-6.14663, 0.}, {5.93229, 0.}};
+    std::vector<cuDoubleComplex> expectedOutput = {{6.4055, 0.}, {7.26438, 0.}, {-5.38333, 0.}, {-6.37332, 0.}, {-3.38333, 0.}, {-4.37332, 0.}, {1.5945, 0.}, {2.73562, 0.}};
     float p1 = 3;
     std::vector<int> targets = {1, 2};
     std::vector<int> controls = {};
@@ -224,7 +224,7 @@ TEST_F(ApplyRYGates, RY_MultipleTargets_SingleControls)
 {
     const int nQubits = 3;
     std::vector<cuDoubleComplex> input = {{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}};
-    std::vector<cuDoubleComplex> expectedOutput = {{3.63219, 0.}, {-3.18666, 0.}, {-2.18666, 0.}, {1.36781, 0.}, {7.06771, 0.}, {-7.14663, 0.}, {-6.14663, 0.}, {5.93229, 0.}};
+    std::vector<cuDoubleComplex> expectedOutput = {{1., 0.}, {2., 0.}, {3., 0.}, {4., 0.}, {7.06771, 0.}, {-7.14663, 0.}, {-6.14663, 0.}, {5.93229, 0.}};
     float p1 = 3;
     std::vector<int> targets = {1, 0};
     std::vector<int> controls = {2};
