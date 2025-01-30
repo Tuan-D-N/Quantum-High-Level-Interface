@@ -19,7 +19,7 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGateUnsafe(std::span<const
 {
     THROW_BROAD_ERROR(applyGatesGeneral(m_handle,
                                         m_numberQubits,
-                                        matrix.data(),
+                                        matrix,
                                         m_adjoint,
                                         targets,
                                         controls,
