@@ -38,13 +38,14 @@ quantumState_SV<selectedPrecision>::quantumState_SV(size_t nQubits)
 template <precision selectedPrecision>
 quantumState_SV<selectedPrecision>::quantumState_SV(std::span<const complex_t> stateVector)
 {
-    THROW_CUSTATEVECTOR(custatevecDestroy(m_handle));
+    THROW_CUSTATEVECTOR(custatevecCreate(&m_handle));
     setStateVector(stateVector);
 }
 
 template <precision selectedPrecision>
 quantumState_SV<selectedPrecision>::~quantumState_SV()
 {
+    THROW_CUSTATEVECTOR(custatevecDestroy(m_handle));
     freeWorkspace();
     freeStateVector();
 }
