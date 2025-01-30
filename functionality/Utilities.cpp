@@ -138,3 +138,7 @@ std::vector<int> rangeVec(int start, int end)
     std::iota(vec.begin(), vec.end(), start);
     return vec;
 }
+
+bool isPowerOf2(int num) {
+    return num > 0 && (num & (num - 1)) == 0;
+}

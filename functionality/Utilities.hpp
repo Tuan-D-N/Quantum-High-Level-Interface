@@ -187,3 +187,5 @@ bool almost_equal(cuFloatComplex x, cuFloatComplex y);
 bool almost_equal(double x, double y);
 
 std::vector<int> rangeVec(int start, int end);
+
+bool isPowerOf2(int num);
