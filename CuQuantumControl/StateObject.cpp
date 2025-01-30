@@ -36,7 +36,7 @@ quantumState_SV<selectedPrecision>::quantumState_SV(size_t nQubits)
 }
 
 template <precision selectedPrecision>
-quantumState_SV<selectedPrecision>::quantumState_SV(std::span<complex_t> stateVector)
+quantumState_SV<selectedPrecision>::quantumState_SV(std::span<const complex_t> stateVector)
 {
     setStateVector(stateVector);
 }
@@ -49,7 +49,7 @@ quantumState_SV<selectedPrecision>::~quantumState_SV()
 }
 
 template <precision selectedPrecision>
-void quantumState_SV<selectedPrecision>::setStateVector(std::span<complex_t> stateVector)
+void quantumState_SV<selectedPrecision>::setStateVector(std::span<const complex_t> stateVector)
 {
     if (!isPowerOf2(stateVector))
     {
@@ -120,7 +120,7 @@ void quantumState_SV<selectedPrecision>::prefetchToCPU()
 }
 
 template <precision selectedPrecision>
-void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::span<const int> targets, std::span<const int> controls, std::span<complex_t> matrix)
+void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::span<const int> targets, std::span<const int> controls, std::span<const complex_t> matrix)
 {
     if (targets.size() <= 0)
     {

@@ -36,12 +36,12 @@ protected:
 
 public:
     quantumState_SV(size_t nQubits);
-    quantumState_SV(std::span<complex_t> stateVector);
+    quantumState_SV(std::span<const complex_t> stateVector);
     ~quantumState_SV();
 
     std::span<complex_t> getStateVector();
 
-    void setStateVector(std::span<complex_t> stateVector);
+    void setStateVector(std::span<const complex_t> stateVector);
     void setNumberOfQubits(size_t nQubits);
 
     void freeWorkspace();
@@ -51,7 +51,7 @@ public:
 
     void applyArbitaryGate(std::span<const int> targets,
                            std::span<const int> controls,
-                           std::span<complex_t> matrix);
+                           std::span<const complex_t> matrix);
     void applyArbitaryGate(std::initializer_list<const int> targets,
                            std::initializer_list<const int> controls,
                            std::initializer_list<complex_t> matrix);
