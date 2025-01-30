@@ -120,44 +120,50 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::span<const int> 
 template <precision selectedPrecision>
 void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::initializer_list<const int> targets, std::initializer_list<const int> controls, std::initializer_list<complex_t> matrix)
 {
-    //always remember that there is an alternative function of this that could cause this to be called recursively.
+    // always remember that there is an alternative function of this that could cause this to be called recursively.
     applyArbitaryGate(std::span(targets),
                       std::span(controls),
                       std::span(matrix));
 }
 
-#define MAKE_GATES_BACKEND(GATE_NAME, NUMBER_OF_EXTRA_PARAMS)                                                 \
-    template <precision selectedPrecision>                                                                    \
-    void quantumState_SV<selectedPrecision>::GATE_NAME(std::span<const int> targets                           \
-                                                           ________SELECT_EXTRA_ARGS(NUMBER_OF_EXTRA_PARAMS), \
-                                                       std::span<const int> controls)                         \
-    {                                                                                                         \
-        apply##GATE_NAME<selectedPrecision>(                                                                  \
-            m_handle,                                                                                         \
-            m_numberQubits,                                                                                   \
-            m_adjoint,                                                                                        \
-            targets,                                                                                          \
-            m_stateVector,                                                                                    \
-            m_extraWorkspace,                                                                                 \
-            m_extraWorkspaceSizeInBytes                                                                       \
-                ________SELECT_EXTRA_VARS(NUMBER_OF_EXTRA_PARAMS));                                           \
-    }                                                                                                         \
-                                                                                                              \
-    template <precision selectedPrecision>                                                                    \
-    void quantumState_SV<selectedPrecision>::GATE_NAME(std::initializer_list<const int> targets               \
-                                                           ________SELECT_EXTRA_ARGS(NUMBER_OF_EXTRA_PARAMS), \
-                                                       std::initializer_list<const int> controls)             \
-    {                                                                                                         \
-        apply##GATE_NAME<selectedPrecision>(                                                                  \
-            m_handle,                                                                                         \
-            m_numberQubits,                                                                                   \
-            m_adjoint,                                                                                        \
-            targets,                                                                                          \
-            m_stateVector,                                                                                    \
-            m_extraWorkspace,                                                                                 \
-            m_extraWorkspaceSizeInBytes                                                                       \
-                ________SELECT_EXTRA_VARS(NUMBER_OF_EXTRA_PARAMS));                                           \
+
+#define MAKE_GATES_BACKEND(GATE_NAME, NUMBER_OF_EXTRA_PARAMS)                                                \
+    template <precision selectedPrecision>                                                                   \
+    void quantumState_SV<selectedPrecision>::GATE_NAME(________SELECT_EXTRA_ARGS_PRE(NUMBER_OF_EXTRA_PARAMS) \
+                                                           std::span<const int>                              \
+                                                               targets,                                      \
+                                                       std::span<const int>                                  \
+                                                           controls)                                         \
+    {                                                                                                        \
+        apply##GATE_NAME<selectedPrecision>(                                                                 \
+            m_handle,                                                                                        \
+            m_numberQubits,                                                                                  \
+            m_adjoint,                                                                                       \
+            targets,                                                                                         \
+            m_stateVector,                                                                                   \
+            m_extraWorkspace,                                                                                \
+            m_extraWorkspaceSizeInBytes                                                                      \
+                ________SELECT_EXTRA_VARS_POST(NUMBER_OF_EXTRA_PARAMS));                                     \
+    }                                                                                                        \
+                                                                                                             \
+    template <precision selectedPrecision>                                                                   \
+    void quantumState_SV<selectedPrecision>::GATE_NAME(________SELECT_EXTRA_ARGS_PRE(NUMBER_OF_EXTRA_PARAMS) \
+                                                           std::initializer_list<const int>                  \
+                                                               targets,                                      \
+                                                       std::initializer_list<const int>                      \
+                                                           controls)                                         \
+    {                                                                                                        \
+        apply##GATE_NAME<selectedPrecision>(                                                                 \
+            m_handle,                                                                                        \
+            m_numberQubits,                                                                                  \
+            m_adjoint,                                                                                       \
+            targets,                                                                                         \
+            m_stateVector,                                                                                   \
+            m_extraWorkspace,                                                                                \
+            m_extraWorkspaceSizeInBytes                                                                      \
+                ________SELECT_EXTRA_VARS_POST(NUMBER_OF_EXTRA_PARAMS));                                     \
     }
+
 MAKE_GATES_BACKEND(X, 0)
 MAKE_GATES_BACKEND(Y, 0)
 MAKE_GATES_BACKEND(Z, 0)
@@ -166,3 +172,5 @@ MAKE_GATES_BACKEND(H, 0)
 MAKE_GATES_BACKEND(RX, 1)
 MAKE_GATES_BACKEND(RY, 1)
 MAKE_GATES_BACKEND(RZ, 1)
+
+

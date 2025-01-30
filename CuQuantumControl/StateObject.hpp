@@ -54,14 +54,17 @@ public:
     void applyArbitaryGate(std::initializer_list<const int> targets,
                            std::initializer_list<const int> controls,
                            std::initializer_list<complex_t> matrix);
-
+    // clang-format off
 #define MAKE_GATES(GATE_NAME, NUMBER_OF_EXTRA_PARAMS)                     \
-    void GATE_NAME(std::span<const int> targets                           \
-                       ________SELECT_EXTRA_ARGS(NUMBER_OF_EXTRA_PARAMS), \
+    void GATE_NAME(________SELECT_EXTRA_ARGS_PRE(NUMBER_OF_EXTRA_PARAMS)  \
+                    std::span<const int> targets,                         \
                    std::span<const int> controls = {});                   \
-    void GATE_NAME(std::initializer_list<const int> targets               \
-                       ________SELECT_EXTRA_ARGS(NUMBER_OF_EXTRA_PARAMS), \
+                                                                          \
+    void GATE_NAME(________SELECT_EXTRA_ARGS_PRE(NUMBER_OF_EXTRA_PARAMS)  \
+                   std::initializer_list<const int> targets,              \
                    std::initializer_list<const int> controls = {});
+    // clang-format on
+
 
     MAKE_GATES(X, 0)
     MAKE_GATES(Y, 0)
