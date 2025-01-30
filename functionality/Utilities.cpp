@@ -142,3 +142,12 @@ std::vector<int> rangeVec(int start, int end)
 bool isPowerOf2(int num) {
     return num > 0 && (num & (num - 1)) == 0;
 }
+
+bool are_disjoint(std::span<const int> listA, std::span<const int> listB) {
+    for (const auto& elementA : listA) {
+        if (std::find(listB.begin(), listB.end(), elementA) != listB.end()) {
+            return false; // Overlap found
+        }
+    }
+    return true; // No overlap
+}
