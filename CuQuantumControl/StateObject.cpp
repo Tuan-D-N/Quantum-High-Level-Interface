@@ -31,12 +31,14 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGateUnsafe(std::span<const
 template <precision selectedPrecision>
 quantumState_SV<selectedPrecision>::quantumState_SV(size_t nQubits)
 {
+    THROW_CUSTATEVECTOR(custatevecCreate(&m_handle));
     setNumberOfQubits(nQubits);
 }
 
 template <precision selectedPrecision>
 quantumState_SV<selectedPrecision>::quantumState_SV(std::span<const complex_t> stateVector)
 {
+    THROW_CUSTATEVECTOR(custatevecDestroy(m_handle));
     setStateVector(stateVector);
 }
 
