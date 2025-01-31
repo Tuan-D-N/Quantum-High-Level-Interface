@@ -180,15 +180,15 @@ int runSys3(int evenqubits)
 
     generateNormalizedRandomStateWrite<cuDoubleComplex>(std::span(rThetaVector,A_num_cols));
     
-    printDeviceArray(rThetaVector, A_num_cols);
+    // printDeviceArray(rThetaVector, A_num_cols);
     fftshift2D(rThetaVector, img_num_rows, img_num_columns);
     applyQFTVertically(rThetaVector, qftWorkSpace, img_num_columns, img_num_rows, halfOfQubits);
     fftshift2D(rThetaVector, img_num_rows, img_num_columns);
-    printDeviceArray(rThetaVector, A_num_cols);
+    // printDeviceArray(rThetaVector, A_num_cols);
 
     Transpose(rThetaVector, img_num_rows, img_num_columns);
     CHECK_CUDA(static_cast<cudaError_t>(applyInterpolationMatrix(evenqubits, rThetaVector, xyVector)));
-    printDeviceArray(xyVector, A_num_cols);
+    // printDeviceArray(xyVector, A_num_cols);
 
     fftshift2D(xyVector, img_num_rows, img_num_columns);
     applyQFTHorizontally(xyVector, img_num_columns, img_num_rows, halfOfQubits);
