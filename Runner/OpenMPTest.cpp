@@ -2,48 +2,63 @@
 #include <iostream>
 #include <chrono>
 
-void sequential_sum(int* arr, int size) {
-    int sum = 0;
+void sequential_matrix_multiply(int* A, int* B, int* C, int size) {
     for (int i = 0; i < size; i++) {
-        sum += arr[i];
+        for (int j = 0; j < size; j++) {
+            C[i * size + j] = 0;
+            for (int k = 0; k < size; k++) {
+                C[i * size + j] += A[i * size + k] * B[k * size + j];
+            }
+        }
     }
 }
 
-void parallel_sum(int* arr, int size) {
-    int sum = 0;
-    #pragma omp parallel for
+void parallel_matrix_multiply(int* A, int* B, int* C, int size) {
+    #pragma omp parallel for collapse(2)
     for (int i = 0; i < size; i++) {
-        sum += arr[i];
+        for (int j = 0; j < size; j++) {
+            C[i * size + j] = 0;
+            for (int k = 0; k < size; k++) {
+                C[i * size + j] += A[i * size + k] * B[k * size + j];
+            }
+        }
     }
 }
 
 int runOMPTest() {
-    const int size = 10000000;
-    int* arr = new int[size];
+    const int size = 1000;
+    int* A = new int[size * size];
+    int* B = new int[size * size];
+    int* C = new int[size * size];
     
-    // Initialize array with values
+    // Initialize matrices A and B with some values
     for (int i = 0; i < size; i++) {
-        arr[i] = 1; // Simple values to sum up
+        for (int j = 0; j < size; j++) {
+            A[i * size + j] = 1;
+            B[i * size + j] = 1;
+        }
     }
 
     // Sequential execution
     auto start = std::chrono::high_resolution_clock::now();
-    sequential_sum(arr, size);
+    sequential_matrix_multiply(A, B, C, size);
     auto end = std::chrono::high_resolution_clock::now();
     auto sequential_duration = std::chrono::duration<double>(end - start).count();
-    std::cout << "Sequential time: " << sequential_duration << " seconds" << std::endl;
+    std::cout << "Sequential matrix multiplication time: " << sequential_duration << " seconds" << std::endl;
 
     // Parallel execution
     start = std::chrono::high_resolution_clock::now();
-    parallel_sum(arr, size);
+    parallel_matrix_multiply(A, B, C, size);
     end = std::chrono::high_resolution_clock::now();
     auto parallel_duration = std::chrono::duration<double>(end - start).count();
-    std::cout << "Parallel time: " << parallel_duration << " seconds" << std::endl;
+    std::cout << "Parallel matrix multiplication time: " << parallel_duration << " seconds" << std::endl;
 
     // Calculate speedup
     double speedup = sequential_duration / parallel_duration;
     std::cout << "Speedup: " << speedup << "x" << std::endl;
 
-    delete[] arr;
+    delete[] A;
+    delete[] B;
+    delete[] C;
     return 0;
 }
