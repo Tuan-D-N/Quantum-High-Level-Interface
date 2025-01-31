@@ -51,8 +51,9 @@ void generateNormalizedRandomStateWrite(std::span<T> StateVector)
 
     // Generate random complex numbers and compute norm
     #pragma omp parallel for
-    for (auto &v : StateVector)
+    for (size_t i = 0; i < StateVector.size(); ++i)
     {
+        auto &v = StateVector[i];
         float real = dist(gen);
         float imag = dist(gen);
         v = {real, imag};
@@ -63,8 +64,9 @@ void generateNormalizedRandomStateWrite(std::span<T> StateVector)
 
     // Normalize the vector
     #pragma omp parallel for
-    for (auto &v : StateVector)
+    for (size_t i = 0; i < StateVector.size(); ++i)
     {
+        auto &v = StateVector[i];
         v.x /= norm;
         v.y /= norm;
     }
