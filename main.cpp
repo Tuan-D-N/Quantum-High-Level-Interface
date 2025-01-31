@@ -1,13 +1,14 @@
 #include <iostream>
 #include "Runner/CircuitTest.hpp"
+#include "Runner/ApplyIRadon.hpp"
 #include "CudaControl/Helper.hpp"
 #include <cmath>
 
 int main()
 {
-    // runner();
-    // runSys2();
-    
-    CHECK_BROAD_ERROR(grover(3));
+    for (int n = 1; n < 30; ++n)
+    {
+        CHECK_BROAD_ERROR(runSys3(n));
+    }
     return 1;
 }
