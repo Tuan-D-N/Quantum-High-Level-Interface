@@ -19,16 +19,22 @@ void circuitExecution(quantumState_SV<precision::bit_32> &state, int nQubits)
             }
         }
     }
+    cudaDeviceSynchronize();
 }
+
 
 void time_execution(int nQubits)
 {
-    const auto stateVec = generateNormalizedRandomVectorState<cuComplex>(nQubits);
-    quantumState_SV<precision::bit_32> state(stateVec);
+    std::ostringstream name;
+    name << "Total Creation and Run. number of qubits: " << nQubits;
+    auto a = Timer(name.str());
+        
+    quantumState_SV<precision::bit_32> state(nQubits);
+    generateNormalizedRandomStateWrite<cuComplex>(state.getStateVector());
     {
         std::ostringstream name;
-        name << "number of qubits: " << nQubits;
-        Timer(name.str());
+        name << "Just circuit run time. number of qubits: " << nQubits;
+        auto b = Timer(name.str());
         
         circuitExecution(state, nQubits);
     }
@@ -37,7 +43,7 @@ void time_execution(int nQubits)
 int main(int argc, char const *argv[])
 {
     std::cout << "begin" << std::endl;
-    for(int i = 1; i < 30; ++i)
+    for(int i = 25; i < 30; ++i)
     {
         time_execution(i);
     }
