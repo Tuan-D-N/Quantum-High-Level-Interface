@@ -28,7 +28,7 @@ int ApplyQFTOnStateVector(PRECISION_TYPE_COMPLEX(SelectPrecision) * d_stateVecto
     {
         int i_qubit_reversed = numQubits - 1 - i_qubit;
         const int targets[] = {i_qubit_reversed};
-        CHECK_BROAD_ERROR(applyH(handle, numQubits, adjoint, i_qubit_reversed, d_stateVector, extraWorkspace, extraWorkspaceSizeInBytes));
+        CHECK_BROAD_ERROR(applyH<SelectPrecision>(handle, numQubits, adjoint, i_qubit_reversed, d_stateVector, extraWorkspace, extraWorkspaceSizeInBytes));
 
         // The controled rotation loop
         for (int j_qubit = 0; j_qubit < i_qubit_reversed; ++j_qubit)
@@ -37,7 +37,7 @@ int ApplyQFTOnStateVector(PRECISION_TYPE_COMPLEX(SelectPrecision) * d_stateVecto
             const int controls[] = {i_qubit_reversed - 1 - j_qubit};
             const int ncontrols = 1;
 
-            CHECK_BROAD_ERROR(applyRK(handle, 
+            CHECK_BROAD_ERROR(applyRK<SelectPrecision>(handle, 
             numQubits,
             adjoint,
             targets,
@@ -64,3 +64,7 @@ int ApplyQFTOnStateVector(PRECISION_TYPE_COMPLEX(SelectPrecision) * d_stateVecto
 
     return cudaSuccess;
 }
+
+template int ApplyQFTOnStateVector<precision::bit_32>(PRECISION_TYPE_COMPLEX(precision::bit_32) * d_stateVector, int numQubits);
+
+template int ApplyQFTOnStateVector<precision::bit_64>(PRECISION_TYPE_COMPLEX(precision::bit_64) * d_stateVector, int numQubits);

@@ -18,5 +18,5 @@ set_target_properties(Runner PROPERTIES
 
 
 # Link the necessary CUDA libraries (e.g., cusparse)
-target_link_libraries(Runner PRIVATE CUDA::cusparse CUDA::cudart radon_functionality CuQuantumControl)
+target_link_libraries(Runner PRIVATE CUDA::cusparse CUDA::cudart radon_functionality CuQuantumControl CuSparseControl)
 
