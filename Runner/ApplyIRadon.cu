@@ -50,6 +50,7 @@ void applyQFTHorizontally(cuDoubleComplex *vector, const int num_columns, const 
 
 void applyQFTVertically(cuDoubleComplex *vector, cuDoubleComplex *workSpace, const int num_columns, const int num_rows, const int num_qubit_per_row)
 {
+    #pragma omp parallel for
     for (int i = 0; i < num_columns; ++i)
     {
         for (int j = 0; j < num_rows; ++j)
