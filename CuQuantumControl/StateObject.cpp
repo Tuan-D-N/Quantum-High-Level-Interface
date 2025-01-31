@@ -15,7 +15,7 @@
 #include "StateObject.hpp"
 
 template <precision selectedPrecision>
-void quantumState_SV<selectedPrecision>::applyArbitaryGateUnsafe(std::span<const int> targets, std::span<const int> controls, std::span<const complex_t> matrix)
+void quantumState_SV<selectedPrecision>::applyArbitaryGateUnsafe(std::span<const int> targets, std::span<const int> controls, std::span<const complex_type> matrix)
 {
     THROW_BROAD_ERROR(applyGatesGeneral<selectedPrecision>(m_handle,
                                                            m_numberQubits,
@@ -36,7 +36,7 @@ quantumState_SV<selectedPrecision>::quantumState_SV(size_t nQubits)
 }
 
 template <precision selectedPrecision>
-quantumState_SV<selectedPrecision>::quantumState_SV(std::span<const complex_t> stateVector)
+quantumState_SV<selectedPrecision>::quantumState_SV(std::span<const complex_type> stateVector)
 {
     THROW_CUSTATEVECTOR(custatevecCreate(&m_handle));
     setStateVector(stateVector);
@@ -51,7 +51,13 @@ quantumState_SV<selectedPrecision>::~quantumState_SV()
 }
 
 template <precision selectedPrecision>
-void quantumState_SV<selectedPrecision>::setStateVector(std::span<const complex_t> stateVector)
+std::span<PRECISION_TYPE_COMPLEX(selectedPrecision)> quantumState_SV<selectedPrecision>::getStateVector()
+{
+    return std::span<complex_type>(m_stateVector, m_numberQubits);
+}
+
+template <precision selectedPrecision>
+void quantumState_SV<selectedPrecision>::setStateVector(std::span<const complex_type> stateVector)
 {
     if (!isPowerOf2(stateVector.size()))
     {
@@ -81,7 +87,7 @@ void quantumState_SV<selectedPrecision>::setNumberOfQubits(size_t nQubits)
 
     size_t nSV = 1 << nQubits;
 
-    THROW_CUDA(cudaMallocManaged((void **)&m_stateVector, nSV * sizeof(complex_t)));
+    THROW_CUDA(cudaMallocManaged((void **)&m_stateVector, nSV * sizeof(complex_type)));
     m_numberQubits = nQubits;
 }
 
@@ -111,18 +117,18 @@ template <precision selectedPrecision>
 void quantumState_SV<selectedPrecision>::prefetchToDevice(int deviceNumber)
 {
     size_t nSV = 1 << m_numberQubits;
-    cudaMemPrefetchAsync(m_stateVector, nSV * sizeof(complex_t), deviceNumber);
+    cudaMemPrefetchAsync(m_stateVector, nSV * sizeof(complex_type), deviceNumber);
 }
 
 template <precision selectedPrecision>
 void quantumState_SV<selectedPrecision>::prefetchToCPU()
 {
     size_t nSV = 1 << m_numberQubits;
-    cudaMemPrefetchAsync(m_stateVector, nSV * sizeof(complex_t), cudaCpuDeviceId);
+    cudaMemPrefetchAsync(m_stateVector, nSV * sizeof(complex_type), cudaCpuDeviceId);
 }
 
 template <precision selectedPrecision>
-void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::span<const int> targets, std::span<const int> controls, std::span<const complex_t> matrix)
+void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::span<const int> targets, std::span<const int> controls, std::span<const complex_type> matrix)
 {
     if (targets.size() <= 0)
     {
@@ -140,7 +146,7 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::span<const int> 
 }
 
 template <precision selectedPrecision>
-void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::initializer_list<const int> targets, std::initializer_list<const int> controls, std::initializer_list<const complex_t> matrix)
+void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::initializer_list<const int> targets, std::initializer_list<const int> controls, std::initializer_list<const complex_type> matrix)
 {
     // always remember that there is an alternative function of this that could cause this to be called recursively.
     applyArbitaryGate(std::span(targets),
