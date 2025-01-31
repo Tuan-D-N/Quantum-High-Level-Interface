@@ -11,8 +11,8 @@ set(CMAKE_CXX_COMPILER "/opt/nvidia/hpc_sdk/Linux_aarch64/24.5/compilers/bin/nvc
 set(CMAKE_CUDA_COMPILER "/opt/nvidia/hpc_sdk/Linux_aarch64/24.5/compilers/bin/nvcc")
 
 # Set C++ standard
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 --diag_suppress=177 --diag_suppress=550 -gpu=mem:unified -fopenmp -O2")
-set(CMAKE_CUDA_FLAGS "-std=c++20 -diag-suppress=550 -diag-suppress=177 -fopenmp -O2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 --diag_suppress=177 --diag_suppress=550 -gpu=mem:unified -fopenmp")
+set(CMAKE_CUDA_FLAGS "-std=c++20 -diag-suppress=550 -diag-suppress=177 -fopenmp")
 
 message(STATUS "CXX Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "CUDA_LIBRARIES: ${CUDA_LIBRARIES}")
