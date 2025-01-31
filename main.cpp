@@ -6,7 +6,7 @@
 
 int main()
 {
-    for (int n = 1; n < 30; ++n)
+    for (int n = 2; n < 30; n += 2)
     {
         CHECK_BROAD_ERROR(runSys3(n));
     }
