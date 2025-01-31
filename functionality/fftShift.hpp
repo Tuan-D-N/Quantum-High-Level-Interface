@@ -36,11 +36,13 @@ void fftshift1D(T* data, int length) {
 template<typename T>
 void fftshift2D(T* data, int rows, int cols) {
     // Shift each row
+    #pragma omp parallel for
     for (int i = 0; i < rows; ++i) {
         fftshift1D(data + i * cols, cols);
     }
 
     // Shift each column
+    #pragma omp parallel for
     for (int j = 0; j < cols; ++j) {
         // Extract column into temporary storage
         std::vector<T> column(rows);
