@@ -2,7 +2,7 @@
 #include <iostream>
 #include <functional>
 #include <vector>
-#include "stateContracter.hpp"
+#include "../CuQuantumControl/stateContracter.hpp"
 
 class optimizingSystem
 {

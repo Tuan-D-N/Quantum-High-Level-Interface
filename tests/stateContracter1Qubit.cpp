@@ -4,7 +4,7 @@
 #include <array>
 #include <utility>
 #include <stdexcept>
-#include "../CudaQControl/stateContracter.hpp"
+#include "../CuQuantumControl/stateContracter.hpp"
 
 // Test fixture for the measure1QubitUnified function
 class Measure1QubitUnifiedTest : public ::testing::Test

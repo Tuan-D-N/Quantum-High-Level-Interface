@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <iostream>
 #include <complex>
-#include "../CudaQControl/stateContracter.hpp"
+#include "../CuQuantumControl/stateContracter.hpp"
 #include "../functionality/Utilities.hpp"
 
 //TODO reinstate GetStateProbability

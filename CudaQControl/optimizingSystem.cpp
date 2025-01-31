@@ -5,7 +5,7 @@
 #include <vector>
 #include <cudaq/algorithm.h>
 #include <cudaq/optimizers.h>
-#include "stateContracter.hpp"
+#include "../CuQuantumControl/stateContracter.hpp"
 
 std::function<double(const std::vector<double> &, std::vector<double> &)> optimizingSystem::getObjectiveFunction()
 {
