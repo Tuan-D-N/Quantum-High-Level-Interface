@@ -50,7 +50,7 @@ void applyQFTHorizontally(cuDoubleComplex *vector, const int num_columns, const 
 
 void applyQFTVertically(cuDoubleComplex *vector, cuDoubleComplex *workSpace, const int num_columns, const int num_rows, const int num_qubit_per_row)
 {
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < num_columns; ++i)
     {
         for (int j = 0; j < num_rows; ++j)
@@ -119,7 +119,7 @@ int runSys2()
     int img_num_columns = 1 << (halfOfQubits);
     int A_num_rows = 1 << evenqubits;
     int A_num_cols = 1 << evenqubits;
-    
+
     cuDoubleComplex alpha = make_cuDoubleComplex(1.0, 0.0);
     cuDoubleComplex beta = make_cuDoubleComplex(0.0, 0.0);
     //--------------------------------------------------------------------------
@@ -179,8 +179,8 @@ int runSys3(int evenqubits)
     cuDoubleComplex *qftWorkSpace;
     CHECK_CUDA(cudaMallocManaged((void **)&qftWorkSpace, img_num_rows * sizeof(cuDoubleComplex)));
 
-    generateNormalizedRandomStateWrite<cuDoubleComplex>(std::span(rThetaVector,A_num_cols));
-    
+    generateNormalizedRandomStateWrite<cuDoubleComplex>(std::span(rThetaVector, A_num_cols));
+
     // printDeviceArray(rThetaVector, A_num_cols);
     fftshift2D(rThetaVector, img_num_rows, img_num_columns);
     applyQFTVertically(rThetaVector, qftWorkSpace, img_num_columns, img_num_rows, halfOfQubits);
@@ -188,7 +188,12 @@ int runSys3(int evenqubits)
     // printDeviceArray(rThetaVector, A_num_cols);
 
     Transpose(rThetaVector, img_num_rows, img_num_columns);
-    CHECK_CUDA(static_cast<cudaError_t>(applyInterpolationMatrix(evenqubits, rThetaVector, xyVector)));
+    {
+        std::ostringstream name;
+        name << "Interpolation Time. number of qubits: " << evenqubits;
+        auto b = Timer(name.str());
+        CHECK_CUDA(static_cast<cudaError_t>(applyInterpolationMatrix(evenqubits, rThetaVector, xyVector)));
+    }
     // printDeviceArray(xyVector, A_num_cols);
 
     fftshift2D(xyVector, img_num_rows, img_num_columns);
@@ -196,12 +201,8 @@ int runSys3(int evenqubits)
     applyQFTVertically(xyVector, qftWorkSpace, img_num_columns, img_num_rows, halfOfQubits);
     fftshift2D(xyVector, img_num_rows, img_num_columns);
 
-
-
-
     CHECK_CUDA(cudaFree(xyVector))
     CHECK_CUDA(cudaFree(rThetaVector))
     CHECK_CUDA(cudaFree(qftWorkSpace))
     return EXIT_SUCCESS;
 }
-
