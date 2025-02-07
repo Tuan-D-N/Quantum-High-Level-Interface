@@ -14,6 +14,8 @@ private:
 public:
     Timer();
     Timer(std::string name);
+    void setTime();
+    void getTime();
     ~Timer();
 };
 
