@@ -6,7 +6,7 @@
 // Function to transpose a 2D matrix
 std::vector<std::vector<int>> Transpose(const std::vector<std::vector<int>> &matrix)
 {
-        return Transpose<int>(matrix);
+    return Transpose<int>(matrix);
 }
 void Transpose(const cuDoubleComplex *input, cuDoubleComplex *output, int rows, int cols)
 {

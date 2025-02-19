@@ -6,6 +6,13 @@
 constexpr double INV_SQRT2(0.707106781186547524400844362105); // Approximation of 1/sqrt(2)
 constexpr double SQRT2(1.41421356237309504880168872421);      // Approximation of sqrt(2)
 
+//replaces the <<<a,b>>> notation
+#ifdef __CUDACC__
+#define CUDA_KERNEL(...) <<< __VA_ARGS__ >>>
+#else
+#define CUDA_KERNEL(...) 
+#endif
+
 // Macro to check CUDA API errors
 #define CHECK_CUDA(func)                                                          \
     {                                                                             \
@@ -138,3 +145,5 @@ constexpr double SQRT2(1.41421356237309504880168872421);      // Approximation o
                    __LINE__, __FILE__);                               \
         }                                                             \
     }
+
+void __syncthreads();
