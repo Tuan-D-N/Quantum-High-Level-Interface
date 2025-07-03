@@ -17,7 +17,7 @@
 template <precision selectedPrecision>
 void quantumState_SV<selectedPrecision>::applyArbitaryGateUnsafe(std::span<const int> targets, std::span<const int> controls, std::span<const complex_type> matrix)
 {
-    THROW_BROAD_ERROR(applyGatesGeneral<selectedPrecision>(m_handle,
+    THROW_BROAD_ERROR(applyGatesGeneral<selectedPrecision>(m_custatevec_handle,
                                                            m_numberQubits,
                                                            matrix,
                                                            m_adjoint,
@@ -31,21 +31,24 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGateUnsafe(std::span<const
 template <precision selectedPrecision>
 quantumState_SV<selectedPrecision>::quantumState_SV(size_t nQubits)
 {
-    THROW_CUSTATEVECTOR(custatevecCreate(&m_handle));
+    THROW_CUSTATEVECTOR(custatevecCreate(&m_custatevec_handle));
+    THROW_CUSPARSE(cusparseCreate(&m_cusparse_handle));
     setNumberOfQubits(nQubits);
 }
 
 template <precision selectedPrecision>
 quantumState_SV<selectedPrecision>::quantumState_SV(std::span<const complex_type> stateVector)
 {
-    THROW_CUSTATEVECTOR(custatevecCreate(&m_handle));
+    THROW_CUSTATEVECTOR(custatevecCreate(&m_custatevec_handle));
+    THROW_CUSPARSE(cusparseCreate(&m_cusparse_handle));
     setStateVector(stateVector);
 }
 
 template <precision selectedPrecision>
 quantumState_SV<selectedPrecision>::~quantumState_SV()
 {
-    THROW_CUSTATEVECTOR(custatevecDestroy(m_handle));
+    THROW_CUSTATEVECTOR(custatevecDestroy(m_custatevec_handle));
+    THROW_CUSPARSE(cusparseDestroy(m_cusparse_handle));
     freeWorkspace();
     freeStateVector();
 }
@@ -163,7 +166,7 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::initializer_list
                                                            controls)                                         \
     {                                                                                                        \
         THROW_BROAD_ERROR(apply##GATE_NAME<selectedPrecision>(                                               \
-            m_handle,                                                                                        \
+            m_custatevec_handle,                                                                                        \
             m_numberQubits,                                                                                  \
             m_adjoint,                                                                                       \
             targets,                                                                                         \
@@ -181,7 +184,7 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::initializer_list
                                                            controls)                                         \
     {                                                                                                        \
         THROW_BROAD_ERROR(apply##GATE_NAME<selectedPrecision>(                                               \
-            m_handle,                                                                                        \
+            m_custatevec_handle,                                                                                        \
             m_numberQubits,                                                                                  \
             m_adjoint,                                                                                       \
             targets,                                                                                         \

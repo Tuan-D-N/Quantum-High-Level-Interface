@@ -2,6 +2,7 @@
 #include <custatevec.h>
 #include <cuda_runtime_api.h>
 #include <cuComplex.h>
+#include <cusparse.h>
 #include <iostream>
 #include <span>
 #include <vector>
@@ -25,7 +26,8 @@ private:
     size_t m_numberQubits = 0;
     int m_adjoint = static_cast<int>(false);
 
-    custatevecHandle_t m_handle;
+    custatevecHandle_t m_custatevec_handle;
+    cusparseHandle_t m_cusparse_handle;
     void *m_extraWorkspace = nullptr;
     size_t m_extraWorkspaceSizeInBytes = 0;
 
