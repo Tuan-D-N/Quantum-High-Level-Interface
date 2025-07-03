@@ -7,7 +7,7 @@
 #include "../functionality/WriteAdjMat.hpp"
 
 // theta slow, r fast
-int applyInterpolationMatrix(int evenqubits, cuDoubleComplex *rThetaVector, cuDoubleComplex *&xyVector)
+int applyInterpolationMatrix(int evenqubits, cuDoubleComplex *rThetaVector, cuDoubleComplex *xyVector)
 {
     // Host problem definition
     int A_num_rows = 1 << evenqubits;
@@ -75,6 +75,7 @@ int applyInterpolationMatrix(int evenqubits, cuDoubleComplex *rThetaVector, cuDo
     cusparseDestroyDnVec(vectorIn);
     cusparseDestroyDnVec(vectorOut);
 
+    CHECK_CUDA(cudaFree(dBuffer))
     CHECK_CUDA(cudaFree(dA_csrOffsets))
     CHECK_CUDA(cudaFree(dA_columns))
     CHECK_CUDA(cudaFree(dA_values))
