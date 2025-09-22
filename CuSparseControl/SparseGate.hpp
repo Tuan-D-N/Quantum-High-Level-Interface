@@ -3,6 +3,10 @@
 #include <device_launch_parameters.h>
 #include <c++/11/bits/specfun.h>
 #include <cuComplex.h>
+#include <vector>
+#include <cusparse.h>
+#include <stdlib.h>           // EXIT_FAILURE
+#include <cuda_runtime_api.h> // cudaMalloc, cudaMemcpy, etc.
 
 #ifdef __CUDACC__
 #define CUDA_KERNEL(...) <<< __VA_ARGS__ >>>
@@ -11,12 +15,13 @@
 #endif
 
 
-__global__ void apply_controlled_csr_kernel(
-    cuDoubleComplex *state,
-    int num_qubits,
-    int control_qubit,
-    int target_start,
-    int num_target_qubits,
-    const int *__restrict__ row_ptr,
-    const int *__restrict__ col_idx,
-    const cuDoubleComplex *__restrict__ values);
+int applySparseGate(
+    cusparseHandle_t handle,
+    int nQubits,
+    const int* d_csrRowPtrU,
+    const int* d_csrColIndU,
+    const cuDoubleComplex* d_csrValU,
+    const cuDoubleComplex* d_state_in,
+    cuDoubleComplex* d_state_out,
+    const std::vector<int>& targetQubits,
+    int nnzU);
