@@ -1,27 +1,40 @@
 #include <gtest/gtest.h>
 #include <vector>
 #include <cmath>
-#include "custatevec.h"  // cuQuantum headers
+#include <iostream>
+#include "custatevec.h"
 #include "cuda_runtime.h"
 #include "cusparse.h"
 #include "../CuSparseControl/SparseGate.hpp"
 #include "../CuQuantumControl/ApplyGates.hpp"
 
-// Helper: compare two device arrays approximately
 bool deviceArraysNear(const cuDoubleComplex* d1,
                       const cuDoubleComplex* d2,
                       int size,
                       double tol = 1e-12)
 {
+    // Transfer to host for comparison
     std::vector<cuDoubleComplex> h1(size), h2(size);
-    cudaMemcpy(h1.data(), d1, size*sizeof(cuDoubleComplex), cudaMemcpyDeviceToHost);
-    cudaMemcpy(h2.data(), d2, size*sizeof(cuDoubleComplex), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h1.data(), d1, size * sizeof(cuDoubleComplex), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h2.data(), d2, size * sizeof(cuDoubleComplex), cudaMemcpyHostToDevice);
+
+    bool are_near = true;
 
     for (int i = 0; i < size; i++) {
-        double diff = std::abs(h1[i].x - h2[i].x) + std::abs(h1[i].y - h2[i].y);
-        if (diff > tol) return false;
+        double diff_real = std::abs(h1[i].x - h2[i].x);
+        double diff_imag = std::abs(h1[i].y - h2[i].y);
+        double total_diff = diff_real + diff_imag;
+
+        if (total_diff > tol) {
+            // Found a difference, print it and keep checking to find all differences
+            std::cerr << "Difference at index " << i << ":\n"
+                      << "  d_sv1[" << i << "] = " << h1[i].x << " + " << h1[i].y << "i\n"
+                      << "  d_sv2[" << i << "] = " << h2[i].x << " + " << h2[i].y << "i\n"
+                      << "  Total difference = " << total_diff << " (tolerance = " << tol << ")\n";
+            are_near = false;
+        }
     }
-    return true;
+    return are_near;
 }
 
 // Test fixture
@@ -92,7 +105,7 @@ TEST_F(ApplyGateTest, CompareSparseVsCuStateVec) {
 
 
     
-    applyGatesGeneral<precision::bit_64>(
+    THROW_BROAD_ERROR(applyGatesGeneral<precision::bit_64>(
         custateHandle,
         nQubits,
         h_values,
@@ -102,7 +115,7 @@ TEST_F(ApplyGateTest, CompareSparseVsCuStateVec) {
         d_sv2,
         extraWorkspace,
         extraWorkspaceSizeInBytes
-    );
+    ));
     // --- Compare outputs
     EXPECT_TRUE(deviceArraysNear(d_sv1, d_sv2, dim));
 
