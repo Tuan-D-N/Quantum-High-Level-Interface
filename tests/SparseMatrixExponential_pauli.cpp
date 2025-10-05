@@ -55,20 +55,20 @@ static void runPauliTest(const std::vector<cuDoubleComplex> &A,
 
 TEST(ExpiPauliSparse, SigmaX)
 {
-    double θ = M_PI / 4;
-    std::vector<cuDoubleComplex> σx = {
-        {0, 0}, {θ, 0}, {θ, 0}, {0, 0}};
-    runPauliTest(σx, {{1, 0}, {0, 0}},
-                 {{cos(θ), 0}, {0, sin(θ)}}, 2);
+    double theta = M_PI / 4;
+    std::vector<cuDoubleComplex> pauli_x = {
+        {0, 0}, {theta, 0}, {theta, 0}, {0, 0}};
+    runPauliTest(pauli_x, {{1, 0}, {0, 0}},
+                 {{cos(theta), 0}, {0, sin(theta)}}, 2);
 }
 
 TEST(ExpiPauliSparse, SigmaZ)
 {
-    double θ = M_PI / 3, s = 1 / std::sqrt(2.0);
-    std::vector<cuDoubleComplex> σz = {
-        {θ, 0}, {0, 0}, {0, 0}, {-θ, 0}};
-    runPauliTest(σz, {{s, 0}, {s, 0}},
-                 {{s * cos(θ), s * sin(θ)}, {s * cos(-θ), s * sin(-θ)}}, 2);
+    double theta = M_PI / 3, s = 1 / std::sqrt(2.0);
+    std::vector<cuDoubleComplex> pauli_z = {
+        {theta, 0}, {0, 0}, {0, 0}, {-theta, 0}};
+    runPauliTest(pauli_z, {{s, 0}, {s, 0}},
+                 {{s * cos(theta), s * sin(theta)}, {s * cos(-theta), s * sin(-theta)}}, 2);
 }
 
 // Controlled 2-qubit test
@@ -76,11 +76,11 @@ TEST(ExpiPauliSparse, ControlledX)
 {
     cusparseHandle_t h;
     cusparseCreate(&h);
-    double θ = M_PI / 4;
+    double theta = M_PI / 4;
     int nQ = 2, d = 2, nnz = 4, order = 25;
     std::vector<int> row = {0, 2, 4}, col = {0, 1, 0, 1};
     std::vector<cuDoubleComplex> val = {
-        {0, 0}, {θ, 0}, {θ, 0}, {0, 0}};
+        {0, 0}, {theta, 0}, {theta, 0}, {0, 0}};
     int *drow, *dcol;
     cuDoubleComplex *dval, *dstate;
     cudaMalloc(&drow, (d + 1) * sizeof(int));
@@ -96,8 +96,8 @@ TEST(ExpiPauliSparse, ControlledX)
     std::vector<int> targ = {0}, ctrl = {1};
     applyControlledExpTaylor_cusparse(h, nQ, drow, dcol, dval, dstate, targ, ctrl, nnz, order);
     std::vector<std::complex<double>> ref(4, {0, 0});
-    ref[2] = {cos(θ), 0};
-    ref[3] = {0, sin(θ)};
+    ref[2] = {cos(theta), 0};
+    ref[3] = {0, sin(theta)};
     EXPECT_TRUE(deviceNear(dstate, ref, 4));
     cudaFree(drow);
     cudaFree(dcol);
