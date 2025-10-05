@@ -1,3 +1,4 @@
+#pragma once
 #include <device_launch_parameters.h>
 #include <cuComplex.h>
 #include <cuda_runtime_api.h> // cudaMalloc, cudaMemcpy, etc.

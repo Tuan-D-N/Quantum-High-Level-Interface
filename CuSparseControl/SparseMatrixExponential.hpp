@@ -1,3 +1,4 @@
+#pragma once
 #include <cuda_runtime.h>
 #include <cusparse.h>
 #include <cuComplex.h>
