@@ -1,7 +1,6 @@
 #include <cmath>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
-#include <c++/11/bits/specfun.h>
 #include <cuComplex.h>
 #include <vector>
 #include <cusparse.h>
@@ -15,6 +14,18 @@
 #endif
 
 
+/// @brief Applies a sparse quantum gate U (in CSR format) to a quantum state vector.
+///        The operation performed is: d_state_out = U * d_state_in.
+/// @param handle The cuSPARSE library handle.
+/// @param nQubits The total number of qubits in the system (defines vector and matrix dimension $N=2^{\text{nQubits}}$).
+/// @param d_csrRowPtrU Device pointer to the CSR row pointers of the sparse gate U.
+/// @param d_csrColIndU Device pointer to the CSR column indices of the sparse gate U.
+/// @param d_csrValU Device pointer to the non-zero values of the sparse gate U (cuDoubleComplex for quantum state).
+/// @param d_state_in Device pointer to the input quantum state vector (dense, $|\psi_{\text{in}}\rangle$).
+/// @param d_state_out Device pointer to the output quantum state vector (dense, $|\psi_{\text{out}}\rangle$).
+/// @param targetQubits List of target qubits that the gate U operates on (passed as context, not directly used in the raw SpMV call).
+/// @param nnzU The number of non-zero elements in the sparse gate U.
+/// @return An integer status code (0 for success, non-zero for error).
 int applySparseGate(
     cusparseHandle_t handle,
     int nQubits,
