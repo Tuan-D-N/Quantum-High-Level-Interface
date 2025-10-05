@@ -340,6 +340,139 @@ TEST_P(ApplyGateSparse, CompareSparseVsCuStateVec_DeterministicGate)
     custatevecDestroy(custateHandle);
 }
 
+TEST_P(ApplyGateSparse, CompareSparseVsCuStateVec_DeterministicGate_control_gate)
+{
+    // Skip if kQubits is too large or too small
+    if (kQubits < 1 || kQubits > 10)
+    {
+        GTEST_SKIP() << "Skipping deterministic gate test for kQubits = " << kQubits;
+    }
+
+    custatevecHandle_t custateHandle;
+    THROW_CUSTATEVECTOR(custatevecCreate(&custateHandle));
+    void *extraWorkspace = nullptr;
+    size_t extraWorkspaceSizeInBytes = 0;
+
+    cusparseHandle_t cusparseHandle;
+    THROW_CUSPARSE(cusparseCreate(&cusparseHandle));
+
+    // Determine gate size
+    int d = 1 << kQubits;
+    int dense_size = d * d;
+
+    // --- Generate a deterministic gate matrix
+    std::vector<cuDoubleComplex> h_dense_matrix(dense_size);
+    for (int i = 0; i < d; ++i)
+    {
+        for (int j = 0; j < d; ++j)
+        {
+            h_dense_matrix[i * d + j] = make_cuDoubleComplex(
+                static_cast<double>(i + j) / static_cast<double>(d),
+                static_cast<double>(i - j) / static_cast<double>(d));
+        }
+    }
+
+    // --- Convert the dense matrix to CSR format
+    std::vector<int> h_rowPtr_sparse;
+    std::vector<int> h_colInd_sparse;
+    std::vector<cuDoubleComplex> h_values_sparse;
+
+    h_rowPtr_sparse.push_back(0);
+    for (int row = 0; row < d; ++row)
+    {
+        for (int col = 0; col < d; ++col)
+        {
+            cuDoubleComplex val = h_dense_matrix[row * d + col];
+            // Treat very small values as zero for sparsity
+            if (std::abs(val.x) > 1e-15 || std::abs(val.y) > 1e-15)
+            {
+                h_colInd_sparse.push_back(col);
+                h_values_sparse.push_back(val);
+            }
+        }
+        h_rowPtr_sparse.push_back(h_values_sparse.size());
+    }
+
+    int nnz_sparse = h_values_sparse.size();
+
+    // --- Copy sparse data to device
+    int *d_rowPtr_sparse, *d_colInd_sparse;
+    cuDoubleComplex *d_values_sparse;
+    cudaMalloc(&d_rowPtr_sparse, (d + 1) * sizeof(int));
+    cudaMalloc(&d_colInd_sparse, nnz_sparse * sizeof(int));
+    cudaMalloc(&d_values_sparse, nnz_sparse * sizeof(cuDoubleComplex));
+    cudaMemcpy(d_rowPtr_sparse, h_rowPtr_sparse.data(), (d + 1) * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_colInd_sparse, h_colInd_sparse.data(), nnz_sparse * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_values_sparse, h_values_sparse.data(), nnz_sparse * sizeof(cuDoubleComplex), cudaMemcpyHostToDevice);
+
+    // --- Copy dense matrix to device
+    cuDoubleComplex *d_dense_matrix;
+    cudaMalloc(&d_dense_matrix, dense_size * sizeof(cuDoubleComplex));
+    cudaMemcpy(d_dense_matrix, h_dense_matrix.data(), dense_size * sizeof(cuDoubleComplex), cudaMemcpyHostToDevice);
+
+    // Select k random target qubits
+    std::vector<int> targetQubits;
+    std::vector<int> allQubits(nQubits);
+    std::iota(allQubits.begin(), allQubits.end(), 0);
+
+    // Use a fixed seed for reproducibility
+    std::mt19937 gen(0);
+    std::shuffle(allQubits.begin(), allQubits.end(), gen);
+
+    for (int i = 0; i < kQubits; ++i)
+    {
+        targetQubits.push_back(allQubits[i]);
+    }
+    // std::sort(targetQubits.begin(), targetQubits.end());
+
+    // --- Select one random control qubit that is NOT in targetQubits
+    std::vector<int> controlQubits;
+    std::vector<int> availableControls;
+
+    // Build a list of qubits not used as targets
+    for (int q = 0; q < nQubits; ++q)
+    {
+        if (std::find(targetQubits.begin(), targetQubits.end(), q) == targetQubits.end())
+            availableControls.push_back(q);
+    }
+
+    // Pick one control qubit at random if available
+    if (!availableControls.empty())
+    {
+        std::uniform_int_distribution<int> dist(0, static_cast<int>(availableControls.size() - 1));
+        controlQubits.push_back(availableControls[dist(gen)]);
+    }
+
+    std::sort(controlQubits.begin(), controlQubits.end());
+
+    // --- Apply custom sparse function
+    THROW_BROAD_ERROR(applySparseGate(cusparseHandle, nQubits, d_rowPtr_sparse, d_colInd_sparse, d_values_sparse,
+                                      d_sv1, d_sv1, targetQubits, controlQubits, nnz_sparse));
+
+    // --- Apply cuQuantum's applyGatesGeneral with the dense matrix
+    THROW_BROAD_ERROR(applyGatesGeneral<precision::bit_64>(
+        custateHandle,
+        nQubits,
+        std::span(h_dense_matrix),
+        true, // Matrix is on host
+        targetQubits,
+        controlQubits,
+        d_sv2,
+        extraWorkspace,
+        extraWorkspaceSizeInBytes));
+
+    // --- Compare outputs
+    EXPECT_TRUE(deviceArraysNear(d_sv1, d_sv2, dim));
+
+    // Cleanup
+    cudaFree(d_rowPtr_sparse);
+    cudaFree(d_colInd_sparse);
+    cudaFree(d_values_sparse);
+    cudaFree(d_dense_matrix);
+    cusparseDestroy(cusparseHandle);
+    custatevecDestroy(custateHandle);
+}
+
 // Global instantiation of test suite
 INSTANTIATE_TEST_SUITE_P(
     SparseGateTestSuite,
