@@ -5,31 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include "../CudaControl/Helper.hpp"
-
-#ifdef __CUDACC__
-#define CUDA_KERNEL(...) <<< __VA_ARGS__ >>>
-#else
-#define CUDA_KERNEL(...)
-#endif
-
-// The gather and scatter kernels are still necessary for correctness and performance.
-__global__ void gather_kernel(cuDoubleComplex *d_out, const cuDoubleComplex *d_in, const int *d_offsets, int size)
-{
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < size)
-    {
-        d_out[i] = d_in[d_offsets[i]];
-    }
-}
-
-__global__ void scatter_kernel(cuDoubleComplex *d_out, const cuDoubleComplex *d_in, const int *d_offsets, int size)
-{
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < size)
-    {
-        d_out[d_offsets[i]] = d_in[i];
-    }
-}
+#include "SparseHelper.hpp"
 
 // Apply sparse gate U to given qubits (q0, q1, ..., qk).
 // - nQubits: total system qubits
