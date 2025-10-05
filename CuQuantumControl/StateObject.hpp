@@ -16,12 +16,15 @@
 #include "MatriceDefinitions.hpp"
 #include "Precision.hpp"
 
+#include "../CuSparseControl/ApplySparseCSRMat.hpp"
+#include "../CuSparseControl/SparseMatrixExponential.hpp"
+
 template <precision selectedPrecision>
 class quantumState_SV
 {
 private:
     using complex_type = PRECISION_TYPE_COMPLEX(selectedPrecision);
-    
+
     complex_type *m_stateVector = nullptr;
     size_t m_numberQubits = 0;
     int m_adjoint = static_cast<int>(false);
@@ -57,6 +60,27 @@ public:
     void applyArbitaryGate(std::initializer_list<const int> targets,
                            std::initializer_list<const int> controls,
                            std::initializer_list<const complex_type> matrix);
+
+    // =============================================================
+    // Apply a sparse CSR matrix directly to m_stateVector (in place)
+    // =============================================================
+    int applySparseMatrix(
+        std::span<int> csrOffsets,
+        std::span<int> csrColumns,
+        std::span<cuDoubleComplex> csrValues);
+
+    // =============================================================
+    // Apply e^{iA} (using truncated Taylor series) to the statevector
+    // =============================================================
+    int applyMatrixExponential(
+        const int *d_csrRowPtr,
+        const int *d_csrColInd,
+        const cuDoubleComplex *d_csrVal,
+        int nnz,
+        int order,
+        const std::vector<int> &targetQubits,
+        const std::vector<int> &controlQubits = {});
+
     // clang-format off
 #define MAKE_GATES(GATE_NAME, NUMBER_OF_EXTRA_PARAMS)                     \
     void GATE_NAME(________SELECT_EXTRA_ARGS_PRE(NUMBER_OF_EXTRA_PARAMS)  \
@@ -67,7 +91,6 @@ public:
                    std::initializer_list<const int> targets,              \
                    std::initializer_list<const int> controls = {});
     // clang-format on
-
 
     MAKE_GATES(X, 0)
     MAKE_GATES(Y, 0)

@@ -14,6 +14,70 @@
 #include "Precision.hpp"
 #include "StateObject.hpp"
 
+// =============================================================
+// Apply a sparse CSR matrix directly to m_stateVector (in place)
+// =============================================================
+template <precision selectedPrecision>
+int quantumState_SV<selectedPrecision>::applySparseMatrix(
+    std::span<int> csrOffsets,
+    std::span<int> csrColumns,
+    std::span<cuDoubleComplex> csrValues)
+{
+    assert(m_cusparse_handle != nullptr);
+    assert(m_stateVector != nullptr);
+
+    // Allocate a temporary device buffer for intermediate output
+    size_t dim = 1ull << m_numberQubits;
+    cuDoubleComplex *d_temp = nullptr;
+    CHECK_CUDA(cudaMalloc(&d_temp, dim * sizeof(cuDoubleComplex)));
+
+    // Perform sparse multiplication
+    int status = applySparseCSRMat(
+        m_cusparse_handle,
+        csrOffsets,
+        csrColumns,
+        csrValues,
+        std::span<cuDoubleComplex>(m_stateVector, dim),
+        std::span<cuDoubleComplex>(d_temp, dim));
+
+    // Overwrite m_stateVector with the result
+    CHECK_CUDA(cudaMemcpy(m_stateVector, d_temp,
+                          dim * sizeof(cuDoubleComplex),
+                          cudaMemcpyDeviceToDevice));
+
+    CHECK_CUDA(cudaFree(d_temp));
+    return status;
+}
+
+// =============================================================
+// Apply e^{iA} (using truncated Taylor series) to the statevector
+// =============================================================
+template <precision selectedPrecision>
+int quantumState_SV<selectedPrecision>::applyMatrixExponential(
+    const int *d_csrRowPtr,
+    const int *d_csrColInd,
+    const cuDoubleComplex *d_csrVal,
+    int nnz,
+    int order,
+    const std::vector<int> &targetQubits,
+    const std::vector<int> &controlQubits = {})
+{
+    assert(m_cusparse_handle != nullptr);
+    assert(m_stateVector != nullptr);
+
+    return applyControlledExpTaylor_cusparse(
+        m_cusparse_handle,
+        static_cast<int>(m_numberQubits),
+        d_csrRowPtr,
+        d_csrColInd,
+        d_csrVal,
+        m_stateVector,
+        targetQubits,
+        controlQubits,
+        nnz,
+        order);
+}
+
 template <precision selectedPrecision>
 void quantumState_SV<selectedPrecision>::applyArbitaryGateUnsafe(std::span<const int> targets, std::span<const int> controls, std::span<const complex_type> matrix)
 {
@@ -166,7 +230,7 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::initializer_list
                                                            controls)                                         \
     {                                                                                                        \
         THROW_BROAD_ERROR(apply##GATE_NAME<selectedPrecision>(                                               \
-            m_custatevec_handle,                                                                                        \
+            m_custatevec_handle,                                                                             \
             m_numberQubits,                                                                                  \
             m_adjoint,                                                                                       \
             targets,                                                                                         \
@@ -184,7 +248,7 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::initializer_list
                                                            controls)                                         \
     {                                                                                                        \
         THROW_BROAD_ERROR(apply##GATE_NAME<selectedPrecision>(                                               \
-            m_custatevec_handle,                                                                                        \
+            m_custatevec_handle,                                                                             \
             m_numberQubits,                                                                                  \
             m_adjoint,                                                                                       \
             targets,                                                                                         \
