@@ -127,6 +127,7 @@ int expiAv_taylor_cusparse(
     cusparseDestroyDnVec(vecX);
     cusparseDestroyDnVec(vecY);
     cusparseDestroySpMat(matA);
+    return 0;
 }
 
 // ===============================
