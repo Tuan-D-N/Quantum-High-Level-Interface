@@ -18,6 +18,33 @@ static bool deviceNear(const cuDoubleComplex *d_vec,
     return true;
 }
 
+static bool deviceNear(const cuDoubleComplex *d_vec1,
+                       const cuDoubleComplex *d_vec2,
+                       int n,
+                       double tol = 1e-8)
+{
+    std::vector<cuDoubleComplex> h1(n), h2(n);
+    cudaMemcpy(h1.data(), d_vec1, n * sizeof(cuDoubleComplex), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h2.data(), d_vec2, n * sizeof(cuDoubleComplex), cudaMemcpyDeviceToHost);
+
+    for (int i = 0; i < n; ++i)
+    {
+        double dr = h1[i].x - h2[i].x;
+        double di = h1[i].y - h2[i].y;
+        double diff = std::sqrt(dr * dr + di * di);
+        if (diff > tol)
+        {
+            std::cerr << "Mismatch at index " << i << "\n"
+                      << "  Actual:   (" << h1[i].x << ", " << h1[i].y << "i)\n"
+                      << "  Expected: (" << h2[i].x << ", " << h2[i].y << "i)\n"
+                      << "  Difference magnitude: " << diff << "\n"
+                      << "  Tolerance: " << tol << std::endl;
+            return false;
+        }
+    }
+    return true;
+}
+
 static void runPauliTest(const std::vector<cuDoubleComplex> &A,
                          const std::vector<std::complex<double>> &vin,
                          const std::vector<std::complex<double>> &vexp,
@@ -104,4 +131,126 @@ TEST(ExpiPauliSparse, ControlledX)
     cudaFree(dval);
     cudaFree(dstate);
     cusparseDestroy(h);
+}
+
+// ======================================================
+// σx on first qubit
+// ======================================================
+TEST(ExpiPauliSparse, SigmaX_FirstQubit)
+{
+    double theta = M_PI / 6;
+    // σx ⊗ I (4×4)
+    std::vector<cuDoubleComplex> A = {
+        {0, 0}, {theta, 0}, {0, 0}, {0, 0}, {theta, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {theta, 0}, {0, 0}, {0, 0}, {theta, 0}, {0, 0}};
+    runPauliTest(A,
+                 {{1, 0}, {0, 0}, {0, 0}, {0, 0}}, // |00>
+                 {{cos(theta), 0}, {0, sin(theta)}, {0, 0}, {0, 0}},
+                 4, 30);
+}
+
+// ======================================================
+// σx on second qubit
+// ======================================================
+TEST(ExpiPauliSparse, SigmaX_SecondQubit)
+{
+    double theta = M_PI / 5;
+    // I ⊗ σx (4×4)
+    std::vector<cuDoubleComplex> A = {
+        {0, 0}, {theta, 0}, {0, 0}, {0, 0}, {theta, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {theta, 0}, {0, 0}, {0, 0}, {theta, 0}, {0, 0}};
+    runPauliTest(A,
+                 {{1, 0}, {0, 0}, {0, 0}, {0, 0}}, // |00>
+                 {{cos(theta), 0}, {0, sin(theta)}, {0, 0}, {0, 0}},
+                 4, 30);
+}
+
+// ======================================================
+// σx⊗σx — simultaneous flip on both qubits
+// ======================================================
+TEST(ExpiPauliSparse, SigmaX_Tensor_SigmaX)
+{
+    double theta = M_PI / 4;
+    // σx⊗σx (4×4)
+    std::vector<cuDoubleComplex> A = {
+        {0, 0}, {0, 0}, {0, 0}, {theta, 0}, {0, 0}, {0, 0}, {theta, 0}, {0, 0}, {0, 0}, {theta, 0}, {0, 0}, {0, 0}, {theta, 0}, {0, 0}, {0, 0}, {0, 0}};
+    runPauliTest(A,
+                 {{1, 0}, {0, 0}, {0, 0}, {0, 0}}, // |00>
+                 {{cos(theta), 0}, {0, 0}, {0, 0}, {0, sin(theta)}},
+                 4, 30);
+}
+
+// ======================================================
+// σz⊗σz — phase rotation
+// ======================================================
+TEST(ExpiPauliSparse, SigmaZ_Tensor_SigmaZ)
+{
+    double theta = M_PI / 3;
+    // σz⊗σz = diag(1, -1, -1, 1)
+    std::vector<cuDoubleComplex> A = {
+        {theta, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {-theta, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {-theta, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {theta, 0}};
+    double c = std::cos(theta), s = std::sin(theta);
+    runPauliTest(A,
+                 {{1 / std::sqrt(2.0), 0}, {1 / std::sqrt(2.0), 0}, {0, 0}, {0, 0}}, // (|00>+|01>)/√2
+                 {{c / sqrt(2.0), s / sqrt(2.0)}, {c / sqrt(2.0), -s / sqrt(2.0)}, {0, 0}, {0, 0}},
+                 4, 30);
+}
+
+TEST(ExpiPauliSparse, Controlled_NoControl_Equals_Uncontrolled4by4)
+{
+    double theta = M_PI / 4;
+    int nQubits = 2;
+    int d = 4;
+    int nnz = d * d;
+    int order = 30;
+
+    // σx ⊗ I  (acts only on first qubit)
+    std::vector<cuDoubleComplex> A = {
+        {0, 0}, {theta, 0}, {0, 0}, {0, 0}, {theta, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {theta, 0}, {0, 0}, {0, 0}, {theta, 0}, {0, 0}};
+
+    // Initial |00>
+    std::vector<cuDoubleComplex> h_state(d, {0, 0});
+    h_state[0] = {1, 0};
+
+    // Device setup
+    std::vector<int> row(d + 1), col(nnz);
+    for (int i = 0; i <= d; ++i)
+        row[i] = i * d;
+    for (int i = 0; i < nnz; ++i)
+        col[i] = i % d;
+
+    int *d_row, *d_col;
+    cuDoubleComplex *d_val, *d_state1, *d_state2;
+    cudaMalloc(&d_row, (d + 1) * sizeof(int));
+    cudaMalloc(&d_col, nnz * sizeof(int));
+    cudaMalloc(&d_val, nnz * sizeof(cuDoubleComplex));
+    cudaMalloc(&d_state1, d * sizeof(cuDoubleComplex));
+    cudaMalloc(&d_state2, d * sizeof(cuDoubleComplex));
+    cudaMemcpy(d_row, row.data(), (d + 1) * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_col, col.data(), nnz * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_val, A.data(), nnz * sizeof(cuDoubleComplex), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_state1, h_state.data(), d * sizeof(cuDoubleComplex), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_state2, h_state.data(), d * sizeof(cuDoubleComplex), cudaMemcpyHostToDevice);
+
+    cusparseHandle_t handle;
+    cusparseCreate(&handle);
+
+    // Run uncontrolled version
+    expiAv_taylor_cusparse(handle, d, nnz, order, d_row, d_col, d_val, d_state1);
+
+    // Run controlled version (no controls)
+    std::vector<int> targetQubits = {0, 1};
+    std::vector<int> controlQubits; // empty
+    applyControlledExpTaylor_cusparse(handle, nQubits,
+                                      d_row, d_col, d_val, d_state2,
+                                      targetQubits, controlQubits,
+                                      nnz, order);
+
+    // Compare
+    EXPECT_TRUE(deviceNear(d_state1, d_state2, d));
+
+    cudaFree(d_row);
+    cudaFree(d_col);
+    cudaFree(d_val);
+    cudaFree(d_state1);
+    cudaFree(d_state2);
+    cusparseDestroy(handle);
 }

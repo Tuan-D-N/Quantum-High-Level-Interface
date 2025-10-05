@@ -14,7 +14,7 @@
 // ===============================
 
 // out[i] += (i^k * tmp[i] / k!)
-__global__ void add_div_kernel_complex(cuDoubleComplex *out, const cuDoubleComplex *tmp, int n, int k)
+__global__ void add_div_kernel_complex(cuDoubleComplex *out, const cuDoubleComplex *tmp, int n, int k, double factorial_track)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= n)
@@ -38,7 +38,7 @@ __global__ void add_div_kernel_complex(cuDoubleComplex *out, const cuDoubleCompl
         break;
     }
 
-    double invk = 1.0 / static_cast<double>(k);
+    double invk = 1.0 / factorial_track;
     cuDoubleComplex scale = make_cuDoubleComplex(invk, 0.0);
     cuDoubleComplex term = cuCmul(i_powk, cuCmul(scale, tmp[i]));
     out[i] = cuCadd(out[i], term);
@@ -81,23 +81,23 @@ int expiAv_taylor_cusparse(
 
     // Create sparse matrix descriptor
     cusparseSpMatDescr_t matA;
-    cusparseDnVecDescr_t vecX, vecY;
-
     CHECK_CUSPARSE(cusparseCreateCsr(
         &matA, n, n, nnz,
         (void *)d_csrRowPtr, (void *)d_csrColInd, (void *)d_csrVal,
         CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I,
         CUSPARSE_INDEX_BASE_ZERO, CUDA_C_64F));
 
-    // Allocate single temporary vector
-    cuDoubleComplex *d_tmp;
-    CHECK_CUDA(cudaMalloc(&d_tmp, n * sizeof(cuDoubleComplex)));
-    CHECK_CUDA(cudaMemcpy(d_tmp, d_out, n * sizeof(cuDoubleComplex), cudaMemcpyDeviceToDevice));
+    // Allocate two buffers
+    cuDoubleComplex *d_tmp_in, *d_tmp_out;
+    CHECK_CUDA(cudaMalloc(&d_tmp_in, n * sizeof(cuDoubleComplex)));
+    CHECK_CUDA(cudaMalloc(&d_tmp_out, n * sizeof(cuDoubleComplex)));
+    CHECK_CUDA(cudaMemcpy(d_tmp_in, d_out, n * sizeof(cuDoubleComplex), cudaMemcpyDeviceToDevice));
 
-    CHECK_CUSPARSE(cusparseCreateDnVec(&vecX, n, d_tmp, CUDA_C_64F));
-    CHECK_CUSPARSE(cusparseCreateDnVec(&vecY, n, d_tmp, CUDA_C_64F));
+    cusparseDnVecDescr_t vecX, vecY;
+    CHECK_CUSPARSE(cusparseCreateDnVec(&vecX, n, d_tmp_in, CUDA_C_64F));
+    CHECK_CUSPARSE(cusparseCreateDnVec(&vecY, n, d_tmp_out, CUDA_C_64F));
 
-    // Workspace buffer
+    // Workspace
     size_t bufferSize = 0;
     void *dBuffer = nullptr;
     CHECK_CUSPARSE(cusparseSpMV_bufferSize(
@@ -109,22 +109,30 @@ int expiAv_taylor_cusparse(
     int threads = 256;
     int blocks = (n + threads - 1) / threads;
 
+    double factorial_track = 1;
     for (int k = 1; k <= order; ++k)
     {
-        // d_tmp = A * d_tmp
+        factorial_track *= k;
+
+        // d_tmp_out = A * d_tmp_in
         CHECK_CUSPARSE(cusparseSpMV(
             handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
             &alpha, matA, vecX, &beta, vecY,
             CUDA_C_64F, CUSPARSE_SPMV_ALG_DEFAULT, dBuffer));
 
-        // out += (i^k / k!) * tmp
-        add_div_kernel_complex CUDA_KERNEL(blocks, threads)(d_out, d_tmp, n, k);
+        // Add term to output
+        add_div_kernel_complex CUDA_KERNEL(blocks, threads)(d_out, d_tmp_out, n, k, factorial_track);
         CHECK_CUDA(cudaDeviceSynchronize());
+
+        // Swap buffers for next iteration
+        std::swap(d_tmp_in, d_tmp_out);
+        CHECK_CUSPARSE(cusparseDnVecSetValues(vecX, d_tmp_in));
+        CHECK_CUSPARSE(cusparseDnVecSetValues(vecY, d_tmp_out));
     }
 
-    // Cleanup
     cudaFree(dBuffer);
-    cudaFree(d_tmp);
+    cudaFree(d_tmp_in);
+    cudaFree(d_tmp_out);
     cusparseDestroyDnVec(vecX);
     cusparseDestroyDnVec(vecY);
     cusparseDestroySpMat(matA);
