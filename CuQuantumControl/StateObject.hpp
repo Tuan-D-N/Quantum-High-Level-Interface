@@ -17,7 +17,7 @@
 #include "Precision.hpp"
 
 #include "../CuSparseControl/ApplySparseCSRMat.hpp"
-#include "../CuSparseControl/SparseMatrixExponential.hpp"
+#include "../CuSparseControl/TaylorSparseMatrixExponential.hpp"
 
 template <precision selectedPrecision>
 class quantumState_SV
