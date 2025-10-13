@@ -64,6 +64,13 @@ void quantumState_SV<selectedPrecision>::write_amplitudes_to_target_qubits(
 }
 
 template <precision selectedPrecision>
+void quantumState_SV<selectedPrecision>::zero_state()
+{
+    assert(m_stateVector != nullptr);
+    THROW_CUDA(cudaMemset(m_stateVector, 0, 1 << m_numberQubits));
+}
+
+template <precision selectedPrecision>
 void quantumState_SV<selectedPrecision>::normalise_SV()
 {
     assert(m_cusparse_handle != nullptr);

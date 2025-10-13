@@ -48,6 +48,7 @@ public:
 
     std::span<complex_type> getStateVector();
 
+    void zero_state();
     void normalise_SV();
 
     void setStateVector(std::span<const complex_type> stateVector);
