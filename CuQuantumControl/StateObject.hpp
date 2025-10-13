@@ -15,9 +15,11 @@
 #include "ApplyGates.hpp"
 #include "MatriceDefinitions.hpp"
 #include "Precision.hpp"
+#include "Normalise_d.hpp"
 
 #include "../CuSparseControl/ApplySparseCSRMat.hpp"
 #include "../CuSparseControl/TaylorSparseMatrixExponential.hpp"
+#include "../CuSparseControl/ChebyshevMatrixExponential.hpp"
 
 template <precision selectedPrecision>
 class quantumState_SV
@@ -45,6 +47,8 @@ public:
     ~quantumState_SV();
 
     std::span<complex_type> getStateVector();
+    
+    void normalise_SV();
 
     void setStateVector(std::span<const complex_type> stateVector);
     void setNumberOfQubits(size_t nQubits);

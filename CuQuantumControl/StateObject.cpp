@@ -14,6 +14,23 @@
 #include "Precision.hpp"
 #include "StateObject.hpp"
 
+template <precision selectedPrecision>
+void quantumState_SV<selectedPrecision>::normalise_SV()
+{
+    assert(m_cusparse_handle != nullptr);
+    assert(m_stateVector != nullptr);
+
+    if constexpr (std::is_same_v<complex_type, cuDoubleComplex>)
+    {
+        size_t length = 1ull << m_numberQubits;
+        THROW_CUDA(square_normalize_statevector_u64(m_stateVector, length, nullptr));
+    }
+    else
+    {
+        throw std::runtime_error("Error: get_state_span is not implemented/supported for single precision (cuComplex).");
+    }
+}
+
 // =============================================================
 // Apply a sparse CSR matrix directly to m_stateVector (in place)
 // =============================================================
@@ -127,7 +144,6 @@ int quantumState_SV<selectedPrecision>::applyMatrixExponential_chebyshev(
             "Error: applyMatrixExponential_chebyshev is not implemented/supported for single precision (cuComplex).");
     }
 }
-
 
 template <precision selectedPrecision>
 void quantumState_SV<selectedPrecision>::applyArbitaryGateUnsafe(std::span<const int> targets, std::span<const int> controls, std::span<const complex_type> matrix)
