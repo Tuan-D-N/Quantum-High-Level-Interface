@@ -26,27 +26,34 @@ int quantumState_SV<selectedPrecision>::applySparseMatrix(
     assert(m_cusparse_handle != nullptr);
     assert(m_stateVector != nullptr);
 
-    // Allocate a temporary device buffer for intermediate output
-    size_t dim = 1ull << m_numberQubits;
-    cuDoubleComplex *d_temp = nullptr;
-    CHECK_CUDA(cudaMalloc(&d_temp, dim * sizeof(cuDoubleComplex)));
+    if constexpr (std::is_same_v<complex_type, cuDoubleComplex>)
+    {
+        // Allocate a temporary device buffer for intermediate output
+        size_t dim = 1ull << m_numberQubits;
+        cuDoubleComplex *d_temp = nullptr;
+        CHECK_CUDA(cudaMalloc(&d_temp, dim * sizeof(cuDoubleComplex)));
 
-    // Perform sparse multiplication
-    int status = applySparseCSRMat(
-        m_cusparse_handle,
-        csrOffsets,
-        csrColumns,
-        csrValues,
-        std::span<cuDoubleComplex>(m_stateVector, dim),
-        std::span<cuDoubleComplex>(d_temp, dim));
+        // Perform sparse multiplication
+        int status = applySparseCSRMat(
+            m_cusparse_handle,
+            csrOffsets,
+            csrColumns,
+            csrValues,
+            std::span<cuDoubleComplex>(m_stateVector, dim),
+            std::span<cuDoubleComplex>(d_temp, dim));
 
-    // Overwrite m_stateVector with the result
-    CHECK_CUDA(cudaMemcpy(m_stateVector, d_temp,
-                          dim * sizeof(cuDoubleComplex),
-                          cudaMemcpyDeviceToDevice));
+        // Overwrite m_stateVector with the result
+        CHECK_CUDA(cudaMemcpy(m_stateVector, d_temp,
+                              dim * sizeof(cuDoubleComplex),
+                              cudaMemcpyDeviceToDevice));
 
-    CHECK_CUDA(cudaFree(d_temp));
-    return status;
+        CHECK_CUDA(cudaFree(d_temp));
+        return status;
+    }
+    else
+    {
+        throw std::runtime_error("Error: get_state_span is not implemented/supported for single precision (cuComplex).");
+    }
 }
 
 // =============================================================
@@ -62,20 +69,27 @@ int quantumState_SV<selectedPrecision>::applyMatrixExponential(
     const std::vector<int> &targetQubits,
     const std::vector<int> &controlQubits)
 {
-    assert(m_cusparse_handle != nullptr);
-    assert(m_stateVector != nullptr);
+    if constexpr (std::is_same_v<complex_type, cuDoubleComplex>)
+    {
+        assert(m_cusparse_handle != nullptr);
+        assert(m_stateVector != nullptr);
 
-    return applyControlledExpTaylor_cusparse(
-        m_cusparse_handle,
-        static_cast<int>(m_numberQubits),
-        d_csrRowPtr,
-        d_csrColInd,
-        d_csrVal,
-        m_stateVector,
-        targetQubits,
-        controlQubits,
-        nnz,
-        order);
+        return applyControlledExpTaylor_cusparse(
+            m_cusparse_handle,
+            static_cast<int>(m_numberQubits),
+            d_csrRowPtr,
+            d_csrColInd,
+            d_csrVal,
+            m_stateVector,
+            targetQubits,
+            controlQubits,
+            nnz,
+            order);
+    }
+    else
+    {
+        throw std::runtime_error("Error: get_state_span is not implemented/supported for single precision (cuComplex).");
+    }
 }
 
 template <precision selectedPrecision>
