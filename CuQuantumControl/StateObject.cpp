@@ -17,22 +17,123 @@
 // ===================== Implementation =====================
 
 template <precision selectedPrecision>
+int quantumState_SV<selectedPrecision>::accessor_get_raw(
+    std::span<const int> bitOrdering,
+    std::span<const int> maskBitString,
+    std::span<const int> maskOrdering,
+    std::span<PRECISION_TYPE_COMPLEX(selectedPrecision)> out_buffer)
+{
+    static_assert(selectedPrecision == precision::bit_32 || selectedPrecision == precision::bit_64,
+                  "Unsupported precision.");
+    assert(m_stateVector != nullptr);
+    assert(m_custatevec_handle != nullptr);
+
+    // Validate masks
+    if (maskBitString.size() != maskOrdering.size())
+        throw std::invalid_argument("maskBitString and maskOrdering must have the same length.");
+
+    // Expected full-subspace length = 2^{|bitOrdering|}
+    const std::size_t expected_len =
+        (bitOrdering.size() <= static_cast<std::size_t>(sizeof(std::size_t) * 8))
+            ? (std::size_t(1) << bitOrdering.size())
+            : 0; // overflow guard; practically unreachable for state sizes we can hold
+
+    if (expected_len == 0)
+        throw std::overflow_error("bitOrdering too large for subspace size computation.");
+
+    if (out_buffer.size() != expected_len)
+        throw std::invalid_argument("out_buffer.size() must equal 2^{|bitOrdering|} for auto-range accessor.");
+
+    // Auto range: [0, expected_len)
+    const int buffer_access_begin = 0;
+    const int buffer_access_end = static_cast<int>(expected_len);
+
+    // Forward to your existing accessor (range-explicit)
+    return accessor_get_raw(
+        static_cast<int>(m_numberQubits),
+        bitOrdering,
+        maskBitString,
+        maskOrdering,
+        buffer_access_begin,
+        buffer_access_end,
+        out_buffer);
+}
+
+template <precision selectedPrecision>
+int quantumState_SV<selectedPrecision>::accessor_get_by_qubits(
+    std::span<const int> readOrderingQubits,
+    std::span<const int> maskOrderingQubits,
+    std::span<const int> maskBitString,
+    std::span<PRECISION_TYPE_COMPLEX(selectedPrecision)> out_buffer)
+{
+    if (maskOrderingQubits.size() != maskBitString.size())
+        throw std::invalid_argument("maskBitString and maskOrderingQubits must have the same length.");
+
+    // Build contiguous arrays custatevec expects
+    std::vector<int> bitOrderingVec(readOrderingQubits.begin(), readOrderingQubits.end());
+    std::vector<int> maskOrderingVec(maskOrderingQubits.begin(), maskOrderingQubits.end());
+    std::vector<int> maskBitsVec(maskBitString.begin(), maskBitString.end());
+
+    // Bounds checks
+    for (int q : bitOrderingVec)
+        if (q < 0 || q >= static_cast<int>(m_numberQubits))
+            throw std::out_of_range("readOrderingQubits contains an out-of-range qubit.");
+
+    for (int q : maskOrderingVec)
+        if (q < 0 || q >= static_cast<int>(m_numberQubits))
+            throw std::out_of_range("maskOrderingQubits contains an out-of-range qubit.");
+
+    for (int b : maskBitsVec)
+        if (b != 0 && b != 1)
+            throw std::invalid_argument("maskBitString must contain only 0/1 values.");
+
+    // Expected full-subspace size = 2^{|readOrderingQubits|}
+    const std::size_t expected_len = (bitOrderingVec.size() <= static_cast<std::size_t>(sizeof(std::size_t) * 8))
+                                         ? (std::size_t(1) << bitOrderingVec.size())
+                                         : 0;
+
+    if (expected_len == 0)
+        throw std::overflow_error("readOrderingQubits too large for subspace size computation.");
+
+    if (out_buffer.size() != expected_len)
+        throw std::invalid_argument("out_buffer.size() must equal 2^{|readOrderingQubits|} for auto-range accessor.");
+
+    // Auto range: [0, 2^{|readOrderingQubits|})
+    const int buffer_access_begin = 0;
+    const int buffer_access_end = static_cast<int>(expected_len);
+
+    return accessor_get_raw(
+        static_cast<int>(m_numberQubits),
+        std::span<const int>(bitOrderingVec),
+        std::span<const int>(maskBitsVec),
+        std::span<const int>(maskOrderingVec),
+        buffer_access_begin,
+        buffer_access_end,
+        out_buffer);
+}
+
+template <precision selectedPrecision>
 void quantumState_SV<selectedPrecision>::write_amplitudes_to_target_qubits(
     std::span<const cuDoubleComplex> amplitudes_b,
     std::span<const std::uint64_t> targetQubits)
 {
     // This helper is implemented for double-precision statevectors only.
-    if constexpr (!std::is_same_v<complex_type, cuDoubleComplex>) {
+    if constexpr (!std::is_same_v<complex_type, cuDoubleComplex>)
+    {
         throw std::runtime_error(
             "write_amplitudes_to_target_qubits requires cuDoubleComplex (64-bit complex).");
-    } else {
+    }
+    else
+    {
         assert(m_stateVector != nullptr);
         // nQubits fits in uint64_t naturally
         const std::uint64_t nQubitsTotal = static_cast<std::uint64_t>(m_numberQubits);
 
         // Basic sanity: target indices must be within [0, nQubitsTotal)
-        for (std::uint64_t q : targetQubits) {
-            if (!(q < nQubitsTotal)) {
+        for (std::uint64_t q : targetQubits)
+        {
+            if (!(q < nQubitsTotal))
+            {
                 throw std::out_of_range("Target qubit index out of range.");
             }
         }
@@ -53,8 +154,10 @@ void quantumState_SV<selectedPrecision>::write_amplitudes_to_target_qubits(
     // Convert int -> uint64_t without C-style casts
     std::vector<std::uint64_t> tgt;
     tgt.reserve(static_cast<std::size_t>(targetQubits.size()));
-    for (int q : targetQubits) {
-        if (q < 0) {
+    for (int q : targetQubits)
+    {
+        if (q < 0)
+        {
             throw std::out_of_range("Target qubit index must be non-negative.");
         }
         tgt.push_back(static_cast<std::uint64_t>(q));

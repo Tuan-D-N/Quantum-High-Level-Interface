@@ -66,6 +66,45 @@ public:
                            std::initializer_list<const int> controls,
                            std::initializer_list<const complex_type> matrix);
 
+    // ===================== AUTO-RANGE: RAW (custatevec-ready arrays) =====================
+    //
+    // Reads the FULL subspace addressed by `bitOrdering` (i.e., size = 2^{|bitOrdering|})
+    // into `out_buffer`, with an optional mask (bitstring + ordering).
+    //
+    // You provide:
+    //  - bitOrdering: which qubits define the subspace order (LSB-first by position in this span)
+    //  - maskOrdering, maskBitString: which qubits are clamped to 0/1 and with what values
+    //  - out_buffer: must be sized exactly 2^{|bitOrdering|}; we auto-fill [begin=0, end=2^{|bitOrdering|})
+    //
+    // We still pass nIndexBits = total number of qubits (m_numberQubits) to cuStateVec,
+    // because the accessor view is created over the full state; the bitOrdering/mask define
+    // which subspace is *read* and in what order.
+    int accessor_get_raw(
+        std::span<const int> bitOrdering,
+        std::span<const int> maskBitString,
+        std::span<const int> maskOrdering,
+        std::span<PRECISION_TYPE_COMPLEX(selectedPrecision)> out_buffer);
+
+    // ===================== AUTO-RANGE: BY QUBIT LISTS (ergonomic) =====================
+    //
+    // Same auto-range behavior (read the FULL subspace), but takes qubit lists and builds
+    // the exact arrays cuStateVec needs. This is the version you’ll call most often.
+    //
+    // You provide:
+    //  - readOrderingQubits: which qubits define the subspace’s bit order
+    //  - maskOrderingQubits, maskBitString: optional clamp (0/1) on a set of qubits
+    //  - out_buffer: must be size 2^{|readOrderingQubits|}
+    //
+    // Internally:
+    //  - Validates indices / 0-1 mask values
+    //  - Computes expected len = 2^{|readOrderingQubits|}
+    //  - Auto-fills range [0, expected_len) and forwards to the raw version above
+    int accessor_get_by_qubits(
+        std::span<const int> readOrderingQubits,
+        std::span<const int> maskOrderingQubits,
+        std::span<const int> maskBitString,
+        std::span<PRECISION_TYPE_COMPLEX(selectedPrecision)> out_buffer);
+
     // Map |b> into the subspace spanned by targetQubits across all non-target blocks (64-bit targets)
     void write_amplitudes_to_target_qubits(
         std::span<const cuDoubleComplex> amplitudes_b,
