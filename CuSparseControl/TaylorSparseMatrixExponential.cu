@@ -1,4 +1,4 @@
-#include "SparseMatrixExponential.hpp"
+#include "TaylorSparseMatrixExponential.hpp"
 #include <cuda_runtime.h>
 #include <cusparse.h>
 #include <cuComplex.h>

@@ -4,7 +4,7 @@
 #include <vector>
 #include <complex>
 #include <cmath>
-#include "../CuSparseControl/SparseMatrixExponential.hpp"
+#include "../CuSparseControl/TaylorSparseMatrixExponential.hpp"
 
 static bool deviceNear(const cuDoubleComplex *d_vec,
                        const std::vector<std::complex<double>> &ref,
