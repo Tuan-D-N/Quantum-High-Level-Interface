@@ -60,7 +60,7 @@ int quantumState_SV<selectedPrecision>::applyMatrixExponential(
     int nnz,
     int order,
     const std::vector<int> &targetQubits,
-    const std::vector<int> &controlQubits = {})
+    const std::vector<int> &controlQubits)
 {
     assert(m_cusparse_handle != nullptr);
     assert(m_stateVector != nullptr);
