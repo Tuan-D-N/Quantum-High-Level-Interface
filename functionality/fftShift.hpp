@@ -29,11 +29,12 @@ void fftshift1D(T *data, int length)
 template <typename T>
 void fftshift1D(T *data, int size, int stride)
 {
-    int half = size / 2;
-    for (int i = 0; i < half; ++i)
-    {
-        std::swap(data[i * stride], data[(i + half) * stride]);
-    }
+    throw std::runtime_error("ERROR: not implemented.");
+    // int half = size / 2;
+    // for (int i = 0; i < half; ++i)
+    // {
+    //     std::swap(data[i * stride], data[(i + half) * stride]);
+    // }
 }
 
 template <typename T>
