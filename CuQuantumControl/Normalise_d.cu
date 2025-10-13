@@ -79,7 +79,7 @@ static __global__ void scale_inplace_u64(
  *
  * @return cudaError_t from the last CUDA runtime call (cudaSuccess on success)
  */
-inline cudaError_t square_normalize_statevector_u64(
+cudaError_t square_normalize_statevector_u64(
     cuDoubleComplex *d_sv,
     std::uint64_t length,
     double *out_norm2)
