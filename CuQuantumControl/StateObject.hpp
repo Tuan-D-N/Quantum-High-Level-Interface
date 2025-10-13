@@ -47,7 +47,7 @@ public:
     ~quantumState_SV();
 
     std::span<complex_type> getStateVector();
-    
+
     void normalise_SV();
 
     void setStateVector(std::span<const complex_type> stateVector);
@@ -64,6 +64,16 @@ public:
     void applyArbitaryGate(std::initializer_list<const int> targets,
                            std::initializer_list<const int> controls,
                            std::initializer_list<const complex_type> matrix);
+
+    // Map |b> into the subspace spanned by targetQubits across all non-target blocks (64-bit targets)
+    void write_amplitudes_to_target_qubits(
+        std::span<const cuDoubleComplex> amplitudes_b,
+        std::span<const std::uint64_t> targetQubits);
+
+    // Convenience overload: accepts int targets and forwards to the 64-bit version
+    void write_amplitudes_to_target_qubits(
+        std::span<const cuDoubleComplex> amplitudes_b,
+        std::span<const int> targetQubits);
 
     // =============================================================
     // Apply a sparse CSR matrix directly to m_stateVector (in place)

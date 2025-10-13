@@ -14,6 +14,55 @@
 #include "Precision.hpp"
 #include "StateObject.hpp"
 
+// ===================== Implementation =====================
+
+template <precision selectedPrecision>
+void quantumState_SV<selectedPrecision>::write_amplitudes_to_target_qubits(
+    std::span<const cuDoubleComplex> amplitudes_b,
+    std::span<const std::uint64_t> targetQubits)
+{
+    // This helper is implemented for double-precision statevectors only.
+    if constexpr (!std::is_same_v<complex_type, cuDoubleComplex>) {
+        throw std::runtime_error(
+            "write_amplitudes_to_target_qubits requires cuDoubleComplex (64-bit complex).");
+    } else {
+        assert(m_stateVector != nullptr);
+        // nQubits fits in uint64_t naturally
+        const std::uint64_t nQubitsTotal = static_cast<std::uint64_t>(m_numberQubits);
+
+        // Basic sanity: target indices must be within [0, nQubitsTotal)
+        for (std::uint64_t q : targetQubits) {
+            if (!(q < nQubitsTotal)) {
+                throw std::out_of_range("Target qubit index out of range.");
+            }
+        }
+
+        write_amplitudes_to_target_qubits_u64(
+            m_stateVector,
+            nQubitsTotal,
+            amplitudes_b,
+            targetQubits);
+    }
+}
+
+template <precision selectedPrecision>
+void quantumState_SV<selectedPrecision>::write_amplitudes_to_target_qubits(
+    std::span<const cuDoubleComplex> amplitudes_b,
+    std::span<const int> targetQubits)
+{
+    // Convert int -> uint64_t without C-style casts
+    std::vector<std::uint64_t> tgt;
+    tgt.reserve(static_cast<std::size_t>(targetQubits.size()));
+    for (int q : targetQubits) {
+        if (q < 0) {
+            throw std::out_of_range("Target qubit index must be non-negative.");
+        }
+        tgt.push_back(static_cast<std::uint64_t>(q));
+    }
+    // Forward to the 64-bit overload
+    write_amplitudes_to_target_qubits(amplitudes_b, std::span<const std::uint64_t>(tgt));
+}
+
 template <precision selectedPrecision>
 void quantumState_SV<selectedPrecision>::normalise_SV()
 {
