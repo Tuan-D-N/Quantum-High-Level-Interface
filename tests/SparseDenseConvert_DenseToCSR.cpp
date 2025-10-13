@@ -4,8 +4,7 @@
 #include <cuComplex.h>
 #include "../CuSparseControl/SparseDenseConvert.hpp"
 
-// Include the function under test
-// #include "dense_to_csr.hpp"
+
 
 // Small helper
 static inline cuDoubleComplex C(double r, double i = 0.0) {
