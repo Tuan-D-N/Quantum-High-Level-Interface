@@ -72,7 +72,7 @@ public:
     // =============================================================
     // Apply e^{iA} (using truncated Taylor series) to the statevector
     // =============================================================
-    int applyMatrixExponential(
+    int applyMatrixExponential_taylor(
         const int *d_csrRowPtr,
         const int *d_csrColInd,
         const cuDoubleComplex *d_csrVal,
@@ -80,6 +80,18 @@ public:
         int order,
         const std::vector<int> &targetQubits,
         const std::vector<int> &controlQubits = {});
+
+    // =============================================================
+    // Apply e^{-iA} (using truncated Taylor series) to the statevector
+    // =============================================================
+    int applyMatrixExponential_chebyshev(const int *d_csrRowPtr,
+                                         const int *d_csrColInd,
+                                         const cuDoubleComplex *d_csrVal,
+                                         int nnz,
+                                         int order,
+                                         const std::vector<int> &targetQubits,
+                                         const std::vector<int> &controlQubits,
+                                         double t);
 
     // clang-format off
 #define MAKE_GATES(GATE_NAME, NUMBER_OF_EXTRA_PARAMS)                     \

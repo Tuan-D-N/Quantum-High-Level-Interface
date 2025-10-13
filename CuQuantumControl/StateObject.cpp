@@ -60,7 +60,7 @@ int quantumState_SV<selectedPrecision>::applySparseMatrix(
 // Apply e^{iA} (using truncated Taylor series) to the statevector
 // =============================================================
 template <precision selectedPrecision>
-int quantumState_SV<selectedPrecision>::applyMatrixExponential(
+int quantumState_SV<selectedPrecision>::applyMatrixExponential_taylor(
     const int *d_csrRowPtr,
     const int *d_csrColInd,
     const cuDoubleComplex *d_csrVal,
@@ -91,6 +91,43 @@ int quantumState_SV<selectedPrecision>::applyMatrixExponential(
         throw std::runtime_error("Error: get_state_span is not implemented/supported for single precision (cuComplex).");
     }
 }
+
+template <precision selectedPrecision>
+int quantumState_SV<selectedPrecision>::applyMatrixExponential_chebyshev(
+    const int *d_csrRowPtr,
+    const int *d_csrColInd,
+    const cuDoubleComplex *d_csrVal,
+    int nnz,
+    int order,
+    const std::vector<int> &targetQubits,
+    const std::vector<int> &controlQubits,
+    double t /* = +1.0 for exp(-iA), -1.0 for exp(+iA) */)
+{
+    if constexpr (std::is_same_v<complex_type, cuDoubleComplex>)
+    {
+        assert(m_cusparse_handle != nullptr);
+        assert(m_stateVector != nullptr);
+
+        return applyControlledExpChebyshev_cusparse_host(
+            m_cusparse_handle,
+            static_cast<int>(m_numberQubits),
+            d_csrRowPtr,
+            d_csrColInd,
+            d_csrVal,
+            m_stateVector,
+            targetQubits,
+            controlQubits,
+            nnz,
+            order,
+            t);
+    }
+    else
+    {
+        throw std::runtime_error(
+            "Error: applyMatrixExponential_chebyshev is not implemented/supported for single precision (cuComplex).");
+    }
+}
+
 
 template <precision selectedPrecision>
 void quantumState_SV<selectedPrecision>::applyArbitaryGateUnsafe(std::span<const int> targets, std::span<const int> controls, std::span<const complex_type> matrix)
