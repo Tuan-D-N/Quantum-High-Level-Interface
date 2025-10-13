@@ -278,6 +278,7 @@ void quantumState_SV<selectedPrecision>::setNumberOfQubits(size_t nQubits)
     size_t nSV = 1 << nQubits;
 
     THROW_CUDA(cudaMallocManaged((void **)&m_stateVector, nSV * sizeof(complex_type)));
+    zero_state();
     m_numberQubits = nQubits;
 }
 
