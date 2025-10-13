@@ -9,222 +9,256 @@
 #include <cassert>
 #include <iomanip>
 #include "../CuQuantumControl/StateObject.hpp"
+#include "../functionality/SquareNorm.hpp"
+#include "../CuSparseControl/SparseDenseConvert.hpp"
 
-// Your simulator
+#define DEBUG_HHL 1
+
+// ===== Debug helpers: subspace dumps via accessor =====
+
+static inline cuDoubleComplex Cplx(double r, double i=0.0) {
+    return make_cuDoubleComplex(r,i);
+}
+
+// Print a subspace ordered by `readOrderingQubits`, with an optional mask on other qubits.
+// Example: readOrdering={SYS...}, maskOrdering={phase..., anc}, maskBits={0...,1} to print "anc=1, phase=0...0".
 template <precision P>
-class quantumState_SV;
-
-// ----------------------------- Utilities -----------------------------
-
-struct HHLParams
+static void dump_subspace(
+    const char* label,
+    quantumState_SV<P>& qs,
+    std::span<const int> readOrderingQubits,
+    std::span<const int> maskOrderingQubits,
+    std::span<const int> maskBitString,
+    int max_to_print = -1)  // -1 = print all
 {
-    int pe_qubits = 6;          // phase-estimation register size p
-    double t0 = 1.0;            // base evolution time
-    int order = 30;             // fixed polynomial order for both methods
-    bool use_chebyshev = true;  // else Taylor
-    double compare_eps = 1e-10; // optional for sanity checks
+    const std::size_t out_len = (readOrderingQubits.empty() ? 1 : (std::size_t(1) << readOrderingQubits.size()));
+    std::vector<PRECISION_TYPE_COMPLEX(P)> buf(out_len);
+
+    // Pull amplitudes from the device
+    qs.accessor_get_by_qubits(readOrderingQubits, maskOrderingQubits, maskBitString, std::span<PRECISION_TYPE_COMPLEX(P)>(buf));
+
+    // Compute norm^2 of this subspace (probability mass in the mask)
+    long double p = 0.0L;
+    for (auto z : buf) {
+        const long double re = cuCreal(z);
+        const long double im = cuCimag(z);
+        p += re*re + im*im;
+    }
+
+    std::cout << "\n--- " << label << " ---\n";
+    std::cout << "subspace size = " << buf.size() << ", mass = " << static_cast<double>(p) << "\n";
+    std::cout.setf(std::ios::fixed); std::cout.precision(10);
+
+    const std::size_t limit = (max_to_print < 0) ? buf.size() : std::min<std::size_t>(buf.size(), max_to_print);
+    for (std::size_t i = 0; i < limit; ++i) {
+        std::cout << "amp[" << i << "] = (" << cuCreal(buf[i]) << ", " << cuCimag(buf[i]) << ")\n";
+    }
+    if (limit < buf.size()) std::cout << "... (" << (buf.size() - limit) << " more)\n";
+}
+
+// For tiny systems only: dump full |ψ⟩ in computational order [q=0 is LSB].
+template <precision P>
+static void dump_full_state_small(quantumState_SV<P>& qs, int total_qubits, int max_to_print = -1)
+{
+    std::vector<int> order(total_qubits);
+    for (int q=0;q<total_qubits;++q) order[q]=q;
+
+    const std::size_t N = (total_qubits == 0 ? 1 : (std::size_t(1) << total_qubits));
+    std::vector<PRECISION_TYPE_COMPLEX(P)> buf(N);
+
+    qs.accessor_get_by_qubits(order, /*maskOrder*/{}, /*maskBits*/{}, buf);
+
+    long double norm2 = 0.0L;
+    for (auto z : buf) { long double re=cuCreal(z), im=cuCimag(z); norm2 += re*re+im*im; }
+
+    std::cout << "\n=== Full state dump ("<< N <<" amps), ||ψ||^2=" << static_cast<double>(norm2) << " ===\n";
+    const std::size_t limit = (max_to_print < 0) ? N : std::min<std::size_t>(N, max_to_print);
+    std::cout.setf(std::ios::fixed); std::cout.precision(10);
+    for (std::size_t i=0;i<limit;++i) {
+        std::cout << "ψ["<< i << "] = (" << cuCreal(buf[i]) << ", " << cuCimag(buf[i]) << ")\n";
+    }
+    if (limit < N) std::cout << "... (" << (N - limit) << " more)\n";
+}
+
+
+struct HHL_options
+{
+    int num_phaseReg = 4;
+    int num_SYSReg = 3;
+    int num_ancilla = 1;
+    int t0 = 1;
+    std::vector<cuDoubleComplex> b;
+    std::vector<cuDoubleComplex> A;
 };
-
-struct HHLBenchResult
+int HHL_run(HHL_options options)
 {
-    float ms_phase_estimate = 0.0f; // time spent in controlled e^{+iA t} blocks
-    float ms_inv_qft = 0.0f;
-    float ms_total = 0.0f;
-    double post_select_prob = 0.0; // filled if you do the reciprocal+project
-};
+    const int p   = options.num_phaseReg;
+    const int ns  = options.num_SYSReg;
+    const int na  = options.num_ancilla;
+    const int total_qubits = p + ns + na;
 
-// Little helper for cudaEvent timing
-struct CudaTimer
-{
-    cudaEvent_t start{}, stop{};
-    CudaTimer()
+    // layout: phase [0..p-1], system [p..p+ns-1], ancilla [p+ns]
+    int cur = 0;
+    std::vector<int> phase_qubits(p);  for (int i=0;i<p;++i)  phase_qubits[i] = cur++;
+    std::vector<int> system_qubits(ns);for (int i=0;i<ns;++i) system_qubits[i]= cur++;
+    std::vector<int> ancilla_qubit(na);for (int i=0;i<na;++i) ancilla_qubit[i]= cur++;
+    const int anc = ancilla_qubit[0];
+
+    // CSR(A)
+    const int n = 1 << ns;
+    std::vector<int> row_ptr_A, col_ind_A;
+    std::vector<cuDoubleComplex> values_A;
+    dense_to_csr(std::span<const cuDoubleComplex>(options.A), n, row_ptr_A, col_ind_A, values_A, 0.0);
+
+    quantumState_SV<precision::bit_64> qs(total_qubits);
+    qs.prefetchToDevice();
+
+    // Write |b> into the system subspace across *all* non-target blocks (simple for debugging).
+    qs.write_amplitudes_to_target_qubits(std::span<const cuDoubleComplex>(options.b),
+                                         std::span<const int>(system_qubits));
+
+#if DEBUG_HHL
+    dump_subspace("After |b> load (system only, no mask)", qs,
+                  std::span<const int>(system_qubits),
+                  /*maskOrder*/{}, /*maskBits*/{}, /*max_to_print*/ (1<<std::min(6,ns)));
+    // Uncomment if system is tiny:
+    // dump_full_state_small(qs, total_qubits, 64);
+#endif
+
+    // Hadamards on phase
+    qs.H(std::span<const int>(phase_qubits));
+#if DEBUG_HHL
+    dump_subspace("After H on phase (phase register only)", qs,
+                  std::span<const int>(phase_qubits),
+                  /*maskOrder*/{}, /*maskBits*/{}, /*max*/ (1<<std::min(8,p)));
+    // Show system while fixing anc=0 (so slices are interpretable)
     {
-        cudaEventCreate(&start);
-        cudaEventCreate(&stop);
+        std::vector<int> maskOrder = { anc };
+        std::vector<int> maskBits  = { 0   };
+        dump_subspace("System slice with anc=0 (phase free)", qs,
+                      std::span<const int>(system_qubits), maskOrder, maskBits, (1<<std::min(6,ns)));
     }
-    ~CudaTimer()
-    {
-        cudaEventDestroy(start);
-        cudaEventDestroy(stop);
-    }
-    void tic() { cudaEventRecord(start); }
-    float toc()
-    {
-        cudaEventRecord(stop);
-        cudaEventSynchronize(stop);
-        float ms = 0;
-        cudaEventElapsedTime(&ms, start, stop);
-        return ms;
-    }
-};
+#endif
 
-// Map a contiguous block of “phase” qubits: [phase_base, phase_base+pe_qubits)
-inline std::vector<int> phase_range(int phase_base, int pe_qubits)
-{
-    std::vector<int> q(pe_qubits);
-    for (int i = 0; i < pe_qubits; ++i)
-        q[i] = phase_base + i;
-    return q;
-}
-
-// Inverse QFT on bit-order [q0(LSB), q1, ..., q_{p-1}(MSB)]
-template <precision P>
-static void inverse_qft(quantumState_SV<P> &qs, const std::vector<int> &phase)
-{
-    const int p = (int)phase.size();
-    // Standard in-place inverse QFT (no swaps if you choose same ordering everywhere)
-    for (int j = p - 1; j >= 0; --j)
+    // Controlled U^{2^k}: Chebyshev with t = -(t0 * 2^k) → e^{+i A t0 2^k}
+    constexpr int ORDER = 30;
+    for (int k = 0; k < p; ++k)
     {
-        for (int k = p - 1; k > j; --k)
-        {
-            // Controlled phase: |11> gets phase -pi/2^{k-j}
-            const double theta = -M_PI / std::ldexp(1.0, k - j); // -pi / 2^(k-j)
-            qs.RZ(/*theta=*/theta, /*targets=*/{phase[j]}, /*controls=*/{phase[k]});
+        const int ctrlQ = phase_qubits[k];
+        const double tk = -static_cast<double>(options.t0) * static_cast<double>(1ull << k);
+        qs.applyMatrixExponential_chebyshev(
+            row_ptr_A.data(), col_ind_A.data(), values_A.data(),
+            static_cast<int>(values_A.size()),
+            ORDER,
+            system_qubits,
+            std::vector<int>{ctrlQ},
+            tk);
+
+#if DEBUG_HHL
+        // peek: system subspace with (for readability) anc=0
+        std::vector<int> mO = { anc }, mB = { 0 };
+        char label[128];
+        std::snprintf(label, sizeof(label), "After controlled exp step k=%d", k);
+        dump_subspace(label, qs, std::span<const int>(system_qubits), mO, mB, (1<<std::min(6,ns)));
+#endif
+    }
+
+    // Inverse QFT on phase
+    for (int j = p-1; j >= 0; --j) {
+        const int tgt = phase_qubits[j];
+        for (int k = p-1; k > j; --k) {
+            const int ctrl = phase_qubits[k];
+            const double theta = -M_PI / static_cast<double>(1 << (k-j));
+            qs.RZ(theta, std::span<const int>(&tgt,1), std::span<const int>(&ctrl,1));
         }
-        qs.H({phase[j]});
+        qs.H(std::span<const int>(&tgt,1));
     }
-}
+#if DEBUG_HHL
+    dump_subspace("After IQFT (phase only)", qs,
+                  std::span<const int>(phase_qubits), {}, {}, (1<<std::min(8,p)));
+#endif
 
-// Apply controlled-U^{2^k} with U = exp(+iA t0)  (so time = t0 * 2^k)
-// We implement U via Chebyshev (t=-1 for your API to get +iA) or Taylor.
-template <precision P>
-static int controlled_exp_iA_pow2(
-    quantumState_SV<P> &qs,
-    int nQubits_total,
-    const int *d_csrRowPtr,
-    const int *d_csrColInd,
-    const cuDoubleComplex *d_csrVal,
-    int nnz,
-    int order,
-    int k,
-    double t0,
-    int control_qubit,
-    const std::vector<int> &target_qubits,
-    bool use_chebyshev)
-{
-    const double scale = std::ldexp(t0, k); // t0 * 2^k
-    if (use_chebyshev)
-    {
-        // Chebyshev host API: t = -scale → exp(+i A * scale)
-        return qs.applyMatrixExponential_chebyshev(
-            d_csrRowPtr, d_csrColInd, d_csrVal, nnz, order,
-            /*targets*/ target_qubits,
-            /*controls*/ std::vector<int>{control_qubit},
-            /*t*/ -scale);
+    // Controlled ancilla rotations (bitstring-conditioned on phase)
+    const double two_pi_over_t0 = (2.0 * M_PI) / static_cast<double>(options.t0);
+    double min_lambda_hat = std::numeric_limits<double>::infinity();
+    for (std::uint64_t s=1; s < (1ull<<p); ++s) {
+        const double phi = double(s) / double(1ull<<p);
+        const double lambda_hat = two_pi_over_t0 * phi;
+        if (lambda_hat > 0.0) min_lambda_hat = std::min(min_lambda_hat, lambda_hat);
     }
-    else
-    {
-        throw std::runtime_error("Not supported");
-    }
-}
+    if (std::isfinite(min_lambda_hat) && min_lambda_hat > 0.0) {
+        const double C = 0.5 * min_lambda_hat;
+        std::vector<int> flip_bits; flip_bits.reserve(p);
+        for (std::uint64_t s=0; s < (1ull<<p); ++s) {
+            flip_bits.clear();
+            for (int qpos=0; qpos<p; ++qpos)
+                if (((s>>qpos)&1ull)==0ull) flip_bits.push_back(phase_qubits[qpos]);
 
-// Placeholder: coherent reciprocal rotation  |0>_anc → sqrt(1-C^2/φ^2)|0> + (C/φ)|1>
-// driven by the phase register |φ~>. Replace with your QROM/piecewise polynomial.
-template <precision P>
-static void reciprocal_rotation_placeholder(
-    quantumState_SV<P> &qs,
-    int solution_ancilla,
-    const std::vector<int> &phase_register,
-    double C /* scaling constant, <= min|λ| to keep <=1 */)
-{
-    // ⚠️ This is a no-op. Plug your multi-controlled RY approximant here.
-    (void)qs;
-    (void)solution_ancilla;
-    (void)phase_register;
-    (void)C;
-}
+            const double phi = double(s)/double(1ull<<p);
+            const double lambda_hat = two_pi_over_t0 * phi;
+            if (lambda_hat <= 0.0) continue;
 
-// Project on ancilla |1> (post-selection) in host memory: zero amplitudes with anc=0; renormalize.
-// Return probability of |1>.
-template <precision P>
-static double project_ancilla_one(quantumState_SV<P> &qs, int anc_idx)
-{
-    auto sv = qs.getStateVector(); // span<complex_type>
-    using complex_type = typename std::remove_reference_t<decltype(sv)>::value_type;
-    double prob1 = 0.0;
-    const size_t dim = sv.size();
-    for (size_t i = 0; i < dim; ++i)
-    {
-        const bool anc1 = ((i >> anc_idx) & 1u) != 0u;
-        double r = (double)reinterpret_cast<const cuDoubleComplex &>(sv[i]).x;
-        double im = (double)reinterpret_cast<const cuDoubleComplex &>(sv[i]).y;
-        double amp2 = r * r + im * im;
-        if (anc1)
-            prob1 += amp2;
-    }
-    double inv_norm = (prob1 > 0.0) ? 1.0 / std::sqrt(prob1) : 0.0;
-    for (size_t i = 0; i < dim; ++i)
-    {
-        const bool anc1 = ((i >> anc_idx) & 1u) != 0u;
-        cuDoubleComplex &z = reinterpret_cast<cuDoubleComplex &>(sv[i]);
-        if (!anc1)
-        {
-            z = make_cuDoubleComplex(0.0, 0.0);
-        }
-        else
-        {
-            z = make_cuDoubleComplex(z.x * inv_norm, z.y * inv_norm);
+            double x = C / lambda_hat;
+            if (x > 1.0) x = 1.0;
+            if (x < 0.0) x = 0.0;
+            const double theta = 2.0 * std::asin(x);
+            if (theta == 0.0) continue;
+
+            if (!flip_bits.empty()) qs.X(std::span<const int>(flip_bits));
+            qs.RY(theta, std::span<const int>(&anc,1), std::span<const int>(phase_qubits));
+            if (!flip_bits.empty()) qs.X(std::span<const int>(flip_bits));
         }
     }
-    return prob1;
-}
 
-// ----------------------------- HHL main ------------------------------
+#if DEBUG_HHL
+    // look at ancilla marginal (just the ancilla qubit amplitudes)
+    dump_subspace("Ancilla marginal (anc only)", qs,
+                  std::span<const int>(ancilla_qubit), {}, {}, 2);
+    // system conditioned on anc=1, phase free:
+    { std::vector<int> mO = { anc }; std::vector<int> mB = { 1 };
+      dump_subspace("System with anc=1 (phase free)", qs,
+                    std::span<const int>(system_qubits), mO, mB, (1<<std::min(6,ns))); }
+#endif
 
-template <precision P>
-HHLBenchResult run_hhl_benchmark(
-    quantumState_SV<P> &qs,
-    // A in CSR (device pointers)
-    const int *d_csrRowPtr,
-    const int *d_csrColInd,
-    const cuDoubleComplex *d_csrVal,
-    int n_target_dim, // size of A (2^#target_qubits)
-    int nnz,
-    // register layout in qs:
-    int phase_base,                        // first phase qubit index
-    int pe_qubits,                         // p
-    int solution_anc,                      // index of the |0> ancilla used for reciprocal & postselect
-    const std::vector<int> &target_qubits, // contiguous or arbitrary, your kernels already support mapping
-    // algorithm params
-    const HHLParams &params = {})
-{
-    assert(pe_qubits == params.pe_qubits && "pe_qubits mismatch with params");
-    HHLBenchResult out{};
-    CudaTimer t_total, t_phase, t_iqft;
-
-    // 0) Hadamards on the phase register
-    const auto phase_reg = phase_range(phase_base, pe_qubits);
-    for (int q : phase_reg)
-        qs.H({q});
-
-    // 1) Controlled-U^{2^k} blocks  (U = exp(+iA t0))
-    t_total.tic();
-    t_phase.tic();
-    for (int k = 0; k < pe_qubits; ++k)
-    {
-        const int ctrl = phase_reg[k]; // LSB-first convention
-        const int rc = controlled_exp_iA_pow2(
-            qs, /*nQubits_total unused*/ 0,
-            d_csrRowPtr, d_csrColInd, d_csrVal, nnz,
-            params.order, k, params.t0, ctrl, target_qubits, params.use_chebyshev);
-        if (rc != 0)
-            throw std::runtime_error("controlled_exp_iA_pow2 failed");
+    // UNCOMPUTE: forward QFT then inverse evolutions
+    for (int j = 0; j < p; ++j) {
+        const int tgt = phase_qubits[j];
+        qs.H(std::span<const int>(&tgt,1));
+        for (int k = j+1; k < p; ++k) {
+            const int ctrl = phase_qubits[k];
+            const double theta = +M_PI / static_cast<double>(1 << (k-j));
+            qs.RZ(theta, std::span<const int>(&tgt,1), std::span<const int>(&ctrl,1));
+        }
     }
-    out.ms_phase_estimate = t_phase.toc();
+    for (int k = p-1; k >= 0; --k) {
+        const int ctrlQ = phase_qubits[k];
+        const double tk = +static_cast<double>(options.t0) * static_cast<double>(1ull << k);
+        qs.applyMatrixExponential_chebyshev(
+            row_ptr_A.data(), col_ind_A.data(), values_A.data(),
+            static_cast<int>(values_A.size()),
+            ORDER,
+            system_qubits,
+            std::vector<int>{ctrlQ},
+            tk);
+    }
 
-    // 2) Inverse QFT on phase register
-    t_iqft.tic();
-    inverse_qft(qs, phase_reg);
-    out.ms_inv_qft = t_iqft.toc();
+#if DEBUG_HHL
+    // PE should be back to |0...0>, inspect that marginal
+    dump_subspace("After uncompute: phase marginal", qs,
+                  std::span<const int>(phase_qubits), {}, {}, (1<<std::min(8,p)));
+#endif
 
-    // 3) Reciprocal rotation on solution ancilla (placeholder)
-    reciprocal_rotation_placeholder(qs, solution_anc, phase_reg, /*C=*/0.5);
+    // FINAL: system slice with anc=1, phase=0...0 (what you asked to print earlier)
+    std::vector<int> mask_order; std::vector<int> mask_bits;
+    mask_order.reserve(p+1); mask_bits.reserve(p+1);
+    for (int q : phase_qubits) { mask_order.push_back(q); mask_bits.push_back(0); }
+    mask_order.push_back(anc);  mask_bits.push_back(1);
 
-    // 4) Uncompute phase register if you encoded reciprocal coherently (not needed for placeholder)
+    dump_subspace("FINAL: system amplitudes |anc=1, phase=0...0>", qs,
+                  std::span<const int>(system_qubits),
+                  std::span<const int>(mask_order),
+                  std::span<const int>(mask_bits),
+                  (1<<std::min(12,ns))); // print all if ns<=12
 
-    // 5) Post-select on |1> of solution ancilla (optional; we do it for a sanity metric)
-    out.post_select_prob = project_ancilla_one(qs, solution_anc);
-
-    out.ms_total = t_total.toc();
-    return out;
+    return cudaSuccess;
 }
