@@ -38,7 +38,7 @@ int applyAccessorGet(custatevecHandle_t &handle,
                 const int buffer_access_begin,
                 const int buffer_access_end,
                 PRECISION_TYPE_COMPLEX(SelectPrecision) * out_buffer,
-                void *extraWorkspace,
+                void *&extraWorkspace,
                 size_t &extraWorkspaceSizeInBytes);
 
 template <precision SelectPrecision = precision::bit_64>
@@ -51,7 +51,7 @@ int applyAccessorGet(custatevecHandle_t &handle,
                 std::vector<PRECISION_TYPE_COMPLEX(SelectPrecision)> &out_buffer,
                 const int buffer_start,
                 const int buffer_end,
-                void *extraWorkspace,
+                void *&extraWorkspace,
                 size_t &extraWorkspaceSizeInBytes)
 {
     assert(maskBitString.size() == maskOrdering.size());
@@ -81,7 +81,7 @@ int applyAccessorGet(custatevecHandle_t &handle,
                 std::span<const int> maskOrdering,
                 PRECISION_TYPE_COMPLEX(SelectPrecision) * d_sv,
                 std::vector<PRECISION_TYPE_COMPLEX(SelectPrecision)> &out_buffer,
-                void *extraWorkspace,
+                void *&extraWorkspace,
                 size_t &extraWorkspaceSizeInBytes)
 {
     assert(maskBitString.size() == maskOrdering.size());

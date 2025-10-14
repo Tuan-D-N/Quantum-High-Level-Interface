@@ -23,7 +23,7 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                       const int controls[],
                       const int nControls,
                       PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,
-                      void *extraWorkspace,
+                      void *&extraWorkspace,
                       size_t &extraWorkspaceSizeInBytes);
 
 template <precision selectPrecision>
@@ -34,7 +34,7 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                       const std::span<const int> targets,
                       const std::span<const int> controls,
                       PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,
-                      void *extraWorkspace,
+                      void *&extraWorkspace,
                       size_t &extraWorkspaceSizeInBytes)
 {
     CHECK_BROAD_ERROR(applyGatesGeneral<selectPrecision>(
@@ -60,7 +60,7 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                   const int adjoint,                                                                                                                                    \
                   const int target,                                                                                                                                     \
                   PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,                                                                                                       \
-                  void *extraWorkspace,                                                                                                                                 \
+                  void *&extraWorkspace,                                                                                                                                 \
                   size_t &extraWorkspaceSizeInBytes                                                                                                                     \
                       ________SELECT_EXTRA_ARGS_POST(NUMBER_OF_EXTRA_PARAMS))                                                                                           \
     {                                                                                                                                                                   \
@@ -87,7 +87,7 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                   const int controls[],                                                                                                                                 \
                   const int nControls,                                                                                                                                  \
                   PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,                                                                                                       \
-                  void *extraWorkspace,                                                                                                                                 \
+                  void *&extraWorkspace,                                                                                                                                 \
                   size_t &extraWorkspaceSizeInBytes                                                                                                                     \
                       ________SELECT_EXTRA_ARGS_POST(NUMBER_OF_EXTRA_PARAMS))                                                                                           \
     {                                                                                                                                                                   \
@@ -114,7 +114,7 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                          const int target,                                                                                                                              \
                          const std::span<const int> &controls,                                                                                                          \
                          PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,                                                                                                \
-                         void *extraWorkspace,                                                                                                                          \
+                         void *&extraWorkspace,                                                                                                                          \
                          size_t &extraWorkspaceSizeInBytes                                                                                                              \
                              ________SELECT_EXTRA_ARGS_POST(NUMBER_OF_EXTRA_PARAMS))                                                                                    \
     {                                                                                                                                                                   \
@@ -137,7 +137,7 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                          const int adjoint,                                                                                                                             \
                          const std::span<const int> &targets,                                                                                                           \
                          PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,                                                                                                \
-                         void *extraWorkspace,                                                                                                                          \
+                         void *&extraWorkspace,                                                                                                                          \
                          size_t &extraWorkspaceSizeInBytes                                                                                                              \
                              ________SELECT_EXTRA_ARGS_POST(NUMBER_OF_EXTRA_PARAMS))                                                                                    \
     {                                                                                                                                                                   \
@@ -162,7 +162,7 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                          const std::span<const int> &targets,                                                                                                           \
                          const std::span<const int> &controls,                                                                                                          \
                          PRECISION_TYPE_COMPLEX(selectPrecision) * d_sv,                                                                                                \
-                         void *extraWorkspace,                                                                                                                          \
+                         void *&extraWorkspace,                                                                                                                          \
                          size_t &extraWorkspaceSizeInBytes                                                                                                              \
                              ________SELECT_EXTRA_ARGS_POST(NUMBER_OF_EXTRA_PARAMS))                                                                                    \
     {                                                                                                                                                                   \

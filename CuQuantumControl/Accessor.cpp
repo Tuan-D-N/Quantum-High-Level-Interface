@@ -19,7 +19,7 @@ int applyAccessorGet(custatevecHandle_t &handle,
                      const int buffer_access_begin,
                      const int buffer_access_end,
                      PRECISION_TYPE_COMPLEX(SelectPrecision) * out_buffer,
-                     void *extraWorkspace,
+                     void *&extraWorkspace,
                      size_t &extraWorkspaceSizeInBytes)
 {
     // Precision generate -----------------------------------------------------
@@ -77,7 +77,7 @@ template int applyAccessorGet<precision::bit_32>(custatevecHandle_t &handle,
                                                  const int buffer_access_begin,
                                                  const int buffer_access_end,
                                                  PRECISION_TYPE_COMPLEX(precision::bit_32) * out_buffer,
-                                                 void *extraWorkspace,
+                                                 void *&extraWorkspace,
                                                  size_t &extraWorkspaceSizeInBytes);
 
 template int applyAccessorGet<precision::bit_64>(custatevecHandle_t &handle,
@@ -91,5 +91,5 @@ template int applyAccessorGet<precision::bit_64>(custatevecHandle_t &handle,
                                                  const int buffer_access_begin,
                                                  const int buffer_access_end,
                                                  PRECISION_TYPE_COMPLEX(precision::bit_64) * out_buffer,
-                                                 void *extraWorkspace,
+                                                 void *&extraWorkspace,
                                                  size_t &extraWorkspaceSizeInBytes);

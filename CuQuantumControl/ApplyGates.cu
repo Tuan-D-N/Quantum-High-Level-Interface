@@ -19,7 +19,7 @@ int applyGatesGeneral(custatevecHandle_t &handle,
                       const int controls[],
                       const int nControls,
                       PRECISION_TYPE_COMPLEX(SelectPrecision) *d_sv,
-                      void *extraWorkspace,
+                      void *&extraWorkspace,
                       size_t &extraWorkspaceSizeInBytes)
 {
     cudaDataType_t cudaType;
@@ -71,7 +71,7 @@ template int applyGatesGeneral<precision::bit_32>(custatevecHandle_t &handle,
                                                   const int controls[],
                                                   const int nControls,
                                                   PRECISION_TYPE_COMPLEX(precision::bit_32) *d_sv,
-                                                  void *extraWorkspace,
+                                                  void *&extraWorkspace,
                                                   size_t &extraWorkspaceSizeInBytes);
 
 template int applyGatesGeneral<precision::bit_64>(custatevecHandle_t &handle,
@@ -83,6 +83,6 @@ template int applyGatesGeneral<precision::bit_64>(custatevecHandle_t &handle,
                                                   const int controls[],
                                                   const int nControls,
                                                   PRECISION_TYPE_COMPLEX(precision::bit_64) *d_sv,
-                                                  void *extraWorkspace,
+                                                  void *&extraWorkspace,
                                                   size_t &extraWorkspaceSizeInBytes);
 

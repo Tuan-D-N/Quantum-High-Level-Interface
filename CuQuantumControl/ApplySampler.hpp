@@ -28,7 +28,7 @@ int sampleSV(custatevecHandle_t &handle,
              PRECISION_TYPE_COMPLEX(selectPrecision) d_sv[],
              custatevecIndex_t bitStrings_out[],
              const int nShots,
-             void *extraWorkspace,
+             void *&extraWorkspace,
              size_t &extraWorkspaceSizeInBytes,
              double randnums[] = nullptr);
 
@@ -39,7 +39,7 @@ int sampleSV(custatevecHandle_t &handle,
              PRECISION_TYPE_COMPLEX(selectPrecision) d_sv[],
              custatevecIndex_t bitStrings_out[],
              const int nShots,
-             void *extraWorkspace,
+             void *&extraWorkspace,
              size_t &extraWorkspaceSizeInBytes,
              double randnums[] = nullptr)
 {
@@ -65,7 +65,7 @@ int sampleSV(custatevecHandle_t &handle,
              PRECISION_TYPE_COMPLEX(selectPrecision) d_sv[],
              custatevecIndex_t bitStrings_out[],
              const int nShots,
-             void *extraWorkspace,
+             void *&extraWorkspace,
              size_t &extraWorkspaceSizeInBytes,
              double randnums[] = nullptr)
 {
@@ -91,7 +91,7 @@ int sampleSV(custatevecHandle_t &handle,
              PRECISION_TYPE_COMPLEX(selectPrecision) d_sv[],
              std::vector<custatevecIndex_t> &bitStrings_out,
              const int nShots,
-             void *extraWorkspace,
+             void *&extraWorkspace,
              size_t &extraWorkspaceSizeInBytes,
              double randnums[] = nullptr)
 {
