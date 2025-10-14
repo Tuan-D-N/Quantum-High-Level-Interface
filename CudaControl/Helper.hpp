@@ -6,11 +6,11 @@
 constexpr double INV_SQRT2(0.707106781186547524400844362105); // Approximation of 1/sqrt(2)
 constexpr double SQRT2(1.41421356237309504880168872421);      // Approximation of sqrt(2)
 
-//replaces the <<<a,b>>> notation
+// replaces the <<<a,b>>> notation
 #ifdef __CUDACC__
 #define CUDA_KERNEL(...) <<< __VA_ARGS__ >>>
 #else
-#define CUDA_KERNEL(...) 
+#define CUDA_KERNEL(...)
 #endif
 
 // Macro to check CUDA API errors
@@ -94,16 +94,15 @@ constexpr double SQRT2(1.41421356237309504880168872421);      // Approximation o
         }                                                                             \
     }
 // Macro to check broad errors
-#define THROW_BROAD_ERROR(integer)                                    \
-    {                                                                 \
-        if (integer != 0)                                             \
-        {                                                             \
-            printf("Broad CUDA ERROR failed at line %d in file %s\n", \
-                   __LINE__, __FILE__);                               \
-            throw std::runtime_error("Broad CUDA Error");             \
-        }                                                             \
+#define THROW_BROAD_ERROR(integer)                                                   \
+    {                                                                                \
+        if (integer != 0)                                                            \
+        {                                                                            \
+            printf("Broad CUDA ERROR failed at line %d in file %s with error: %d\n", \
+                   __LINE__, __FILE__, integer);                                     \
+            throw std::runtime_error("Broad CUDA Error");                            \
+        }                                                                            \
     }
-
 // Macro to check CUDA API errors
 #define ALERT_CUDA(func)                                                          \
     {                                                                             \
