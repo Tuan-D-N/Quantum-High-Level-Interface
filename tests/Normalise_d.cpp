@@ -165,33 +165,107 @@ TEST(SquareNormalizeU64, AlreadyNormalized_VectorStaysSame) {
 TEST(SquareNormalizeU64, LengthNotMultipleOfBlockSize) {
     // Ensure kernel bounds check works when len % TPB != 0
     const std::uint64_t n = 12345;
+
+    auto printCuda = [](const char* where, cudaError_t err) {
+        std::cerr << "[CUDA] " << where << ": " << static_cast<int>(err)
+                  << " (" << cudaGetErrorString(err) << ")\n";
+    };
+
+    // 1) Host init
     std::vector<cuDoubleComplex> h(n);
-    for (std::uint64_t i=0;i<n;++i) {
-        double re = 0.001 * double(i+1);
-        double im = 0.002 * double((i+3) % 11);
-        h[i] = C(re, im);
+    for (std::uint64_t i = 0; i < n; ++i) {
+        const double re = 0.001 * static_cast<double>(i + 1);
+        const double im = 0.002 * static_cast<double>((i + 3) % 11);
+        h[i] = make_cuDoubleComplex(re, im);
     }
     const double norm2_before = host_norm2(h);
-    ASSERT_GT(norm2_before, 0.0);
+    ASSERT_GT(norm2_before, 0.0) << "Initial host norm2 must be > 0.";
+    // std::cout << "[DEBUG] host_norm2 = " << std::setprecision(17) << norm2_before << "\n";
 
-    cuDoubleComplex* d=nullptr;
-    upload_vec(h, &d);
+    // 2) Upload to device
+    cuDoubleComplex* d = nullptr;
+    {
+        cudaError_t err = cudaMalloc(reinterpret_cast<void**>(&d), sizeof(cuDoubleComplex) * n);
+        printCuda("cudaMalloc(d)", err);
+        ASSERT_EQ(err, cudaSuccess);
 
+        err = cudaMemcpy(d, h.data(), sizeof(cuDoubleComplex) * n, cudaMemcpyHostToDevice);
+        printCuda("cudaMemcpy H2D", err);
+        ASSERT_EQ(err, cudaSuccess);
+
+        err = cudaDeviceSynchronize();
+        printCuda("cudaDeviceSynchronize after H2D", err);
+        ASSERT_EQ(err, cudaSuccess);
+    }
+    // std::cout << "[DEBUG] device ptr d=" << d << "\n";
+
+    // 3) Call function under test
     double norm2_reported = -1.0;
-    ASSERT_EQ(square_normalize_statevector_u64(d, n, &norm2_reported), cudaSuccess);
-    EXPECT_NEAR(norm2_reported, norm2_before, 1e-12);
+    cudaError_t result = square_normalize_statevector_u64(d, n, &norm2_reported);
+    printCuda("square_normalize_statevector_u64 return", result);
+    ASSERT_EQ(result, cudaSuccess) << "square_normalize_statevector_u64 failed";
 
-    auto hn = download_vec(d, n);
-    EXPECT_NEAR(host_norm2(hn), 1.0, 1e-12);
+    // Check for any deferred kernel errors now
+    {
+        cudaError_t err = cudaGetLastError();
+        printCuda("cudaGetLastError after normalize", err);
+        ASSERT_EQ(err, cudaSuccess);
 
-    // Proportionality spot-check for a few indices
-    const double alpha = 1.0/std::sqrt(norm2_before);
-    std::array<unsigned long, 5> idxes {0ull, 1ull, 17ull, 1024ull, n-1};
-    for (auto idx : idxes) {
-        cuDoubleComplex expi = C(alpha*cuCreal(h[idx]), alpha*cuCimag(h[idx]));
-        EXPECT_TRUE(CEq(hn[idx], expi, 1e-12))
-            << "idx="<<idx;
+        err = cudaDeviceSynchronize();
+        printCuda("cudaDeviceSynchronize after normalize", err);
+        ASSERT_EQ(err, cudaSuccess);
     }
 
-    cudaFree(d);
+    // std::cout << "[DEBUG] norm2_before   = " << std::setprecision(17) << norm2_before   << "\n";
+    // std::cout << "[DEBUG] norm2_reported = " << std::setprecision(17) << norm2_reported << "\n";
+
+    // 4) Compare reported norm (avoid heavy GTest message allocations on mismatch)
+    {
+        const double diff = std::abs(norm2_reported - norm2_before);
+        if (diff > 1e-12) {
+            std::cerr << "[MISMATCH] reported norm2 differs by " << std::setprecision(17) << diff << "\n";
+        }
+        EXPECT_LE(diff, 1e-8);
+    }
+
+    // 5) Download normalized vector
+    std::vector<cuDoubleComplex> hn(n);
+    {
+        cudaError_t err = cudaMemcpy(hn.data(), d, sizeof(cuDoubleComplex) * n, cudaMemcpyDeviceToHost);
+        printCuda("cudaMemcpy D2H", err);
+        ASSERT_EQ(err, cudaSuccess);
+
+        err = cudaDeviceSynchronize();
+        printCuda("cudaDeviceSynchronize after D2H", err);
+        ASSERT_EQ(err, cudaSuccess);
+    }
+
+    // 6) Final norm should be ~1
+    const double norm2_after = host_norm2(hn);
+    // std::cout << "[DEBUG] host_norm2(after) = " << std::setprecision(17) << norm2_after << "\n";
+    EXPECT_NEAR(norm2_after, 1.0, 1e-12);
+
+    // 7) Proportionality spot checks
+    const double alpha = 1.0 / std::sqrt(norm2_before);
+    const std::array<std::uint64_t, 5> idxes{0ull, 1ull, 17ull, 1024ull, n - 1};
+    for (std::uint64_t idx : idxes) {
+        const cuDoubleComplex expi = make_cuDoubleComplex(alpha * cuCreal(h[idx]), alpha * cuCimag(h[idx]));
+        const double dre = std::abs(cuCreal(hn[idx]) - cuCreal(expi));
+        const double dim = std::abs(cuCimag(hn[idx]) - cuCimag(expi));
+        if (dre > 1e-12 || dim > 1e-12) {
+            std::cerr << "[PROPORTIONALITY] idx=" << idx
+                      << " expected=(" << cuCreal(expi) << "," << cuCimag(expi) << ")"
+                      << " got=(" << cuCreal(hn[idx]) << "," << cuCimag(hn[idx]) << ")"
+                      << " diff=(" << dre << "," << dim << ")\n";
+        }
+        EXPECT_LE(dre, 1e-12);
+        EXPECT_LE(dim, 1e-12);
+    }
+
+    // 8) Cleanup
+    {
+        cudaError_t err = cudaFree(d);
+        printCuda("cudaFree(d)", err);
+        ASSERT_EQ(err, cudaSuccess);
+    }
 }

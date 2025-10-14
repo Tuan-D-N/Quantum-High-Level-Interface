@@ -111,8 +111,30 @@ cudaError_t square_normalize_statevector_u64(
     double *d_partials = reinterpret_cast<double *>(tmp);
 
     // 1) partial reductions
-    const size_t shmem_bytes = sizeof(double) * TPB;
-    reduce_norm2_partials_u64 CUDA_KERNEL(blocks, TPB, shmem_bytes)(d_sv, static_cast<unsigned long long>(length), d_partials);
+    // const size_t shmem_bytes = sizeof(double) * TPB;
+    // reduce_norm2_partials_u64 CUDA_KERNEL(blocks, TPB, shmem_bytes)(d_sv, static_cast<unsigned long long>(length), d_partials);
+
+    {
+        const size_t shmem_bytes = sizeof(double) * TPB;
+        reduce_norm2_partials_u64 CUDA_KERNEL(blocks, TPB, shmem_bytes)(
+            d_sv,
+            static_cast<unsigned long long>(length),
+            d_partials);
+
+        cudaError_t st = cudaGetLastError();
+        if (st != cudaSuccess)
+        {
+            cudaFree(d_partials);
+            return st;
+        }
+        st = cudaDeviceSynchronize(); // <- surface device faults here
+        if (st != cudaSuccess)
+        {
+            cudaFree(d_partials);
+            return st;
+        }
+    }
+
     st = cudaGetLastError();
     if (st != cudaSuccess)
     {
@@ -145,9 +167,28 @@ cudaError_t square_normalize_statevector_u64(
     const double inv_norm = 1.0 / std::sqrt(norm2);
 
     // 4) scale in place
-    const unsigned int grid2 = static_cast<unsigned int>((length + TPB - 1ull) / TPB);
-    scale_inplace_u64 CUDA_KERNEL(grid2, TPB)(d_sv, static_cast<unsigned long long>(length), inv_norm);
-    st = cudaGetLastError();
+    {
+        const unsigned int grid2 =
+            static_cast<unsigned int>((length + TPB - 1ull) / TPB);
+
+        scale_inplace_u64 CUDA_KERNEL(grid2, TPB)(
+            d_sv,
+            static_cast<unsigned long long>(length),
+            inv_norm);
+
+        cudaError_t st = cudaGetLastError();
+        if (st != cudaSuccess)
+        {
+            cudaFree(d_partials);
+            return st;
+        }
+        st = cudaDeviceSynchronize(); // <- and here
+        if (st != cudaSuccess)
+        {
+            cudaFree(d_partials);
+            return st;
+        }
+    }
 
     cudaFree(d_partials);
     return st;
