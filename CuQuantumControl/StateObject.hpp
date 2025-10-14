@@ -16,10 +16,13 @@
 #include "MatriceDefinitions.hpp"
 #include "Precision.hpp"
 #include "Normalise_d.hpp"
+#include "Accessor.hpp"
+#include "AmplitudeWriter.hpp"
 
 #include "../CuSparseControl/ApplySparseCSRMat.hpp"
 #include "../CuSparseControl/TaylorSparseMatrixExponential.hpp"
 #include "../CuSparseControl/ChebyshevMatrixExponential.hpp"
+#include "../CuSparseControl/SparseGate.hpp"
 
 template <precision selectedPrecision>
 class quantumState_SV
@@ -85,6 +88,14 @@ public:
         std::span<const int> maskOrdering,
         std::span<PRECISION_TYPE_COMPLEX(selectedPrecision)> out_buffer);
 
+    int accessor_get_raw(int nIndexBits,
+                         std::span<const int> bitOrdering,
+                         std::span<const int> maskBitString,
+                         std::span<const int> maskOrdering,
+                         int buffer_access_begin,
+                         int buffer_access_end,
+                         std::span<PRECISION_TYPE_COMPLEX(selectedPrecision)> out_buffer);
+
     // ===================== AUTO-RANGE: BY QUBIT LISTS (ergonomic) =====================
     //
     // Same auto-range behavior (read the FULL subspace), but takes qubit lists and builds
@@ -118,10 +129,17 @@ public:
     // =============================================================
     // Apply a sparse CSR matrix directly to m_stateVector (in place)
     // =============================================================
-    int applySparseMatrix(
+    int applySparseMatrixStateVectorWide(
         std::span<int> csrOffsets,
         std::span<int> csrColumns,
         std::span<cuDoubleComplex> csrValues);
+
+    int applySparseGateToSV(
+        std::span<const int> d_csrRowPtrU,
+        std::span<const int> d_csrColIndU,
+        std::span<const cuDoubleComplex> d_csrValU,
+        const std::vector<int> &targetQubits,
+        const std::vector<int> &controlQubits);
 
     // =============================================================
     // Apply e^{iA} (using truncated Taylor series) to the statevector

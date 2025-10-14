@@ -15,6 +15,49 @@
 #include "StateObject.hpp"
 
 // ===================== Implementation =====================
+// Low-level: directly forwards to your applyAccessorGet template
+template <precision selectedPrecision>
+int quantumState_SV<selectedPrecision>::accessor_get_raw(
+    int nIndexBits,
+    std::span<const int> bitOrdering,
+    std::span<const int> maskBitString,
+    std::span<const int> maskOrdering,
+    int buffer_access_begin,
+    int buffer_access_end,
+    std::span<PRECISION_TYPE_COMPLEX(selectedPrecision)> out_buffer)
+{
+    static_assert(selectedPrecision == precision::bit_32 || selectedPrecision == precision::bit_64,
+                  "Unsupported precision");
+
+    // Basic sanity
+    assert(m_stateVector != nullptr);
+    assert(m_custatevec_handle != nullptr);
+    assert(nIndexBits >= 0);
+    assert(bitOrdering.size() == static_cast<std::size_t>(nIndexBits));
+    assert(maskBitString.size() == maskOrdering.size()); // both 0 means no mask
+    assert(buffer_access_begin >= 0 && buffer_access_end >= buffer_access_begin);
+
+    // custatevec requires raw pointers
+    const int *bitOrderingPtr = bitOrdering.empty() ? nullptr : bitOrdering.data();
+    const int *maskBitStringPtr = maskBitString.empty() ? nullptr : maskBitString.data();
+    const int *maskOrderingPtr = maskOrdering.empty() ? nullptr : maskOrdering.data();
+
+    // Call your provided function template
+    return applyAccessorGet<selectedPrecision>(
+        m_custatevec_handle,
+        static_cast<int>(m_numberQubits), // nIndexBits MUST be total index bits of the full state
+        static_cast<int>(bitOrdering.size()),
+        bitOrderingPtr,
+        static_cast<int>(maskBitString.size()),
+        maskBitStringPtr,
+        maskOrderingPtr,
+        m_stateVector,
+        buffer_access_begin,
+        buffer_access_end,
+        out_buffer.data(),
+        m_extraWorkspace,
+        m_extraWorkspaceSizeInBytes);
+}
 
 template <precision selectedPrecision>
 int quantumState_SV<selectedPrecision>::accessor_get_raw(
@@ -194,7 +237,7 @@ void quantumState_SV<selectedPrecision>::normalise_SV()
 // Apply a sparse CSR matrix directly to m_stateVector (in place)
 // =============================================================
 template <precision selectedPrecision>
-int quantumState_SV<selectedPrecision>::applySparseMatrix(
+int quantumState_SV<selectedPrecision>::applySparseMatrixStateVectorWide(
     std::span<int> csrOffsets,
     std::span<int> csrColumns,
     std::span<cuDoubleComplex> csrValues)
@@ -218,6 +261,8 @@ int quantumState_SV<selectedPrecision>::applySparseMatrix(
             std::span<cuDoubleComplex>(m_stateVector, dim),
             std::span<cuDoubleComplex>(d_temp, dim));
 
+        CHECK_BROAD_ERROR(status);
+
         // Overwrite m_stateVector with the result
         CHECK_CUDA(cudaMemcpy(m_stateVector, d_temp,
                               dim * sizeof(cuDoubleComplex),
@@ -231,7 +276,84 @@ int quantumState_SV<selectedPrecision>::applySparseMatrix(
         throw std::runtime_error("Error: get_state_span is not implemented/supported for single precision (cuComplex).");
     }
 }
+template <precision selectedPrecision>
+int quantumState_SV<selectedPrecision>::applySparseGateToSV(
+    std::span<const int> d_csrRowPtrU,
+    std::span<const int> d_csrColIndU,
+    std::span<const cuDoubleComplex> d_csrValU,
+    const std::vector<int> &targetQubits,
+    const std::vector<int> &controlQubits)
+{
+    // Enforce cuDoubleComplex precision (return runtime error code if not supported)
+    if constexpr (!std::is_same_v<complex_type, cuDoubleComplex>) {
+        throw std::runtime_error("Error: get_state_span is not implemented/supported for single precision (cuComplex).");
+        return -999; // NOT_IMPLEMENTED_FOR_THIS_PRECISION
+    }
 
+    // Basic state sanity
+    if (!m_stateVector)           return -10; // state not initialized
+    if (m_numberQubits == 0)      return -11; // invalid qubit count
+
+    // Dimension N = 2^{m_numberQubits}
+    const size_t Nsz = size_t{1} << m_numberQubits;
+    if (Nsz > static_cast<size_t>(std::numeric_limits<int>::max())) {
+        // Requires 64-bit CSR indices; this path is 32-bit only.
+        return -12;
+    }
+    const int N = static_cast<int>(Nsz);
+
+    // --- Basic checks on the 3 spans (sizes only; do NOT dereference device memory) ---
+    if (d_csrRowPtrU.size() != static_cast<size_t>(N + 1)) return -20;
+    if (d_csrColIndU.size() != d_csrValU.size())           return -21;
+    const int nnzU = static_cast<int>(d_csrColIndU.size());
+    if (nnzU <= 0)                                         return -22;
+
+    {
+        std::vector<int> tmp = targetQubits;
+        std::sort(tmp.begin(), tmp.end());
+        if (std::adjacent_find(tmp.begin(), tmp.end()) != tmp.end()) return -32; // duplicate targets
+    }
+    {
+        std::vector<int> tmp = controlQubits;
+        std::sort(tmp.begin(), tmp.end());
+        if (std::adjacent_find(tmp.begin(), tmp.end()) != tmp.end()) return -33; // duplicate controls
+    }
+    {
+        // Check disjointness (not strictly required if CU already encodes logic, but good hygiene)
+        std::vector<int> t = targetQubits, c = controlQubits;
+        std::vector<int> inter;
+        std::set_intersection(t.begin(), t.end(), c.begin(), c.end(), std::back_inserter(inter));
+        if (!inter.empty()) return -34; // overlap between targets and controls
+    }
+
+    // --- Allocate temporary output on device ---
+    cuDoubleComplex* d_state_out = nullptr;
+    CHECK_CUDA(cudaMalloc(&d_state_out, N * sizeof(cuDoubleComplex)));
+
+    CHECK_BROAD_ERROR(applySparseGate(
+        m_custatevec_handle,
+        static_cast<int>(m_numberQubits),
+        d_csrRowPtrU.data(),
+        d_csrColIndU.data(),
+        d_csrValU.data(),
+        m_stateVector, 
+        d_state_out,                                           
+        targetQubits,
+        controlQubits,
+        nnzU));
+
+
+
+    // --- Copy result back into member state and free temp ---
+    CHECK_CUDA(cudaMemcpy(
+        m_stateVector,
+        d_state_out,
+        N * sizeof(cuDoubleComplex),
+        cudaMemcpyDeviceToDevice));
+
+    cudaFree(d_state_out);
+    return cudaSuccess; // or 0
+}
 // =============================================================
 // Apply e^{iA} (using truncated Taylor series) to the statevector
 // =============================================================
@@ -432,7 +554,7 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::span<const int> 
     {
         throw std::logic_error("targets and controls are not independent set");
     }
-    if (matrix.size() == std::pow((1 << targets.size()), 2))
+    if (matrix.size() != std::pow((1 << targets.size()), 2))
     {
         throw std::logic_error("matrix size is missmatch with target's size");
     }
