@@ -217,9 +217,7 @@ static BenchRow run_case(QState &qs,
         // Dense
         Timer td;
         td.tic();
-        qs.applyArbitaryGate(std::span<const int>(targets.data(), targets.size()),
-                             std::span<const int>(),
-                             std::span<const cplx>(denseM.data(), denseM.size()));
+        qs.applyArbitaryGate(targets, controls, denseM);
         times_dense_ms.push_back(td.toc_ms());
 
         // Sparse
