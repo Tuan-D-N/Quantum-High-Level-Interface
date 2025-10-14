@@ -446,6 +446,7 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGateUnsafe(std::span<const
                                                            m_stateVector,
                                                            m_extraWorkspace,
                                                            m_extraWorkspaceSizeInBytes));
+    freeWorkspace();
 }
 
 template <precision selectedPrecision>
@@ -595,6 +596,7 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::initializer_list
             m_extraWorkspace,                                                                                \
             m_extraWorkspaceSizeInBytes                                                                      \
                 ________SELECT_EXTRA_VARS_POST(NUMBER_OF_EXTRA_PARAMS)));                                    \
+        freeWorkspace();                                                                                     \
     }                                                                                                        \
                                                                                                              \
     template <precision selectedPrecision>                                                                   \
@@ -613,6 +615,7 @@ void quantumState_SV<selectedPrecision>::applyArbitaryGate(std::initializer_list
             m_extraWorkspace,                                                                                \
             m_extraWorkspaceSizeInBytes                                                                      \
                 ________SELECT_EXTRA_VARS_POST(NUMBER_OF_EXTRA_PARAMS)));                                    \
+        freeWorkspace();                                                                                     \
     }
 
 MAKE_GATES_BACKEND(X, 0)
