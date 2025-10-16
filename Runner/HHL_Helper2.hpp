@@ -177,69 +177,38 @@ int HHL_run(HHL_options options)
     dump_subspace("After IQFT (phase only)", qs,
                   std::span<const int>(phase_qubits), {}, {}, (1<<std::min(8,p)));
 #endif
-// Controlled ancilla rotations (bitstring-conditioned on phase)
-// This section implements the core CNOT-like-R_y operation in HHL,
-// rotating the ancilla qubit based on the eigenvalue (phase) estimate.
 
-// 1. Determine the scaling factor for the eigenvalue estimate.
-const double two_pi_over_t0 = (2.0 * M_PI) / static_cast<double>(options.t0);
-
-// 2. Find the minimum non-zero eigenvalue estimate (lambda_hat_min).
-// This minimum is used to calculate the scaling constant C.
-double min_lambda_hat = std::numeric_limits<double>::infinity();
-// Loop over all possible states 's' (bitstrings) in the phase register (from 1 to 2^p - 1)
-for (std::uint64_t s=1; s < (1ull<<p); ++s) {
-    const double phi = double(s) / double(1ull<<p);             // Phase fraction: phi = s / 2^p
-    const double lambda_hat = two_pi_over_t0 * phi;             // Eigenvalue estimate: lambda_hat = (2*pi/t0) * phi
-    if (lambda_hat > 0.0) min_lambda_hat = std::min(min_lambda_hat, lambda_hat);
-}
-
-// 3. Apply the controlled-Ry rotations for all non-zero eigenvalues.
-if (std::isfinite(min_lambda_hat) && min_lambda_hat > 0.0) {
-    // Scaling constant C = 0.5 * lambda_hat_min. This ensures C / lambda_hat <= 1.0.
-    const double C = 0.5 * min_lambda_hat;
-    
-    std::vector<int> flip_bits; flip_bits.reserve(p);
-    
-    // Loop over all possible states 's' (bitstrings) in the phase register (from 0 to 2^p - 1)
-    for (std::uint64_t s=0; s < (1ull<<p); ++s) {
-        flip_bits.clear();
-        
-        // Identify which control bits are '0' for state 's'.
-        // These will need to be flipped to '1' using X gates for the Controlled-Ry.
-        for (int qpos=0; qpos<p; ++qpos)
-            if (((s>>qpos)&1ull)==0ull) flip_bits.push_back(phase_qubits[qpos]);
-
-        const double phi = double(s)/double(1ull<<p);
-        const double lambda_hat = two_pi_over_t0 * phi; // Eigenvalue estimate
-        
-        // Skip states corresponding to lambda <= 0.
-        if (lambda_hat <= 0.0) continue;
-
-        // Calculate the rotation parameter 'x' (proportional to 1/lambda_hat).
-        // This is the desired sin(theta/2) value for the rotation.
-        double x = C / lambda_hat;
-        
-        // Clamp x to [0, 1] to prevent floating point errors or non-physical arcsin arguments.
-        if (x > 1.0) x = 1.0;
-        if (x < 0.0) x = 0.0;
-        
-        // Calculate the final rotation angle theta = 2 * arcsin(x).
-        // The Ry(theta) gate will rotate the ancilla to a state where P(ancilla=1) = x^2.
-        const double theta = 2.0 * std::asin(x);
-        if (theta == 0.0) continue; // Skip if no rotation is required
-
-        // 1. Pre-flip the '0' bits to '1' (so the Controlled-Ry targets state 's').
-        if (!flip_bits.empty()) qs.X(std::span<const int>(flip_bits));
-        
-        // 2. Apply the Controlled-Ry(theta) gate.
-        // Target: anc, Controls: phase_qubits (all of them).
-        qs.RY(theta, std::span<const int>(&anc,1), std::span<const int>(phase_qubits));
-        
-        // 3. Un-flip the bits to restore the phase register to its original state.
-        if (!flip_bits.empty()) qs.X(std::span<const int>(flip_bits));
+    // Controlled ancilla rotations (bitstring-conditioned on phase)
+    const double two_pi_over_t0 = (2.0 * M_PI) / static_cast<double>(options.t0);
+    double min_lambda_hat = std::numeric_limits<double>::infinity();
+    for (std::uint64_t s=1; s < (1ull<<p); ++s) {
+        const double phi = double(s) / double(1ull<<p);
+        const double lambda_hat = two_pi_over_t0 * phi;
+        if (lambda_hat > 0.0) min_lambda_hat = std::min(min_lambda_hat, lambda_hat);
     }
-}
+    if (std::isfinite(min_lambda_hat) && min_lambda_hat > 0.0) {
+        const double C = 0.5 * min_lambda_hat;
+        std::vector<int> flip_bits; flip_bits.reserve(p);
+        for (std::uint64_t s=0; s < (1ull<<p); ++s) {
+            flip_bits.clear();
+            for (int qpos=0; qpos<p; ++qpos)
+                if (((s>>qpos)&1ull)==0ull) flip_bits.push_back(phase_qubits[qpos]);
+
+            const double phi = double(s)/double(1ull<<p);
+            const double lambda_hat = two_pi_over_t0 * phi;
+            if (lambda_hat <= 0.0) continue;
+
+            double x = C / lambda_hat;
+            if (x > 1.0) x = 1.0;
+            if (x < 0.0) x = 0.0;
+            const double theta = 2.0 * std::asin(x);
+            if (theta == 0.0) continue;
+
+            if (!flip_bits.empty()) qs.X(std::span<const int>(flip_bits));
+            qs.RY(theta, std::span<const int>(&anc,1), std::span<const int>(phase_qubits));
+            if (!flip_bits.empty()) qs.X(std::span<const int>(flip_bits));
+        }
+    }
 
 #if DEBUG_HHL
     // look at ancilla marginal (just the ancilla qubit amplitudes)
