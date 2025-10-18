@@ -29,3 +29,12 @@ void write_amplitudes_to_target_qubits_u64(
     uint64_t nQubitsTotal,
     std::span<const cuDoubleComplex> amplitudes_b,
     std::span<const uint64_t> targetQubits);
+
+
+void write_amplitudes_to_target_qubits_u64_masked(
+    cuDoubleComplex* d_state,
+    uint64_t nQubitsTotal,
+    std::span<const cuDoubleComplex> amplitudes_b,
+    std::span<const uint64_t> targetQubits,
+    const std::vector<std::vector<int>>& maskOrderingQubitsVec,
+    const std::vector<std::vector<int>>& maskBitStringsVec);

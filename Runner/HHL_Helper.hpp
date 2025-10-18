@@ -104,6 +104,33 @@ int HHL_run(HHL_options options)
     std::vector<int> ancilla_qubit(na);for (int i=0;i<na;++i) ancilla_qubit[i]= cur++;
     const int anc = ancilla_qubit[0];
 
+    // 1. Not Phase Register (System + Ancilla)
+    std::vector<int> not_phase_qubits(ns + na);
+    // Start after the phase register (index 'p')
+    // and go until the end (index 'total_qubits')
+    for (int i = 0; i < ns + na; ++i) {
+        not_phase_qubits[i] = p + i;
+    }
+
+    // 2. Not System Register (Phase + Ancilla)
+    std::vector<int> not_system_qubits(p + na);
+    
+    // a) Add Phase Qubits (0 to p-1)
+    for (int i = 0; i < p; ++i) {
+        not_system_qubits[i] = i;
+    }
+    // b) Add Ancilla Qubits (p + ns to total_qubits - 1)
+    for (int i = 0; i < na; ++i) {
+        not_system_qubits[p + i] = p + ns + i;
+    }
+
+    // 3. Not Ancilla Register (Phase + System)
+    std::vector<int> not_ancilla_qubits(p + ns);
+    // These are the first p + ns qubits (0 to p+ns-1)
+    for (int i = 0; i < p + ns; ++i) {
+        not_ancilla_qubits[i] = i;
+    }
+
     // CSR(A)
     const int n = 1 << ns;
     std::vector<int> row_ptr_A, col_ind_A;
