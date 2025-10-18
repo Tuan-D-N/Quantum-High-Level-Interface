@@ -120,11 +120,10 @@ int HHL_run(HHL_options options)
 #if DEBUG_HHL
     dump_subspace("After |b> load (system only, no mask)", qs,
                   std::span<const int>(system_qubits),
-                  /*maskOrder*/{}, /*maskBits*/{}, /*max_to_print*/ (1<<std::min(6,ns)));
+                  /*maskOrder*/std::vector{0,1,2,3,7}, /*maskBits*/std::vector{0,0,0,0,0}, /*max_to_print*/ (1<<std::min(6,ns)));
     // Uncomment if system is tiny:
     // dump_full_state_small(qs, total_qubits, 64);
 #endif
-
     // Hadamards on phase
     qs.H(std::span<const int>(phase_qubits));
 #if DEBUG_HHL
