@@ -148,6 +148,9 @@ int applySparseGate(
     const int dim = 1 << nQubits;
     (void)dim;
 
+    // Stuff that is controlled will remain the same
+    CHECK_CUDA(cudaMemcpy(d_state_out, d_state_in, dim * sizeof(cuDoubleComplex), cudaMemcpyDeviceToDevice));
+
     // --- 1) Sparse matrix descriptor for U ---
     cusparseSpMatDescr_t matU;
     CHECK_CUSPARSE(cusparseCreateCsr(&matU, d, d, nnzU,
