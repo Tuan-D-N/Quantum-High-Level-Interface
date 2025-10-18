@@ -33,7 +33,7 @@ int quantumState_SV<selectedPrecision>::accessor_get_raw(
     assert(m_stateVector != nullptr);
     assert(m_custatevec_handle != nullptr);
     assert(nIndexBits >= 0);
-    assert(bitOrdering.size() == static_cast<std::size_t>(nIndexBits));
+    assert(bitOrdering.size() + maskOrdering.size() == static_cast<std::size_t>(nIndexBits));
     assert(maskBitString.size() == maskOrdering.size()); // both 0 means no mask
     assert(buffer_access_begin >= 0 && buffer_access_end >= buffer_access_begin);
 
@@ -89,7 +89,7 @@ int quantumState_SV<selectedPrecision>::accessor_get_raw(
 
     // Auto range: [0, expected_len)
     const int buffer_access_begin = 0;
-    const int buffer_access_end = static_cast<int>(expected_len);
+    const int buffer_access_end =  1 << (m_numberQubits - maskBitString.size());
 
     // Forward to your existing accessor (range-explicit)
     return accessor_get_raw(
@@ -143,7 +143,7 @@ int quantumState_SV<selectedPrecision>::accessor_get_by_qubits(
 
     // Auto range: [0, 2^{|readOrderingQubits|})
     const int buffer_access_begin = 0;
-    const int buffer_access_end = static_cast<int>(expected_len);
+    const int buffer_access_end = 1 << (m_numberQubits - maskBitsVec.size());
 
     return accessor_get_raw(
         static_cast<int>(m_numberQubits),

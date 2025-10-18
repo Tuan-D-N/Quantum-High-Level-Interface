@@ -62,7 +62,7 @@ int applyAccessorGet(custatevecHandle_t &handle,
         handle, accessor, out_buffer, buffer_access_begin, buffer_access_end));
 
     CHECK_CUSTATEVECTOR(custatevecAccessorDestroy(accessor));
-
+    THROW_CUDA(cudaDeviceSynchronize());
     return cudaSuccess;
 }
 

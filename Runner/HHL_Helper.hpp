@@ -145,13 +145,13 @@ int HHL_run(HHL_options options)
     for (int k = 0; k < p; ++k)
     {
         const int ctrlQ = phase_qubits[k];
-        const double tk = -static_cast<double>(options.t0) * static_cast<double>(1ull << k);
+        const double tk = -static_cast<double>(options.t0) * pow(2,k);
         qs.applyMatrixExponential_chebyshev(
             row_ptr_A.data(), col_ind_A.data(), values_A.data(),
-            static_cast<int>(values_A.size()),
+            values_A.size(),
             ORDER,
             system_qubits,
-            std::vector<int>{ctrlQ},
+            {ctrlQ},
             tk);
 
 #if DEBUG_HHL
@@ -168,10 +168,10 @@ int HHL_run(HHL_options options)
         const int tgt = phase_qubits[j];
         for (int k = p-1; k > j; --k) {
             const int ctrl = phase_qubits[k];
-            const double theta = -M_PI / static_cast<double>(1 << (k-j));
-            qs.RZ(theta, std::span<const int>(&tgt,1), std::span<const int>(&ctrl,1));
+            const double theta = -M_PI / pow(2,k-j);
+            qs.RZ(theta, {tgt}, {ctrl});
         }
-        qs.H(std::span<const int>(&tgt,1));
+        qs.H({tgt});
     }
 #if DEBUG_HHL
     dump_subspace("After IQFT (phase only)", qs,
