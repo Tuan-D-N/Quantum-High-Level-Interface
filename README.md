@@ -4,7 +4,7 @@
 
 ---
 
-## 🧠 Overview
+## Overview
 
 **QHLI** (Quantum High-Level Interface) is a modular C++/CUDA framework designed for **GPU-accelerated quantum algorithm simulation**.
 Unlike hardware emulators, QHLI focuses on **numerical algorithmic exploration**, enabling researchers to test, validate, and benchmark dense and sparse quantum operations directly on GPU hardware.
@@ -32,7 +32,7 @@ QHLI is optimized for **NVIDIA Grace-Hopper (GH200)** and **ELLA GPU nodes** at 
 
 ---
 
-## 🧩 Dependencies
+## Dependencies
 
 QHLI builds upon **CUDA and NVIDIA’s HPC libraries**, requiring the following:
 
@@ -48,7 +48,7 @@ QHLI builds upon **CUDA and NVIDIA’s HPC libraries**, requiring the following:
 
 ---
 
-## 🖥️ System Requirements (Pawsey ELLA / Setonix)
+## System Requirements (Pawsey ELLA / Setonix)
 
 | Resource            | Requirement                                    |
 | ------------------- | ---------------------------------------------- |
@@ -59,7 +59,7 @@ QHLI builds upon **CUDA and NVIDIA’s HPC libraries**, requiring the following:
 
 ---
 
-## 🏗️ Build Instructions
+## Build Instructions
 
 ```bash
 [git clone https://github.com/username/qhli.git](https://github.com/Tuan-D-N/Quantum-High-Level-Interface.git)
